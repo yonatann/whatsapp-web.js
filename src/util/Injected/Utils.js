@@ -178,7 +178,7 @@ exports.LoadUtils = () => {
             }
         }
 
-        if (options.linkPreview) {
+        if (options.linkPreview && !options.linkPreviewOverride) {
             delete options.linkPreview;
             const link = window.Store.Validators.findLink(content);
             if (link) {
@@ -190,6 +190,16 @@ exports.LoadUtils = () => {
                     options = {...options, ...preview};
                 }
             }
+        }
+
+        if (options.linkPreviewOverride) {
+            delete options.linkPreviewOverride;
+            options = {
+                ...options, 
+                preview: true,
+                subtype: 'url',
+                ...options.linkPreviewOverride
+            };
         }
 
         let buttonOptions = {};
