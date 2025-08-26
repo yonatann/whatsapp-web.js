@@ -939,6 +939,7 @@ class Client extends EventEmitter {
         
         let internalOptions = {
             linkPreview: options.linkPreview === false ? undefined : true,
+            linkPreviewOverride: options.linkPreviewOverride,
             sendAudioAsVoice: options.sendAudioAsVoice,
             sendVideoAsGif: options.sendVideoAsGif,
             sendMediaAsSticker: options.sendMediaAsSticker,
