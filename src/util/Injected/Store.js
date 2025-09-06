@@ -96,11 +96,13 @@ exports.ExposeStore = () => {
     window.Store.DeviceList = window.require('WAWebApiDeviceList');
     window.Store.HistorySync = window.require('WAWebSendNonMessageDataRequest');
     window.Store.AddonReactionTable = window.require('WAWebAddonReactionTableMode').reactionTableMode;
+    window.Store.AddonPollVoteTable = window.require('WAWebAddonPollVoteTableMode').pollVoteTableMode;
     window.Store.PinnedMsgUtils = window.require('WAWebPinInChatSchema');
     window.Store.ChatGetters = window.require('WAWebChatGetters');
     window.Store.PinnedMsgUtils = window.require('WAWebSendPinMessageAction');
     window.Store.UploadUtils = window.require('WAWebUploadManager');
     window.Store.WAWebStreamModel = window.require('WAWebStreamModel');
+    window.Store.FindOrCreateChat = window.require('WAWebFindChatAction');
     
     window.Store.Settings = {
         ...window.require('WAWebUserPrefsGeneral'),
@@ -209,14 +211,21 @@ exports.ExposeStore = () => {
      * @param {Function} callback Modified function
      */
     window.injectToFunction = (target, callback) => {
-        const module = window.require(target.module);
-        const originalFunction = module[target.function];
-        const modifiedFunction = (...args) => callback(originalFunction, ...args);
-        module[target.function] = modifiedFunction;
+        let module = window.require(target.module);
+
+        const path = target.function.split('.');
+        const funcName = path.pop();
+        for (const key of path) {
+            module = module[key];
+        }
+
+        const originalFunction = module[funcName];
+        module[funcName] = (...args) => callback(originalFunction, ...args);
     };
 
     window.injectToFunction({ module: 'WAWebBackendJobsCommon', function: 'mediaTypeFromProtobuf' }, (func, ...args) => { const [proto] = args; return proto.locationMessage ? null : func(...args); });
 
     window.injectToFunction({ module: 'WAWebE2EProtoUtils', function: 'typeAttributeFromProtobuf' }, (func, ...args) => { const [proto] = args; return proto.locationMessage || proto.groupInviteMessage ? 'text' : func(...args); });
 
+    window.injectToFunction({ module: 'WAWebLid1X1MigrationGating', function: 'Lid1X1MigrationUtils.isLidMigrated' }, () => false);
 };
