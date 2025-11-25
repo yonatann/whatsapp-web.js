@@ -5,7 +5,7 @@ exports.ExposeStore = () => {
     window.safeRequire = (moduleName) => {
         let result;
         try {
-            result = window.require(moduleName);
+            result = window.safeRequire(moduleName);
         } catch (error) {
             console.error(`[Store.js] Failed to require module: ${moduleName}`, error);
             return {};
@@ -74,9 +74,14 @@ exports.ExposeStore = () => {
     window.Store.SendDelete = window.safeRequire('WAWebDeleteChatAction');
     window.Store.SendMessage = window.safeRequire('WAWebSendMsgChatAction');
     window.Store.EditMessage = window.safeRequire('WAWebSendMessageEditAction');
+    window.Store.MediaDataUtils = window.safeRequire('WAWebMediaDataUtils');
+    window.Store.BlobCache = window.safeRequire('WAWebMediaInMemoryBlobCache');
     window.Store.SendSeen = window.safeRequire('WAWebUpdateUnreadChatAction');
     window.Store.User = window.safeRequire('WAWebUserPrefsMeUser');
-    window.Store.ContactMethods = window.safeRequire('WAWebContactGetters');
+    window.Store.ContactMethods = {
+        ...window.safeRequire('WAWebContactGetters'),
+        ...window.safeRequire('WAWebFrontendContactGetters')
+    };
     window.Store.UserConstructor = window.safeRequire('WAWebWid');
     window.Store.Validators = window.safeRequire('WALinkify');
     window.Store.WidFactory = window.safeRequire('WAWebWidFactory');
@@ -116,7 +121,7 @@ exports.ExposeStore = () => {
     window.Store.CustomerNoteUtils = window.safeRequire('WAWebNoteAction');
     window.Store.BusinessGatingUtils = window.safeRequire('WAWebBizGatingUtils');
     window.Store.PollsVotesSchema = window.safeRequire('WAWebPollsVotesSchema');
-    
+    window.Store.PollsSendVote = window.safeRequire('WAWebPollsSendVoteMsgAction');
     
     window.Store.Settings = {
         ...window.safeRequire('WAWebUserPrefsGeneral'),
@@ -162,7 +167,8 @@ exports.ExposeStore = () => {
         ...window.safeRequire('WAWebGroupCreateJob'),
         ...window.safeRequire('WAWebGroupModifyInfoJob'),
         ...window.safeRequire('WAWebExitGroupAction'),
-        ...window.safeRequire('WAWebContactProfilePicThumbBridge')
+        ...window.safeRequire('WAWebContactProfilePicThumbBridge'),
+        ...window.safeRequire('WAWebSetPropertyGroupAction')
     };
     window.Store.GroupParticipants = {
         ...window.safeRequire('WAWebModifyParticipantsGroupAction'),
