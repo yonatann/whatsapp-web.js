@@ -5,7 +5,7 @@ exports.ExposeStore = () => {
     window.safeRequire = (moduleName) => {
         let result;
         try {
-            result = window.safeRequire(moduleName);
+            result = window.require(moduleName);
         } catch (error) {
             console.error(`[Store.js] Failed to require module: ${moduleName}`, error);
             return {};
