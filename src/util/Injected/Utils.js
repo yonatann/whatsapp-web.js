@@ -6,7 +6,7 @@ exports.LoadUtils = () => {
     window.WWebJS.forwardMessage = async (chatId, msgId) => {
         const msg = window.getStore().Msg.get(msgId) || (await window.getStore().Msg.getMessagesById([msgId]))?.messages?.[0];
         const chat = await window.WWebJS.getChat(chatId, { getAsModel: false });
-        return await window.getStore().ForwardUtils.forwardMessages({'chat': chat, 'msgs' : [msg], 'multicast': true, 'includeCaption': true, 'appendedText' : undefined});
+        return await window.getStore().ForwardUtils.forwardMessages({ 'chat': chat, 'msgs': [msg], 'multicast': true, 'includeCaption': true, 'appendedText': undefined });
     };
 
     window.WWebJS.sendSeen = async (chatId) => {
@@ -22,10 +22,11 @@ exports.LoadUtils = () => {
 
     window.WWebJS.sendMessage = async (chat, content, options = {}) => {
         const isChannel = window.getStore().ChatGetters.getIsNewsletter(chat);
+        const isStatus = window.getStore().ChatGetters.getIsBroadcast(chat);
 
         let mediaOptions = {};
         if (options.media) {
-            mediaOptions =  options.sendMediaAsSticker && !isChannel
+            mediaOptions = options.sendMediaAsSticker && !isChannel && !isStatus
                 ? await window.WWebJS.processStickerData(options.media)
                 : await window.WWebJS.processMediaData(options.media, {
                     forceSticker: options.sendMediaAsSticker,
@@ -33,7 +34,8 @@ exports.LoadUtils = () => {
                     forceVoice: options.sendAudioAsVoice,
                     forceDocument: options.sendMediaAsDocument,
                     forceMediaHd: options.sendMediaAsHd,
-                    sendToChannel: isChannel
+                    sendToChannel: isChannel,
+                    sendToStatus: isStatus
                 });
             mediaOptions.caption = options.caption;
             content = options.sendMediaAsSticker ? undefined : mediaOptions.preview;
@@ -60,7 +62,7 @@ exports.LoadUtils = () => {
                     throw new Error('Could not get the quoted message.');
                 }
             }
-            
+
             delete options.ignoreQuoteErrors;
             delete options.quotedMessageId;
         }
@@ -181,7 +183,7 @@ exports.LoadUtils = () => {
                     preview = preview.data;
                     preview.preview = true;
                     preview.subtype = 'url';
-                    options = {...options, ...preview};
+                    options = { ...options, ...preview };
                 }
             }
         }
@@ -189,7 +191,7 @@ exports.LoadUtils = () => {
         if (options.linkPreviewOverride) {
             delete options.linkPreviewOverride;
             options = {
-                ...options, 
+                ...options,
                 preview: true,
                 subtype: 'url',
                 ...options.linkPreviewOverride
@@ -256,6 +258,10 @@ exports.LoadUtils = () => {
             participant = window.getStore().WidFactory.asUserWidOrThrow(from);
         }
 
+        if (typeof chat.id?.isStatus === 'function' && chat.id.isStatus()) {
+            participant = window.getStore().WidFactory.asUserWidOrThrow(from);
+        }
+
         const newMsgKey = new window.getStore().MsgKey({
             from: from,
             to: chat.id,
@@ -294,7 +300,7 @@ exports.LoadUtils = () => {
             ...botOptions,
             ...extraOptions
         };
-        
+
         // Bot's won't reply if canonicalUrl is set (linking)
         if (botOptions) {
             delete message.canonicalUrl;
@@ -330,6 +336,37 @@ exports.LoadUtils = () => {
             return msg;
         }
 
+        if (isStatus) {
+            const { backgroundColor, fontStyle } = extraOptions;
+            const isMedia = Object.keys(mediaOptions).length > 0;
+            const mediaUpdate = data => window.getStore().MediaUpdate(data, mediaOptions);
+            const msg = new window.getStore().Msg.modelClass({
+                ...message,
+                author: participant ? participant : null,
+                messageSecret: window.crypto.getRandomValues(new Uint8Array(32)),
+                cannotBeRanked: window.getStore().StatusUtils.canCheckStatusRankingPosterGating()
+            });
+
+            // for text only
+            const statusOptions = {
+                color: backgroundColor && window.WWebJS.assertColor(backgroundColor) || 0xff7acca5,
+                font: fontStyle >= 0 && fontStyle <= 7 && fontStyle || 0,
+                text: msg.body
+            };
+
+            await window.getStore().StatusUtils[
+                isMedia ?
+                    'sendStatusMediaMsgAction' : 'sendStatusTextMsgAction'
+            ](
+                ...(
+                    isMedia ?
+                        [msg, mediaUpdate] : [statusOptions]
+                )
+            );
+
+            return msg;
+        }
+
         const [msgPromise, sendMsgResultPromise] = window.getStore().SendMessage.addAndSendMsgToChat(chat, message);
         await msgPromise;
 
@@ -337,11 +374,11 @@ exports.LoadUtils = () => {
 
         return window.getStore().Msg.get(newMsgKey._serialized);
     };
-	
+
     window.WWebJS.editMessage = async (msg, content, options = {}) => {
         const extraOptions = options.extraOptions || {};
         delete options.extraOptions;
-        
+
         if (options.mentionedJidList) {
             options.mentionedJidList = options.mentionedJidList.map((id) => window.getStore().WidFactory.createWid(id));
             options.mentionedJidList = options.mentionedJidList.filter(Boolean);
@@ -417,7 +454,7 @@ exports.LoadUtils = () => {
         return stickerInfo;
     };
 
-    window.WWebJS.processMediaData = async (mediaInfo, { forceSticker, forceGif, forceVoice, forceDocument, forceMediaHd, sendToChannel }) => {
+    window.WWebJS.processMediaData = async (mediaInfo, { forceSticker, forceGif, forceVoice, forceDocument, forceMediaHd, sendToChannel, sendToStatus }) => {
         const file = window.WWebJS.mediaInfoToFile(mediaInfo);
         const opaqueData = await window.getStore().OpaqueData.createFromData(file, file.type);
         const mediaParams = {
@@ -426,11 +463,11 @@ exports.LoadUtils = () => {
             isPtt: forceVoice,
             asDocument: forceDocument
         };
-      
+
         if (forceMediaHd && file.type.indexOf('image/') === 0) {
             mediaParams.maxDimension = 2560;
         }
-      
+
         const mediaPrep = window.getStore().MediaPrep.prepRawMedia(opaqueData, mediaParams);
         const mediaData = await mediaPrep.waitForPrep();
         const mediaObject = window.getStore().MediaObject.getOrCreateMediaObject(mediaData.filehash);
@@ -444,7 +481,7 @@ exports.LoadUtils = () => {
             throw new Error('media-fault: sendToChat filehash undefined');
         }
 
-        if (forceVoice && mediaData.type === 'ptt') {
+        if ((forceVoice && mediaData.type === 'ptt') || (sendToStatus && mediaData.type === 'audio')) {
             const waveform = mediaObject.contentInfo.waveform;
             mediaData.waveform =
                 waveform || await window.WWebJS.generateWaveform(file);
@@ -459,7 +496,7 @@ exports.LoadUtils = () => {
 
         mediaData.renderableUrl = mediaData.mediaBlob.url();
         mediaObject.consolidate(mediaData.toJSON());
-        
+
         mediaData.mediaBlob.autorelease();
         const shouldUseMediaCache = window.getStore().MediaDataUtils.shouldUseMediaCache(
             window.getStore().MediaTypes.castToV4(mediaObject.type)
@@ -473,7 +510,7 @@ exports.LoadUtils = () => {
             mimetype: mediaData.mimetype,
             mediaObject,
             mediaType,
-            ...(sendToChannel ? { calculateToken: window.getStore().SendChannelMessage.getRandomFilehash } : {})
+            ...(sendToChannel ? { calculateToken: window.getStore().SendChannelMessage.getRandomFilehash() } : {})
         };
 
         const uploadedMedia = !sendToChannel
@@ -793,17 +830,17 @@ exports.LoadUtils = () => {
         chatId = window.getStore().WidFactory.createWid(chatId);
 
         switch (state) {
-        case 'typing':
-            await window.getStore().ChatState.sendChatStateComposing(chatId);
-            break;
-        case 'recording':
-            await window.getStore().ChatState.sendChatStateRecording(chatId);
-            break;
-        case 'stop':
-            await window.getStore().ChatState.sendChatStatePaused(chatId);
-            break;
-        default:
-            throw 'Invalid chatstate';
+            case 'typing':
+                await window.getStore().ChatState.sendChatStateComposing(chatId);
+                break;
+            case 'recording':
+                await window.getStore().ChatState.sendChatStateRecording(chatId);
+                break;
+            case 'stop':
+                await window.getStore().ChatState.sendChatStatePaused(chatId);
+                break;
+            default:
+                throw 'Invalid chatstate';
         }
 
         return true;
@@ -862,7 +899,7 @@ exports.LoadUtils = () => {
         ]);
         await window.getStore().Socket.deprecatedCastStanza(stanza);
     };
-    
+
     window.WWebJS.cropAndResizeImage = async (media, options = {}) => {
         if (!media.mimetype.includes('image'))
             throw new Error('Media is not an image');
@@ -872,7 +909,7 @@ exports.LoadUtils = () => {
 
         options = Object.assign({ size: 640, mimetype: media.mimetype, quality: .75, asDataUrl: false }, options);
 
-        const img = await new Promise ((resolve, reject) => {
+        const img = await new Promise((resolve, reject) => {
             const img = new Image();
             img.onload = () => resolve(img);
             img.onerror = reject;
@@ -927,11 +964,11 @@ exports.LoadUtils = () => {
             const res = await window.getStore().GroupUtils.requestDeletePicture(chatWid);
             return res ? res.status === 200 : false;
         } catch (err) {
-            if(err.name === 'ServerStatusCodeError') return false;
+            if (err.name === 'ServerStatusCodeError') return false;
             throw err;
         }
     };
-    
+
     window.WWebJS.getProfilePicThumbToBase64 = async (chatWid) => {
         const profilePicCollection = await window.getStore().ProfilePicThumb.find(chatWid);
 
@@ -1041,7 +1078,7 @@ exports.LoadUtils = () => {
         }));
 
         const groupJid = window.getStore().WidToJid.widToGroupJid(groupWid);
-        
+
         const _getSleepTime = (sleep) => {
             if (!Array.isArray(sleep) || (sleep.length === 2 && sleep[0] === sleep[1])) {
                 return sleep;
@@ -1132,17 +1169,17 @@ exports.LoadUtils = () => {
         if (!message) return false;
 
         if (typeof duration !== 'number') return false;
-        
+
         const originalFunction = window.require('WAWebPinMsgConstants').getPinExpiryDuration;
         window.require('WAWebPinMsgConstants').getPinExpiryDuration = () => duration;
-        
+
         const response = await window.getStore().PinnedMsgUtils.sendPinInChatMsg(message, action, duration);
 
         window.require('WAWebPinMsgConstants').getPinExpiryDuration = originalFunction;
 
         return response.messageSendResult === 'OK';
     };
-    
+
     window.WWebJS.getStatusModel = status => {
         const res = status.serialize();
         delete res._msgs;
@@ -1174,5 +1211,21 @@ exports.LoadUtils = () => {
         }
 
         return { lid, phone };
+    };
+
+    window.WWebJS.assertColor = (hex) => {
+        let color;
+        if (typeof hex === 'number') {
+            color = hex > 0 ? hex : 0xffffffff + parseInt(hex) + 1;
+        } else if (typeof hex === 'string') {
+            let number = hex.trim().replace('#', '');
+            if (number.length <= 6) {
+                number = 'FF' + number.padStart(6, '0');
+            }
+            color = parseInt(number, 16);
+        } else {
+            throw 'Invalid hex color';
+        }
+        return color;
     };
 };
