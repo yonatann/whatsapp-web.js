@@ -221,13 +221,12 @@ exports.ExposeStore = () => {
         ...window.safeRequire('WAWebSaveContactAction'),
         ...window.safeRequire('WAWebDeleteContactAction')
     };
-    window.Store.StatusUtils = {
-        ...window.require('WAWebContactStatusBridge'),
-        ...window.require('WAWebSendStatusMsgAction'),
-        ...window.require('WAWebRevokeStatusAction'),
-        ...window.require('WAWebStatusGatingUtils')
-    };
-
+    Store.StatusUtils = Object.assign({},
+        window.safeRequire('WAWebContactStatusBridge'),
+        window.safeRequire('WAWebSendStatusMsgAction'),
+        window.safeRequire('WAWebRevokeStatusAction'),
+        window.safeRequire('WAWebStatusGatingUtils')
+    );
 
     Store.NumberInfo = {
         ...window.safeRequire('WAPhoneUtils'),
