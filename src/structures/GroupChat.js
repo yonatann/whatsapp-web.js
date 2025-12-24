@@ -28,7 +28,7 @@ class GroupChat extends Chat {
     get owner() {
         return this.groupMetadata.owner;
     }
-    
+
     /**
      * Gets the date at which the group was created
      * @type {date}
@@ -128,7 +128,7 @@ class GroupChat extends Chat {
             for (let pWid of participantWids) {
                 const pId = pWid._serialized;
                 pWid = pWid.server === 'lid' ? window.getStore().LidUtils.getPhoneNumber(pWid) : pWid;
-                
+
                 participantData[pId] = {
                     code: undefined,
                     message: undefined,
@@ -148,7 +148,7 @@ class GroupChat extends Chat {
                 }
 
                 const rpcResult =
-                    await window.WWebJS.getAddParticipantsRpcResult(groupWid, pWid);
+                    await window.getWWebJS().getAddParticipantsRpcResult(groupWid, pWid);
                 const { code: rpcResultCode } = rpcResult;
 
                 participantData[pId].code = rpcResultCode;
@@ -156,7 +156,6 @@ class GroupChat extends Chat {
                     errorCodes[rpcResultCode] || errorCodes.default;
 
                 if (autoSendInviteV4 && rpcResultCode === 403) {
-                    let userChat, isInviteV4Sent = false;
                     window.getStore().Contact.gadd(pWid, { silent: true });
 
                     if (rpcResult.name === 'ParticipantRequestCodeCanBeSent' &&
@@ -169,7 +168,7 @@ class GroupChat extends Chat {
                             rpcResult.inviteV4Code,
                             rpcResult.inviteV4CodeExp,
                             comment,
-                            await window.WWebJS.getProfilePicThumbToBase64(groupWid)
+                            await window.getWWebJS().getProfilePicThumbToBase64(groupWid)
                         );
                         isInviteV4Sent = res.messageSendResult === 'OK';
                     }
@@ -194,9 +193,9 @@ class GroupChat extends Chat {
      */
     async removeParticipants(participantIds) {
         return await this.client.pupPage.evaluate(async (chatId, participantIds) => {
-            const chat = await window.WWebJS.getChat(chatId, { getAsModel: false });
+            const chat = await window.getWWebJS().getChat(chatId, { getAsModel: false });
             const participants = (await Promise.all(participantIds.map(async p => {
-                const { lid, phone } = await window.WWebJS.enforceLidAndPnRetrieval(p);
+                const { lid, phone } = await window.getWWebJS().enforceLidAndPnRetrieval(p);
 
                 return chat.groupMetadata.participants.get(lid?._serialized) ||
                     chat.groupMetadata.participants.get(phone?._serialized);
@@ -213,9 +212,9 @@ class GroupChat extends Chat {
      */
     async promoteParticipants(participantIds) {
         return await this.client.pupPage.evaluate(async (chatId, participantIds) => {
-            const chat = await window.WWebJS.getChat(chatId, { getAsModel: false });
+            const chat = await window.getWWebJS().getChat(chatId, { getAsModel: false });
             const participants = (await Promise.all(participantIds.map(async p => {
-                const { lid, phone } = await window.WWebJS.enforceLidAndPnRetrieval(p);
+                const { lid, phone } = await window.getWWebJS().enforceLidAndPnRetrieval(p);
 
                 return chat.groupMetadata.participants.get(lid?._serialized) ||
                     chat.groupMetadata.participants.get(phone?._serialized);
@@ -232,9 +231,9 @@ class GroupChat extends Chat {
      */
     async demoteParticipants(participantIds) {
         return await this.client.pupPage.evaluate(async (chatId, participantIds) => {
-            const chat = await window.WWebJS.getChat(chatId, { getAsModel: false });
+            const chat = await window.getWWebJS().getChat(chatId, { getAsModel: false });
             const participants = (await Promise.all(participantIds.map(async p => {
-                const { lid, phone } = await window.WWebJS.enforceLidAndPnRetrieval(p);
+                const { lid, phone } = await window.getWWebJS().enforceLidAndPnRetrieval(p);
 
                 return chat.groupMetadata.participants.get(lid?._serialized) ||
                     chat.groupMetadata.participants.get(phone?._serialized);
@@ -256,12 +255,12 @@ class GroupChat extends Chat {
                 await window.getStore().GroupUtils.setGroupSubject(chatWid, subject);
                 return true;
             } catch (err) {
-                if(err.name === 'ServerStatusCodeError') return false;
+                if (err.name === 'ServerStatusCodeError') return false;
                 throw err;
             }
         }, this.id._serialized, subject);
 
-        if(!success) return false;
+        if (!success) return false;
         this.name = subject;
         return true;
     }
@@ -280,29 +279,29 @@ class GroupChat extends Chat {
                 await window.getStore().GroupUtils.setGroupDescription(chatWid, description, newId, descId);
                 return true;
             } catch (err) {
-                if(err.name === 'ServerStatusCodeError') return false;
+                if (err.name === 'ServerStatusCodeError') return false;
                 throw err;
             }
         }, this.id._serialized, description);
 
-        if(!success) return false;
+        if (!success) return false;
         this.groupMetadata.desc = description;
         return true;
     }
-    
+
     /**
      * Updates the group setting to allow only admins to add members to the group.
      * @param {boolean} [adminsOnly=true] Enable or disable this option 
      * @returns {Promise<boolean>} Returns true if the setting was properly updated. This can return false if the user does not have the necessary permissions.
      */
-    async setAddMembersAdminsOnly(adminsOnly=true) {
+    async setAddMembersAdminsOnly(adminsOnly = true) {
         const success = await this.client.pupPage.evaluate(async (groupId, adminsOnly) => {
-            const chat = await window.WWebJS.getChat(groupId, { getAsModel: false });
+            const chat = await window.getWWebJS().getChat(groupId, { getAsModel: false });
             try {
                 await window.getStore().GroupUtils.setGroupProperty(chat, 'member_add_mode', adminsOnly ? 0 : 1);
                 return true;
             } catch (err) {
-                if(err.name === 'ServerStatusCodeError') return false;
+                if (err.name === 'ServerStatusCodeError') return false;
                 throw err;
             }
         }, this.id._serialized, adminsOnly);
@@ -310,25 +309,25 @@ class GroupChat extends Chat {
         success && (this.groupMetadata.memberAddMode = adminsOnly ? 'admin_add' : 'all_member_add');
         return success;
     }
-    
+
     /**
      * Updates the group settings to only allow admins to send messages.
      * @param {boolean} [adminsOnly=true] Enable or disable this option 
      * @returns {Promise<boolean>} Returns true if the setting was properly updated. This can return false if the user does not have the necessary permissions.
      */
-    async setMessagesAdminsOnly(adminsOnly=true) {
+    async setMessagesAdminsOnly(adminsOnly = true) {
         const success = await this.client.pupPage.evaluate(async (chatId, adminsOnly) => {
-            const chat = await window.WWebJS.getChat(chatId, { getAsModel: false });
+            const chat = await window.getWWebJS().getChat(chatId, { getAsModel: false });
             try {
                 await window.getStore().GroupUtils.setGroupProperty(chat, 'announcement', adminsOnly ? 1 : 0);
                 return true;
             } catch (err) {
-                if(err.name === 'ServerStatusCodeError') return false;
+                if (err.name === 'ServerStatusCodeError') return false;
                 throw err;
             }
         }, this.id._serialized, adminsOnly);
 
-        if(!success) return false;
+        if (!success) return false;
 
         this.groupMetadata.announce = adminsOnly;
         return true;
@@ -339,31 +338,31 @@ class GroupChat extends Chat {
      * @param {boolean} [adminsOnly=true] Enable or disable this option 
      * @returns {Promise<boolean>} Returns true if the setting was properly updated. This can return false if the user does not have the necessary permissions.
      */
-    async setInfoAdminsOnly(adminsOnly=true) {
+    async setInfoAdminsOnly(adminsOnly = true) {
         const success = await this.client.pupPage.evaluate(async (chatId, adminsOnly) => {
-            const chat = await window.WWebJS.getChat(chatId, { getAsModel: false });
+            const chat = await window.getWWebJS().getChat(chatId, { getAsModel: false });
             try {
                 await window.getStore().GroupUtils.setGroupProperty(chat, 'restrict', adminsOnly ? 1 : 0);
                 return true;
             } catch (err) {
-                if(err.name === 'ServerStatusCodeError') return false;
+                if (err.name === 'ServerStatusCodeError') return false;
                 throw err;
             }
         }, this.id._serialized, adminsOnly);
 
-        if(!success) return false;
-        
+        if (!success) return false;
+
         this.groupMetadata.restrict = adminsOnly;
         return true;
     }
-    
+
     /**
      * Deletes the group's picture.
      * @returns {Promise<boolean>} Returns true if the picture was properly deleted. This can return false if the user does not have the necessary permissions.
      */
     async deletePicture() {
         const success = await this.client.pupPage.evaluate((chatid) => {
-            return window.WWebJS.deletePicture(chatid);
+            return window.getWWebJS().deletePicture(chatid);
         }, this.id._serialized);
 
         return success;
@@ -376,7 +375,7 @@ class GroupChat extends Chat {
      */
     async setPicture(media) {
         const success = await this.client.pupPage.evaluate((chatid, media) => {
-            return window.WWebJS.setPicture(chatid, media);
+            return window.getWWebJS().setPicture(chatid, media);
         }, this.id._serialized, media);
 
         return success;
@@ -395,7 +394,7 @@ class GroupChat extends Chat {
                     : await window.getStore().GroupInvite.queryGroupInviteCode(chatWid, true);
             }
             catch (err) {
-                if(err.name === 'ServerStatusCodeError') return undefined;
+                if (err.name === 'ServerStatusCodeError') return undefined;
                 throw err;
             }
         }, this.id._serialized);
@@ -404,7 +403,7 @@ class GroupChat extends Chat {
             ? codeRes?.code
             : codeRes;
     }
-    
+
     /**
      * Invalidates the current group invite code and generates a new one
      * @returns {Promise<string>} New invite code
@@ -417,7 +416,7 @@ class GroupChat extends Chat {
 
         return codeRes.code;
     }
-    
+
     /**
      * An object that handles the information about the group membership request
      * @typedef {Object} GroupMembershipRequest
@@ -427,7 +426,7 @@ class GroupChat extends Chat {
      * @property {string} requestMethod The method used to create the request: NonAdminAdd/InviteLink/LinkedGroupJoin
      * @property {number} t The timestamp the request was created at
      */
-    
+
     /**
      * Gets an array of membership requests
      * @returns {Promise<Array<GroupMembershipRequest>>} An array of membership requests
@@ -475,7 +474,7 @@ class GroupChat extends Chat {
      */
     async leave() {
         await this.client.pupPage.evaluate(async chatId => {
-            const chat = await window.WWebJS.getChat(chatId, { getAsModel: false });
+            const chat = await window.getWWebJS().getChat(chatId, { getAsModel: false });
             return window.getStore().GroupUtils.sendExitGroup(chat);
         }, this.id._serialized);
     }

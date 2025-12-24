@@ -127,6 +127,12 @@ class Client extends EventEmitter {
             window.getWWebJS = () => {
                 return window.getStore().WWebJS;
             };
+            window.getAuthStore = () => {
+                if (!window.AuthStore) {
+                    window.AuthStore = {};
+                }
+                return window.AuthStore;
+            };
         }, this.options.webStorageNamespace);
 
         if (isCometOrAbove) {
@@ -136,20 +142,20 @@ class Client extends EventEmitter {
         }
 
         const needAuthentication = await this.pupPage.evaluate(async () => {
-            let state = window.AuthStore.AppState.state;
+            let state = window.getAuthStore().AppState.state;
 
             if (state === 'OPENING' || state === 'UNLAUNCHED' || state === 'PAIRING') {
                 // wait till state changes
                 await new Promise(r => {
-                    window.AuthStore.AppState.on('change:state', function waitTillInit(_AppState, state) {
+                    window.getAuthStore().AppState.on('change:state', function waitTillInit(_AppState, state) {
                         if (state !== 'OPENING' && state !== 'UNLAUNCHED' && state !== 'PAIRING') {
-                            window.AuthStore.AppState.off('change:state', waitTillInit);
+                            window.getAuthStore().AppState.off('change:state', waitTillInit);
                             r();
                         }
                     });
                 });
             }
-            state = window.AuthStore.AppState.state;
+            state = window.getAuthStore().AppState.state;
             return state == 'UNPAIRED' || state == 'UNPAIRED_IDLE';
         });
 
@@ -204,16 +210,16 @@ class Client extends EventEmitter {
 
 
                 await this.pupPage.evaluate(async () => {
-                    const registrationInfo = await window.AuthStore.RegistrationUtils.waSignalStore.getRegistrationInfo();
-                    const noiseKeyPair = await window.AuthStore.RegistrationUtils.waNoiseInfo.get();
-                    const staticKeyB64 = window.AuthStore.Base64Tools.encodeB64(noiseKeyPair.staticKeyPair.pubKey);
-                    const identityKeyB64 = window.AuthStore.Base64Tools.encodeB64(registrationInfo.identityKeyPair.pubKey);
-                    const advSecretKey = await window.AuthStore.RegistrationUtils.getADVSecretKey();
-                    const platform = window.AuthStore.RegistrationUtils.DEVICE_PLATFORM;
+                    const registrationInfo = await window.getAuthStore().RegistrationUtils.waSignalStore.getRegistrationInfo();
+                    const noiseKeyPair = await window.getAuthStore().RegistrationUtils.waNoiseInfo.get();
+                    const staticKeyB64 = window.getAuthStore().Base64Tools.encodeB64(noiseKeyPair.staticKeyPair.pubKey);
+                    const identityKeyB64 = window.getAuthStore().Base64Tools.encodeB64(registrationInfo.identityKeyPair.pubKey);
+                    const advSecretKey = await window.getAuthStore().RegistrationUtils.getADVSecretKey();
+                    const platform = window.getAuthStore().RegistrationUtils.DEVICE_PLATFORM;
                     const getQR = (ref) => ref + ',' + staticKeyB64 + ',' + identityKeyB64 + ',' + advSecretKey + ',' + platform;
 
-                    window.onQRChangedEvent(getQR(window.AuthStore.Conn.ref)); // initial qr
-                    window.AuthStore.Conn.on('change:ref', (_, ref) => { window.onQRChangedEvent(getQR(ref)); }); // future QR changes
+                    window.onQRChangedEvent(getQR(window.getAuthStore().Conn.ref)); // initial qr
+                    window.getAuthStore().Conn.on('change:ref', (_, ref) => { window.onQRChangedEvent(getQR(ref)); }); // future QR changes
                 });
             }
         }
@@ -289,12 +295,12 @@ class Client extends EventEmitter {
             await this.pupPage.waitForNavigation({ waitUntil: 'load', timeout: 5000 }).catch((_) => _);
         });
         await this.pupPage.evaluate(() => {
-            window.AuthStore.AppState.on('change:state', (_AppState, state) => { window.onAuthAppStateChangedEvent(state); });
-            window.AuthStore.AppState.on('change:hasSynced', () => { window.onAppStateHasSyncedEvent(); });
-            window.AuthStore.Cmd.on('offline_progress_update', () => {
-                window.onOfflineProgressUpdateEvent(window.AuthStore.OfflineMessageHandler.getOfflineDeliveryProgress());
+            window.getAuthStore().AppState.on('change:state', (_AppState, state) => { window.onAuthAppStateChangedEvent(state); });
+            window.getAuthStore().AppState.on('change:hasSynced', () => { window.onAppStateHasSyncedEvent(); });
+            window.getAuthStore().Cmd.on('offline_progress_update', () => {
+                window.onOfflineProgressUpdateEvent(window.getAuthStore().OfflineMessageHandler.getOfflineDeliveryProgress());
             });
-            window.AuthStore.Cmd.on('logout', async () => {
+            window.getAuthStore().Cmd.on('logout', async () => {
                 await window.onLogoutEvent();
             });
         });
@@ -398,18 +404,18 @@ class Client extends EventEmitter {
     async requestPairingCode(phoneNumber, showNotification = true, intervalMs = 180000) {
         return await this.pupPage.evaluate(async (phoneNumber, showNotification, intervalMs) => {
             const getCode = async () => {
-                while (!window.AuthStore.PairingCodeLinkUtils) {
+                while (!window.getAuthStore().PairingCodeLinkUtils) {
                     await new Promise(resolve => setTimeout(resolve, 250));
                 }
-                window.AuthStore.PairingCodeLinkUtils.setPairingType('ALT_DEVICE_LINKING');
-                await window.AuthStore.PairingCodeLinkUtils.initializeAltDeviceLinking();
-                return window.AuthStore.PairingCodeLinkUtils.startAltLinkingFlow(phoneNumber, showNotification);
+                window.getAuthStore().PairingCodeLinkUtils.setPairingType('ALT_DEVICE_LINKING');
+                await window.getAuthStore().PairingCodeLinkUtils.initializeAltDeviceLinking();
+                return window.getAuthStore().PairingCodeLinkUtils.startAltLinkingFlow(phoneNumber, showNotification);
             };
             if (window.codeInterval) {
                 clearInterval(window.codeInterval); // remove existing interval
             }
             window.codeInterval = setInterval(async () => {
-                if (window.AuthStore.AppState.state != 'UNPAIRED' && window.AuthStore.AppState.state != 'UNPAIRED_IDLE') {
+                if (window.getAuthStore().AppState.state != 'UNPAIRED' && window.getAuthStore().AppState.state != 'UNPAIRED_IDLE') {
                     clearInterval(window.codeInterval);
                     return;
                 }
@@ -752,25 +758,25 @@ class Client extends EventEmitter {
         });
 
         await this.pupPage.evaluate(() => {
-            window.getStore().Msg.on('change', (msg) => { window.onChangeMessageEvent(window.WWebJS.getMessageModel(msg)); });
-            window.getStore().Msg.on('change:type', (msg) => { window.onChangeMessageTypeEvent(window.WWebJS.getMessageModel(msg)); });
-            window.getStore().Msg.on('change:ack', (msg, ack) => { window.onMessageAckEvent(window.WWebJS.getMessageModel(msg), ack); });
-            window.getStore().Msg.on('change:isUnsentMedia', (msg, unsent) => { if (msg.id.fromMe && !unsent) window.onMessageMediaUploadedEvent(window.WWebJS.getMessageModel(msg)); });
-            window.getStore().Msg.on('remove', (msg) => { if (msg.isNewMsg) window.onRemoveMessageEvent(window.WWebJS.getMessageModel(msg)); });
-            window.getStore().Msg.on('change:body change:caption', (msg, newBody, prevBody) => { window.onEditMessageEvent(window.WWebJS.getMessageModel(msg), newBody, prevBody); });
+            window.getStore().Msg.on('change', (msg) => { window.onChangeMessageEvent(window.getWWebJS().getMessageModel(msg)); });
+            window.getStore().Msg.on('change:type', (msg) => { window.onChangeMessageTypeEvent(window.getWWebJS().getMessageModel(msg)); });
+            window.getStore().Msg.on('change:ack', (msg, ack) => { window.onMessageAckEvent(window.getWWebJS().getMessageModel(msg), ack); });
+            window.getStore().Msg.on('change:isUnsentMedia', (msg, unsent) => { if (msg.id.fromMe && !unsent) window.onMessageMediaUploadedEvent(window.getWWebJS().getMessageModel(msg)); });
+            window.getStore().Msg.on('remove', (msg) => { if (msg.isNewMsg) window.onRemoveMessageEvent(window.getWWebJS().getMessageModel(msg)); });
+            window.getStore().Msg.on('change:body change:caption', (msg, newBody, prevBody) => { window.onEditMessageEvent(window.getWWebJS().getMessageModel(msg), newBody, prevBody); });
             window.getStore().AppState.on('change:state', (_AppState, state) => { window.onAppStateChangedEvent(state); });
             window.getStore().Conn.on('change:battery', (state) => { window.onBatteryStateChangedEvent(state); });
             window.getStore().Call.on('add', (call) => { window.onIncomingCall(call); });
-            window.getStore().Chat.on('remove', async (chat) => { window.onRemoveChatEvent(await window.WWebJS.getChatModel(chat)); });
-            window.getStore().Chat.on('change:archive', async (chat, currState, prevState) => { window.onArchiveChatEvent(await window.WWebJS.getChatModel(chat), currState, prevState); });
+            window.getStore().Chat.on('remove', async (chat) => { window.onRemoveChatEvent(await window.getWWebJS().getChatModel(chat)); });
+            window.getStore().Chat.on('change:archive', async (chat, currState, prevState) => { window.onArchiveChatEvent(await window.getWWebJS().getChatModel(chat), currState, prevState); });
             window.getStore().Msg.on('add', (msg) => {
                 if (msg.isNewMsg) {
                     if (msg.type === 'ciphertext') {
                         // defer message event until ciphertext is resolved (type changed)
-                        msg.once('change:type', (_msg) => window.onAddMessageEvent(window.WWebJS.getMessageModel(_msg)));
-                        window.onAddMessageCiphertextEvent(window.WWebJS.getMessageModel(msg));
+                        msg.once('change:type', (_msg) => window.onAddMessageEvent(window.getWWebJS().getMessageModel(_msg)));
+                        window.onAddMessageCiphertextEvent(window.getWWebJS().getMessageModel(msg));
                     } else {
-                        window.onAddMessageEvent(window.WWebJS.getMessageModel(msg));
+                        window.onAddMessageEvent(window.getWWebJS().getMessageModel(msg));
                     }
                 }
             });
@@ -932,7 +938,7 @@ class Client extends EventEmitter {
      */
     async sendSeen(chatId) {
         return await this.pupPage.evaluate(async (chatId) => {
-            return window.WWebJS.sendSeen(chatId);
+            return window.getWWebJS().sendSeen(chatId);
         }, chatId);
     }
 
@@ -1079,17 +1085,17 @@ class Client extends EventEmitter {
         }
 
         const sentMsg = await this.pupPage.evaluate(async (chatId, content, options, sendSeen) => {
-            const chat = await window.WWebJS.getChat(chatId, { getAsModel: false });
+            const chat = await window.getWWebJS().getChat(chatId, { getAsModel: false });
 
             if (!chat) return null;
 
             if (sendSeen) {
-                await window.WWebJS.sendSeen(chatId);
+                await window.getWWebJS().sendSeen(chatId);
             }
 
-            const msg = await window.WWebJS.sendMessage(chat, content, options);
+            const msg = await window.getWWebJS().sendMessage(chat, content, options);
             return msg
-                ? window.WWebJS.getMessageModel(msg)
+                ? window.getWWebJS().getMessageModel(msg)
                 : undefined;
         }, chatId, content, internalOptions, sendSeen);
 
@@ -1126,7 +1132,7 @@ class Client extends EventEmitter {
                     newsletterWid: channelWid,
                     invitee: chatWid,
                     inviteMessage: options.comment,
-                    base64Thumb: await window.WWebJS.getProfilePicThumbToBase64(channelWid)
+                    base64Thumb: await window.getWWebJS().getProfilePicThumbToBase64(channelWid)
                 }
             );
         }, chatId, channelId, options);
@@ -1146,7 +1152,7 @@ class Client extends EventEmitter {
     async searchMessages(query, options = {}) {
         const messages = await this.pupPage.evaluate(async (query, page, count, remote) => {
             const { messages } = await window.getStore().Msg.search(query, page, count, remote);
-            return messages.map(msg => window.WWebJS.getMessageModel(msg));
+            return messages.map(msg => window.getWWebJS().getMessageModel(msg));
         }, query, options.page, options.limit, options.chatId);
 
         return messages.map(msg => new Message(this, msg));
@@ -1158,7 +1164,7 @@ class Client extends EventEmitter {
      */
     async getChats() {
         const chats = await this.pupPage.evaluate(async () => {
-            return await window.WWebJS.getChats();
+            return await window.getWWebJS().getChats();
         });
 
         return chats.map(chat => ChatFactory.create(this, chat));
@@ -1170,7 +1176,7 @@ class Client extends EventEmitter {
      */
     async getChannels() {
         const channels = await this.pupPage.evaluate(async () => {
-            return await window.WWebJS.getChannels();
+            return await window.getWWebJS().getChannels();
         });
 
         return channels.map((channel) => ChatFactory.create(this, channel));
@@ -1183,7 +1189,7 @@ class Client extends EventEmitter {
      */
     async getChatById(chatId) {
         const chat = await this.pupPage.evaluate(async chatId => {
-            return await window.WWebJS.getChat(chatId);
+            return await window.getWWebJS().getChat(chatId);
         }, chatId);
         return chat
             ? ChatFactory.create(this, chat)
@@ -1199,12 +1205,12 @@ class Client extends EventEmitter {
         const channel = await this.pupPage.evaluate(async (inviteCode) => {
             let channelMetadata;
             try {
-                channelMetadata = await window.WWebJS.getChannelMetadata(inviteCode);
+                channelMetadata = await window.getWWebJS().getChannelMetadata(inviteCode);
             } catch (err) {
                 if (err.name === 'ServerStatusCodeError') return null;
                 throw err;
             }
-            return await window.WWebJS.getChat(channelMetadata.id);
+            return await window.getWWebJS().getChat(channelMetadata.id);
         }, inviteCode);
 
         return channel
@@ -1218,7 +1224,7 @@ class Client extends EventEmitter {
      */
     async getContacts() {
         let contacts = await this.pupPage.evaluate(() => {
-            return window.WWebJS.getContacts();
+            return window.getWWebJS().getContacts();
         });
 
         return contacts.map(contact => ContactFactory.create(this, contact));
@@ -1231,7 +1237,7 @@ class Client extends EventEmitter {
      */
     async getContactById(contactId) {
         let contact = await this.pupPage.evaluate(contactId => {
-            return window.WWebJS.getContact(contactId);
+            return window.getWWebJS().getContact(contactId);
         }, contactId);
 
         return ContactFactory.create(this, contact);
@@ -1245,7 +1251,7 @@ class Client extends EventEmitter {
     async getMessageById(messageId) {
         const msg = await this.pupPage.evaluate(async messageId => {
             let msg = window.getStore().Msg.get(messageId);
-            if (msg) return window.WWebJS.getMessageModel(msg);
+            if (msg) return window.getWWebJS().getMessageModel(msg);
 
             const params = messageId.split('_');
             if (params.length !== 3 && params.length !== 4) throw new Error('Invalid serialized message id specified');
@@ -1253,7 +1259,7 @@ class Client extends EventEmitter {
             let messagesObject = await window.getStore().Msg.getMessagesById([messageId]);
             if (messagesObject && messagesObject.messages.length) msg = messagesObject.messages[0];
 
-            if (msg) return window.WWebJS.getMessageModel(msg);
+            if (msg) return window.getWWebJS().getMessageModel(msg);
         }, messageId);
 
         if (msg) return new Message(this, msg);
@@ -1284,7 +1290,7 @@ class Client extends EventEmitter {
 
             return !pinnedMsgs.length
                 ? []
-                : await Promise.all(pinnedMsgs.map((msg) => window.WWebJS.getMessageModel(msg)));
+                : await Promise.all(pinnedMsgs.map((msg) => window.getWWebJS().getMessageModel(msg)));
         }, chatId);
 
         return pinnedMsgs.map((msg) => new Message(this, msg));
@@ -1445,7 +1451,7 @@ class Client extends EventEmitter {
      */
     async archiveChat(chatId) {
         return await this.pupPage.evaluate(async chatId => {
-            let chat = await window.WWebJS.getChat(chatId, { getAsModel: false });
+            let chat = await window.getWWebJS().getChat(chatId, { getAsModel: false });
             await window.getStore().Cmd.archiveChat(chat, true);
             return true;
         }, chatId);
@@ -1457,7 +1463,7 @@ class Client extends EventEmitter {
      */
     async unarchiveChat(chatId) {
         return await this.pupPage.evaluate(async chatId => {
-            let chat = await window.WWebJS.getChat(chatId, { getAsModel: false });
+            let chat = await window.getWWebJS().getChat(chatId, { getAsModel: false });
             await window.getStore().Cmd.archiveChat(chat, false);
             return false;
         }, chatId);
@@ -1469,7 +1475,7 @@ class Client extends EventEmitter {
      */
     async pinChat(chatId) {
         return this.pupPage.evaluate(async chatId => {
-            let chat = await window.WWebJS.getChat(chatId, { getAsModel: false });
+            let chat = await window.getWWebJS().getChat(chatId, { getAsModel: false });
             if (chat.pin) {
                 return true;
             }
@@ -1492,7 +1498,7 @@ class Client extends EventEmitter {
      */
     async unpinChat(chatId) {
         return this.pupPage.evaluate(async chatId => {
-            let chat = await window.WWebJS.getChat(chatId, { getAsModel: false });
+            let chat = await window.getWWebJS().getChat(chatId, { getAsModel: false });
             if (!chat.pin) {
                 return false;
             }
@@ -1544,7 +1550,7 @@ class Client extends EventEmitter {
      */
     async markChatUnread(chatId) {
         await this.pupPage.evaluate(async chatId => {
-            let chat = await window.WWebJS.getChat(chatId, { getAsModel: false });
+            let chat = await window.getWWebJS().getChat(chatId, { getAsModel: false });
             await window.getStore().Cmd.markChatUnread(chat, true);
         }, chatId);
     }
@@ -1768,7 +1774,7 @@ class Client extends EventEmitter {
                         participant.invite_code,
                         participant.invite_code_exp,
                         comment,
-                        await window.WWebJS.getProfilePicThumbToBase64(createGroupResult.wid)
+                        await window.getWWebJS().getProfilePicThumbToBase64(createGroupResult.wid)
                     );
                     isInviteV4Sent = addParticipantResult.messageSendResult === 'OK';
                 }
@@ -1828,7 +1834,7 @@ class Client extends EventEmitter {
             }
 
             if (picture) {
-                picture = await window.WWebJS.cropAndResizeImage(picture, {
+                picture = await window.getWWebJS().cropAndResizeImage(picture, {
                     asDataUrl: true,
                     mimetype: 'image/jpeg',
                     size: 640,
@@ -1865,7 +1871,7 @@ class Client extends EventEmitter {
      */
     async subscribeToChannel(channelId) {
         return await this.pupPage.evaluate(async (channelId) => {
-            return await window.WWebJS.subscribeToUnsubscribeFromChannel(channelId, 'Subscribe');
+            return await window.getWWebJS().subscribeToUnsubscribeFromChannel(channelId, 'Subscribe');
         }, channelId);
     }
 
@@ -1883,7 +1889,7 @@ class Client extends EventEmitter {
      */
     async unsubscribeFromChannel(channelId, options) {
         return await this.pupPage.evaluate(async (channelId, options) => {
-            return await window.WWebJS.subscribeToUnsubscribeFromChannel(channelId, 'Unsubscribe', options);
+            return await window.getWWebJS().subscribeToUnsubscribeFromChannel(channelId, 'Unsubscribe', options);
         }, channelId, options);
     }
 
@@ -1903,7 +1909,7 @@ class Client extends EventEmitter {
      */
     async transferChannelOwnership(channelId, newOwnerId, options = {}) {
         return await this.pupPage.evaluate(async (channelId, newOwnerId, options) => {
-            const channel = await window.WWebJS.getChat(channelId, { getAsModel: false });
+            const channel = await window.getWWebJS().getChat(channelId, { getAsModel: false });
             const newOwner = window.getStore().Contact.get(newOwnerId) || (await window.getStore().Contact.find(newOwnerId));
             if (!channel.newsletterMetadata) {
                 await window.getStore().NewsletterMetadataCollection.update(channel.id);
@@ -1951,20 +1957,6 @@ class Client extends EventEmitter {
             view = 0,
             limit = 50
         }) => {
-            searchText = searchText.trim();
-            const currentRegion = window.getStore().ChannelUtils.currentRegion;
-            if (![0, 1, 2, 3].includes(view)) view = 0;
-
-            countryCodes = countryCodes.length === 1 && countryCodes[0] === currentRegion
-                ? countryCodes
-                : countryCodes.filter((code) => Object.keys(window.getStore().ChannelUtils.countryCodesIso).includes(code));
-
-            const viewTypeMapping = {
-                0: 'RECOMMENDED',
-                1: 'TRENDING',
-                2: 'POPULAR',
-                3: 'NEW'
-            };
 
             searchOptions = {
                 searchText: searchText,
@@ -1983,7 +1975,7 @@ class Client extends EventEmitter {
             limit !== 50 && (window.getStore().ChannelUtils.getNewsletterDirectoryPageSize = originalFunction);
 
             return channels
-                ? await Promise.all(channels.map((channel) => window.WWebJS.getChatModel(channel, { isChannel: true })))
+                ? await Promise.all(channels.map((channel) => window.getWWebJS().getChatModel(channel, { isChannel: true })))
                 : [];
         }, searchOptions);
     }
@@ -1995,7 +1987,7 @@ class Client extends EventEmitter {
      */
     async deleteChannel(channelId) {
         return await this.client.pupPage.evaluate(async (channelId) => {
-            const channel = await window.WWebJS.getChat(channelId, { getAsModel: false });
+            const channel = await window.getWWebJS().getChat(channelId, { getAsModel: false });
             if (!channel) return false;
             try {
                 await window.getStore().ChannelUtils.deleteNewsletterAction(channel);
@@ -2013,7 +2005,7 @@ class Client extends EventEmitter {
      */
     async getLabels() {
         const labels = await this.pupPage.evaluate(async () => {
-            return window.WWebJS.getLabels();
+            return window.getWWebJS().getLabels();
         });
 
         return labels.map(data => new Label(this, data));
@@ -2025,7 +2017,7 @@ class Client extends EventEmitter {
      */
     async getBroadcasts() {
         const broadcasts = await this.pupPage.evaluate(async () => {
-            return window.WWebJS.getAllStatuses();
+            return window.getWWebJS().getAllStatuses();
         });
         return broadcasts.map(data => new Broadcast(this, data));
     }
@@ -2039,15 +2031,15 @@ class Client extends EventEmitter {
         const broadcast = await this.pupPage.evaluate(async (userId) => {
             let status;
             try {
-                status = window.Store.Status.get(userId);
+                status = window.getStore().Status.get(userId);
                 if (!status) {
-                    status = await window.Store.Status.find(userId);
+                    status = await window.getStore().Status.find(userId);
                 }
             } catch {
                 status = null;
             }
 
-            if (status) return window.WWebJS.getStatusModel(status);
+            if (status) return window.getWWebJS().getStatusModel(status);
         }, contactId);
         return new Broadcast(this, broadcast);
     }
@@ -2059,17 +2051,17 @@ class Client extends EventEmitter {
      */
     async revokeStatusMessage(messageId) {
         return await this.pupPage.evaluate(async (msgId) => {
-            const status = window.Store.Status.getMyStatus();
+            const status = window.getStore().Status.getMyStatus();
             if (!status) return;
 
             const msg =
-                window.Store.Msg.get(msgId) || (await window.Store.Msg.getMessagesById([msgId]))?.messages?.[0];
+                window.getStore().Msg.get(msgId) || (await window.getStore().Msg.getMessagesById([msgId]))?.messages?.[0];
             if (!msg) return;
 
             if (!msg.id.fromMe || !msg.id.remote.isStatus())
                 throw 'Invalid usage! Can only revoke the message its from own status broadcast';
 
-            return await window.Store.StatusUtils.sendStatusRevokeMsgAction(status, msg);
+            return await window.getStore().StatusUtils.sendStatusRevokeMsgAction(status, msg);
         }, messageId);
     }
 
@@ -2080,7 +2072,7 @@ class Client extends EventEmitter {
      */
     async getLabelById(labelId) {
         const label = await this.pupPage.evaluate(async (labelId) => {
-            return window.WWebJS.getLabel(labelId);
+            return window.getWWebJS().getLabel(labelId);
         }, labelId);
 
         return new Label(this, label);
@@ -2093,7 +2085,7 @@ class Client extends EventEmitter {
      */
     async getChatLabels(chatId) {
         const labels = await this.pupPage.evaluate(async (chatId) => {
-            return window.WWebJS.getChatLabels(chatId);
+            return window.getWWebJS().getChatLabels(chatId);
         }, chatId);
 
         return labels.map(data => new Label(this, data));
@@ -2126,7 +2118,7 @@ class Client extends EventEmitter {
     async getBlockedContacts() {
         const blockedContacts = await this.pupPage.evaluate(() => {
             let chatIds = window.getStore().Blocklist.getModelsArray().map(a => a.id._serialized);
-            return Promise.all(chatIds.map(id => window.WWebJS.getContact(id)));
+            return Promise.all(chatIds.map(id => window.getWWebJS().getContact(id)));
         });
 
         return blockedContacts.map(contact => ContactFactory.create(this.client, contact));
@@ -2139,7 +2131,7 @@ class Client extends EventEmitter {
      */
     async setProfilePicture(media) {
         const success = await this.pupPage.evaluate((chatid, media) => {
-            return window.WWebJS.setPicture(chatid, media);
+            return window.getWWebJS().setPicture(chatid, media);
         }, this.info.wid._serialized, media);
 
         return success;
@@ -2151,7 +2143,7 @@ class Client extends EventEmitter {
      */
     async deleteProfilePicture() {
         const success = await this.pupPage.evaluate((chatid) => {
-            return window.WWebJS.deletePicture(chatid);
+            return window.getWWebJS().deletePicture(chatid);
         }, this.info.wid._serialized);
 
         return success;
@@ -2169,7 +2161,7 @@ class Client extends EventEmitter {
             if (['smba', 'smbi'].indexOf(window.getStore().Conn.platform) === -1) {
                 throw '[LT01] Only Whatsapp business';
             }
-            const labels = window.WWebJS.getLabels().filter(e => labelIds.find(l => l == e.id) !== undefined);
+            const labels = window.getWWebJS().getLabels().filter(e => labelIds.find(l => l == e.id) !== undefined);
             const chats = window.getStore().Chat.filter(e => chatIds.includes(e.id._serialized));
 
             let actions = labels.map(label => ({ id: label.id, type: 'add' }));
@@ -2232,7 +2224,7 @@ class Client extends EventEmitter {
     async approveGroupMembershipRequests(groupId, options = {}) {
         return await this.pupPage.evaluate(async (groupId, options) => {
             const { requesterIds = null, sleep = [250, 500] } = options;
-            return await window.WWebJS.membershipRequestAction(groupId, 'Approve', requesterIds, sleep);
+            return await window.getWWebJS().membershipRequestAction(groupId, 'Approve', requesterIds, sleep);
         }, groupId, options);
     }
 
@@ -2245,7 +2237,7 @@ class Client extends EventEmitter {
     async rejectGroupMembershipRequests(groupId, options = {}) {
         return await this.pupPage.evaluate(async (groupId, options) => {
             const { requesterIds = null, sleep = [250, 500] } = options;
-            return await window.WWebJS.membershipRequestAction(groupId, 'Reject', requesterIds, sleep);
+            return await window.getWWebJS().membershipRequestAction(groupId, 'Reject', requesterIds, sleep);
         }, groupId, options);
     }
 
@@ -2445,7 +2437,7 @@ class Client extends EventEmitter {
             if (!Array.isArray(userIds)) userIds = [userIds];
 
             return await Promise.all(userIds.map(async (userId) => {
-                const { lid, phone } = await window.WWebJS.enforceLidAndPnRetrieval(userId);
+                const { lid, phone } = await window.getWWebJS().enforceLidAndPnRetrieval(userId);
 
                 return {
                     lid: lid?._serialized,

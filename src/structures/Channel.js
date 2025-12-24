@@ -101,14 +101,14 @@ class Channel extends Base {
      */
     async getSubscribers(limit) {
         return await this.client.pupPage.evaluate(async (channelId, limit) => {
-            const channel = await window.WWebJS.getChat(channelId, { getAsModel: false });
+            const channel = await window.getWWebJS().getChat(channelId, { getAsModel: false });
             if (!channel) return [];
             !limit && (limit = window.getStore().ChannelUtils.getMaxSubscriberNumber());
             const response = await window.getStore().ChannelSubscribers.mexFetchNewsletterSubscribers(channelId, limit);
             const contacts = window.getStore().ChannelSubscribers.getSubscribersInContacts(response.subscribers);
             return Promise.all(contacts.map((obj) => ({
                 ...obj,
-                contact: window.WWebJS.getContactModel(obj.contact)
+                contact: window.getWWebJS().getContactModel(obj.contact)
             })));
         }, this.id._serialized, limit);
     }
@@ -181,7 +181,7 @@ class Channel extends Base {
         }
         return success;
     }
-    
+
     /**
      * Unmutes the channel
      * @returns {Promise<boolean>} Returns true if the operation completed successfully, false otherwise
@@ -298,7 +298,7 @@ class Channel extends Base {
                 return true;
             };
 
-            const channel = await window.WWebJS.getChat(channelId, { getAsModel: false });
+            const channel = await window.getWWebJS().getChat(channelId, { getAsModel: false });
             let msgs = channel.msgs.getModelsArray().filter(msgFilter);
 
             if (searchOptions && searchOptions.limit > 0) {
@@ -307,14 +307,14 @@ class Channel extends Base {
                     if (!loadedMessages || !loadedMessages.length) break;
                     msgs = [...loadedMessages.filter(msgFilter), ...msgs];
                 }
-                
+
                 if (msgs.length > searchOptions.limit) {
                     msgs.sort((a, b) => (a.t > b.t) ? 1 : -1);
                     msgs = msgs.splice(msgs.length - searchOptions.limit);
                 }
             }
 
-            return msgs.map(m => window.WWebJS.getMessageModel(m));
+            return msgs.map(m => window.getWWebJS().getMessageModel(m));
 
         }, this.id._serialized, searchOptions);
 
@@ -337,11 +337,11 @@ class Channel extends Base {
      */
     async _setChannelMetadata(value, property) {
         return await this.client.pupPage.evaluate(async (channelId, value, property) => {
-            const channel = await window.WWebJS.getChat(channelId, { getAsModel: false });
+            const channel = await window.getWWebJS().getChat(channelId, { getAsModel: false });
             if (!channel) return false;
             if (property.editPicture) {
                 value.picture = value.picture
-                    ? await window.WWebJS.cropAndResizeImage(value.picture, {
+                    ? await window.getWWebJS().cropAndResizeImage(value.picture, {
                         asDataUrl: true,
                         mimetype: 'image/jpeg',
                         size: 640,

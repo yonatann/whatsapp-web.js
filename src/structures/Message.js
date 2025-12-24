@@ -313,7 +313,7 @@ class Message extends Base {
         const newData = await this.client.pupPage.evaluate(async (msgId) => {
             const msg = window.getStore().Msg.get(msgId) || (await window.getStore().Msg.getMessagesById([msgId]))?.messages?.[0];
             if (!msg) return null;
-            return window.WWebJS.getMessageModel(msg);
+            return window.getWWebJS().getMessageModel(msg);
         }, this.id._serialized);
 
         if (!newData) return null;
@@ -372,7 +372,7 @@ class Message extends Base {
         const quotedMsg = await this.client.pupPage.evaluate(async (msgId) => {
             const msg = window.getStore().Msg.get(msgId) || (await window.getStore().Msg.getMessagesById([msgId]))?.messages?.[0];
             const quotedMsg = window.getStore().QuotedMsg.getQuotedMsgObj(msg);
-            return window.WWebJS.getMessageModel(quotedMsg);
+            return window.getWWebJS().getMessageModel(quotedMsg);
         }, this.id._serialized);
 
         return new Message(this.client, quotedMsg);
@@ -434,7 +434,7 @@ class Message extends Base {
         const chatId = typeof chat === 'string' ? chat : chat.id._serialized;
 
         await this.client.pupPage.evaluate(async (msgId, chatId) => {
-            return window.WWebJS.forwardMessage(chatId, msgId);
+            return window.getWWebJS().forwardMessage(chatId, msgId);
         }, this.id._serialized, chatId);
     }
 
@@ -483,7 +483,7 @@ class Message extends Base {
                     downloadQpl: mockQpl
                 });
 
-                const data = await window.WWebJS.arrayBufferToBase64Async(decryptedMedia);
+                const data = await window.getWWebJS().arrayBufferToBase64Async(decryptedMedia);
 
                 return {
                     data,
@@ -559,7 +559,7 @@ class Message extends Base {
      */
     async pin(duration) {
         return await this.client.pupPage.evaluate(async (msgId, duration) => {
-            return await window.WWebJS.pinUnpinMsgAction(msgId, 1, duration);
+            return await window.getWWebJS().pinUnpinMsgAction(msgId, 1, duration);
         }, this.id._serialized, duration);
     }
 
@@ -569,7 +569,7 @@ class Message extends Base {
      */
     async unpin() {
         return await this.client.pupPage.evaluate(async (msgId) => {
-            return await window.WWebJS.pinUnpinMsgAction(msgId, 2, 0);
+            return await window.getWWebJS().pinUnpinMsgAction(msgId, 2, 0);
         }, this.id._serialized);
     }
 
@@ -611,7 +611,7 @@ class Message extends Base {
     async getOrder() {
         if (this.type === MessageTypes.ORDER) {
             const result = await this.client.pupPage.evaluate((orderId, token, chatId) => {
-                return window.WWebJS.getOrderDetail(orderId, token, chatId);
+                return window.getWWebJS().getOrderDetail(orderId, token, chatId);
             }, this.orderId, this.token, this._getChatId());
             if (!result) return undefined;
             return new Order(this.client, result);
@@ -705,7 +705,7 @@ class Message extends Base {
 
             let canEdit = window.getStore().MsgActionChecks.canEditText(msg) || window.getStore().MsgActionChecks.canEditCaption(msg);
             if (canEdit) {
-                const msgEdit = await window.WWebJS.editMessage(msg, message, options);
+                const msgEdit = await window.getWWebJS().editMessage(msg, message, options);
                 return msgEdit.serialize();
             }
             return null;
