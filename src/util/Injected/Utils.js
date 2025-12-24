@@ -264,7 +264,8 @@ exports.LoadUtils = () => {
             participant = window.getStore().WidFactory.asUserWidOrThrow(from);
         }
 
-        const newMsgKey = new window.getStore().MsgKey({
+        const Store = window.getStore();
+        const newMsgKey = new Store.MsgKey({
             from: from,
             to: chat.id,
             id: newId,
@@ -309,7 +310,8 @@ exports.LoadUtils = () => {
         }
 
         if (isChannel) {
-            const msg = new window.getStore().Msg.modelClass(message);
+            const Store = window.getStore();
+            const msg = new Store.Msg.modelClass(message);
             const msgDataFromMsgModel = window.getStore().SendChannelMessage.msgDataFromMsgModel(msg);
             const isMedia = Object.keys(mediaOptions).length > 0;
             await window.getStore().SendChannelMessage.addNewsletterMsgsRecords([msgDataFromMsgModel]);
@@ -342,7 +344,8 @@ exports.LoadUtils = () => {
             const { backgroundColor, fontStyle } = extraOptions;
             const isMedia = Object.keys(mediaOptions).length > 0;
             const mediaUpdate = data => window.getStore().MediaUpdate(data, mediaOptions);
-            const msg = new window.getStore().Msg.modelClass({
+            const Store = window.getStore();
+            const msg = new Store.Msg.modelClass({
                 ...message,
                 author: participant ? participant : null,
                 messageSecret: window.crypto.getRandomValues(new Uint8Array(32)),
