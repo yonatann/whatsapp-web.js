@@ -24,6 +24,7 @@ exports.DefaultOptions = {
         showNotification: true,
         intervalMs: 180000,
     },
+    webStorageNamespace: 'Store',
 };
 
 /**

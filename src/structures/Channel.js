@@ -103,9 +103,9 @@ class Channel extends Base {
         return await this.client.pupPage.evaluate(async (channelId, limit) => {
             const channel = await window.WWebJS.getChat(channelId, { getAsModel: false });
             if (!channel) return [];
-            !limit && (limit = window.Store.ChannelUtils.getMaxSubscriberNumber());
-            const response = await window.Store.ChannelSubscribers.mexFetchNewsletterSubscribers(channelId, limit);
-            const contacts = window.Store.ChannelSubscribers.getSubscribersInContacts(response.subscribers);
+            !limit && (limit = window.getStore().ChannelUtils.getMaxSubscriberNumber());
+            const response = await window.getStore().ChannelSubscribers.mexFetchNewsletterSubscribers(channelId, limit);
+            const contacts = window.getStore().ChannelSubscribers.getSubscribersInContacts(response.subscribers);
             return Promise.all(contacts.map((obj) => ({
                 ...obj,
                 contact: window.WWebJS.getContactModel(obj.contact)
@@ -303,7 +303,7 @@ class Channel extends Base {
 
             if (searchOptions && searchOptions.limit > 0) {
                 while (msgs.length < searchOptions.limit) {
-                    const loadedMessages = await window.Store.ConversationMsgs.loadEarlierMsgs(channel);
+                    const loadedMessages = await window.getStore().ConversationMsgs.loadEarlierMsgs(channel);
                     if (!loadedMessages || !loadedMessages.length) break;
                     msgs = [...loadedMessages.filter(msgFilter), ...msgs];
                 }
@@ -350,7 +350,7 @@ class Channel extends Base {
                     : null;
             }
             try {
-                await window.Store.ChannelUtils.editNewsletterMetadataAction(channel, property, value);
+                await window.getStore().ChannelUtils.editNewsletterMetadataAction(channel, property, value);
                 return true;
             } catch (err) {
                 if (err.name === 'ServerStatusCodeError') return false;
@@ -368,8 +368,8 @@ class Channel extends Base {
         return await this.client.pupPage.evaluate(async (channelId, action) => {
             try {
                 action === 'MUTE'
-                    ? await window.Store.ChannelUtils.muteNewsletter([channelId])
-                    : await window.Store.ChannelUtils.unmuteNewsletter([channelId]);
+                    ? await window.getStore().ChannelUtils.muteNewsletter([channelId])
+                    : await window.getStore().ChannelUtils.unmuteNewsletter([channelId]);
                 return true;
             } catch (err) {
                 if (err.name === 'ServerStatusCodeError') return false;

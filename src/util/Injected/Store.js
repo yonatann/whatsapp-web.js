@@ -55,75 +55,76 @@ exports.ExposeStore = () => {
         );
     };
 
-    window.Store = Object.assign({}, window.safeRequire('WAWebCollections'));
-    window.Store.AppState = window.safeRequire('WAWebSocketModel').Socket;
-    window.Store.BlockContact = window.safeRequire('WAWebBlockContactAction');
-    window.Store.Conn = window.safeRequire('WAWebConnModel').Conn;
-    window.Store.Cmd = window.safeRequire('WAWebCmd').Cmd;
-    window.Store.DownloadManager = window.safeRequire('WAWebDownloadManager').downloadManager;
-    window.Store.GroupQueryAndUpdate = window.safeRequire('WAWebGroupQueryJob').queryAndUpdateGroupMetadataById;
-    window.Store.MediaPrep = window.safeRequire('WAWebPrepRawMedia');
-    window.Store.MediaObject = window.safeRequire('WAWebMediaStorage');
-    window.Store.MediaTypes = window.safeRequire('WAWebMmsMediaTypes');
-    window.Store.MediaUpload = window.safeRequire('WAWebMediaMmsV4Upload');
-    window.Store.MsgKey = window.safeRequire('WAWebMsgKey');
-    window.Store.OpaqueData = window.safeRequire('WAWebMediaOpaqueData');
-    window.Store.QueryProduct = window.safeRequire('WAWebBizProductCatalogBridge');
-    window.Store.QueryOrder = window.safeRequire('WAWebBizOrderBridge');
-    window.Store.SendClear = window.safeRequire('WAWebChatClearBridge');
-    window.Store.SendDelete = window.safeRequire('WAWebDeleteChatAction');
-    window.Store.SendMessage = window.safeRequire('WAWebSendMsgChatAction');
-    window.Store.EditMessage = window.safeRequire('WAWebSendMessageEditAction');
-    window.Store.MediaDataUtils = window.safeRequire('WAWebMediaDataUtils');
-    window.Store.BlobCache = window.safeRequire('WAWebMediaInMemoryBlobCache');
-    window.Store.SendSeen = window.safeRequire('WAWebUpdateUnreadChatAction');
-    window.Store.User = window.safeRequire('WAWebUserPrefsMeUser');
-    window.Store.ContactMethods = {
+    const Store = window.getStore();
+    Object.assign(Store, window.safeRequire('WAWebCollections'));
+    Store.AppState = window.safeRequire('WAWebSocketModel').Socket;
+    Store.BlockContact = window.safeRequire('WAWebBlockContactAction');
+    Store.Conn = window.safeRequire('WAWebConnModel').Conn;
+    Store.Cmd = window.safeRequire('WAWebCmd').Cmd;
+    Store.DownloadManager = window.safeRequire('WAWebDownloadManager').downloadManager;
+    Store.GroupQueryAndUpdate = window.safeRequire('WAWebGroupQueryJob').queryAndUpdateGroupMetadataById;
+    Store.MediaPrep = window.safeRequire('WAWebPrepRawMedia');
+    Store.MediaObject = window.safeRequire('WAWebMediaStorage');
+    Store.MediaTypes = window.safeRequire('WAWebMmsMediaTypes');
+    Store.MediaUpload = window.safeRequire('WAWebMediaMmsV4Upload');
+    Store.MsgKey = window.safeRequire('WAWebMsgKey');
+    Store.OpaqueData = window.safeRequire('WAWebMediaOpaqueData');
+    Store.QueryProduct = window.safeRequire('WAWebBizProductCatalogBridge');
+    Store.QueryOrder = window.safeRequire('WAWebBizOrderBridge');
+    Store.SendClear = window.safeRequire('WAWebChatClearBridge');
+    Store.SendDelete = window.safeRequire('WAWebDeleteChatAction');
+    Store.SendMessage = window.safeRequire('WAWebSendMsgChatAction');
+    Store.EditMessage = window.safeRequire('WAWebSendMessageEditAction');
+    Store.MediaDataUtils = window.safeRequire('WAWebMediaDataUtils');
+    Store.BlobCache = window.safeRequire('WAWebMediaInMemoryBlobCache');
+    Store.SendSeen = window.safeRequire('WAWebUpdateUnreadChatAction');
+    Store.User = window.safeRequire('WAWebUserPrefsMeUser');
+    Store.ContactMethods = {
         ...window.safeRequire('WAWebContactGetters'),
         ...window.safeRequire('WAWebFrontendContactGetters')
     };
-    window.Store.UserConstructor = window.safeRequire('WAWebWid');
-    window.Store.Validators = window.safeRequire('WALinkify');
-    window.Store.WidFactory = window.safeRequire('WAWebWidFactory');
-    window.Store.ProfilePic = window.safeRequire('WAWebContactProfilePicThumbBridge');
-    window.Store.PresenceUtils = window.safeRequire('WAWebPresenceChatAction');
-    window.Store.ChatState = window.safeRequire('WAWebChatStateBridge');
-    window.Store.findCommonGroups = window.safeRequire('WAWebFindCommonGroupsContactAction').findCommonGroups;
-    window.Store.StatusUtils = window.safeRequire('WAWebContactStatusBridge');
-    window.Store.ConversationMsgs = window.safeRequire('WAWebChatLoadMessages');
-    window.Store.sendReactionToMsg = window.safeRequire('WAWebSendReactionMsgAction').sendReactionToMsg;
-    window.Store.createOrUpdateReactionsModule = window.safeRequire('WAWebDBCreateOrUpdateReactions');
-    window.Store.EphemeralFields = window.safeRequire('WAWebGetEphemeralFieldsMsgActionsUtils');
-    window.Store.MsgActionChecks = window.safeRequire('WAWebMsgActionCapability');
-    window.Store.QuotedMsg = window.safeRequire('WAWebQuotedMsgModelUtils');
-    window.Store.LinkPreview = window.safeRequire('WAWebLinkPreviewChatAction');
-    window.Store.Socket = window.safeRequire('WADeprecatedSendIq');
-    window.Store.SocketWap = window.safeRequire('WAWap');
-    window.Store.SearchContext = window.safeRequire('WAWebChatMessageSearch');
-    window.Store.DrawerManager = window.safeRequire('WAWebDrawerManager').DrawerManager;
-    window.Store.LidUtils = window.safeRequire('WAWebApiContact');
-    window.Store.WidToJid = window.safeRequire('WAWebWidToJid');
-    window.Store.JidToWid = window.safeRequire('WAWebJidToWid');
-    window.Store.getMsgInfo = window.safeRequire('WAWebApiMessageInfoStore').queryMsgInfo;
-    window.Store.QueryExist = window.safeRequire('WAWebQueryExistsJob').queryWidExists;
-    window.Store.ReplyUtils = window.safeRequire('WAWebMsgReply');
-    window.Store.BotSecret = window.safeRequire('WAWebBotMessageSecret');
-    window.Store.BotProfiles = window.safeRequire('WAWebBotProfileCollection');
-    window.Store.ContactCollection = window.safeRequire('WAWebContactCollection').ContactCollection;
-    window.Store.DeviceList = window.safeRequire('WAWebApiDeviceList');
-    window.Store.HistorySync = window.safeRequire('WAWebSendNonMessageDataRequest');
-    window.Store.AddonReactionTable = window.safeRequire('WAWebAddonReactionTableMode').reactionTableMode;
-    window.Store.AddonPollVoteTable = window.safeRequire('WAWebAddonPollVoteTableMode').pollVoteTableMode;
-    window.Store.ChatGetters = window.safeRequire('WAWebChatGetters');
-    window.Store.UploadUtils = window.safeRequire('WAWebUploadManager');
-    window.Store.WAWebStreamModel = window.safeRequire('WAWebStreamModel');
-    window.Store.FindOrCreateChat = window.safeRequire('WAWebFindChatAction');
-    window.Store.CustomerNoteUtils = window.safeRequire('WAWebNoteAction');
-    window.Store.BusinessGatingUtils = window.safeRequire('WAWebBizGatingUtils');
-    window.Store.PollsVotesSchema = window.safeRequire('WAWebPollsVotesSchema');
-    window.Store.PollsSendVote = window.safeRequire('WAWebPollsSendVoteMsgAction');
-    
-    window.Store.Settings = {
+    Store.UserConstructor = window.safeRequire('WAWebWid');
+    Store.Validators = window.safeRequire('WALinkify');
+    Store.WidFactory = window.safeRequire('WAWebWidFactory');
+    Store.ProfilePic = window.safeRequire('WAWebContactProfilePicThumbBridge');
+    Store.PresenceUtils = window.safeRequire('WAWebPresenceChatAction');
+    Store.ChatState = window.safeRequire('WAWebChatStateBridge');
+    Store.findCommonGroups = window.safeRequire('WAWebFindCommonGroupsContactAction').findCommonGroups;
+    Store.StatusUtils = window.safeRequire('WAWebContactStatusBridge');
+    Store.ConversationMsgs = window.safeRequire('WAWebChatLoadMessages');
+    Store.sendReactionToMsg = window.safeRequire('WAWebSendReactionMsgAction').sendReactionToMsg;
+    Store.createOrUpdateReactionsModule = window.safeRequire('WAWebDBCreateOrUpdateReactions');
+    Store.EphemeralFields = window.safeRequire('WAWebGetEphemeralFieldsMsgActionsUtils');
+    Store.MsgActionChecks = window.safeRequire('WAWebMsgActionCapability');
+    Store.QuotedMsg = window.safeRequire('WAWebQuotedMsgModelUtils');
+    Store.LinkPreview = window.safeRequire('WAWebLinkPreviewChatAction');
+    Store.Socket = window.safeRequire('WADeprecatedSendIq');
+    Store.SocketWap = window.safeRequire('WAWap');
+    Store.SearchContext = window.safeRequire('WAWebChatMessageSearch');
+    Store.DrawerManager = window.safeRequire('WAWebDrawerManager').DrawerManager;
+    Store.LidUtils = window.safeRequire('WAWebApiContact');
+    Store.WidToJid = window.safeRequire('WAWebWidToJid');
+    Store.JidToWid = window.safeRequire('WAWebJidToWid');
+    Store.getMsgInfo = window.safeRequire('WAWebApiMessageInfoStore').queryMsgInfo;
+    Store.QueryExist = window.safeRequire('WAWebQueryExistsJob').queryWidExists;
+    Store.ReplyUtils = window.safeRequire('WAWebMsgReply');
+    Store.BotSecret = window.safeRequire('WAWebBotMessageSecret');
+    Store.BotProfiles = window.safeRequire('WAWebBotProfileCollection');
+    Store.ContactCollection = window.safeRequire('WAWebContactCollection').ContactCollection;
+    Store.DeviceList = window.safeRequire('WAWebApiDeviceList');
+    Store.HistorySync = window.safeRequire('WAWebSendNonMessageDataRequest');
+    Store.AddonReactionTable = window.safeRequire('WAWebAddonReactionTableMode').reactionTableMode;
+    Store.AddonPollVoteTable = window.safeRequire('WAWebAddonPollVoteTableMode').pollVoteTableMode;
+    Store.ChatGetters = window.safeRequire('WAWebChatGetters');
+    Store.UploadUtils = window.safeRequire('WAWebUploadManager');
+    Store.WAWebStreamModel = window.safeRequire('WAWebStreamModel');
+    Store.FindOrCreateChat = window.safeRequire('WAWebFindChatAction');
+    Store.CustomerNoteUtils = window.safeRequire('WAWebNoteAction');
+    Store.BusinessGatingUtils = window.safeRequire('WAWebBizGatingUtils');
+    Store.PollsVotesSchema = window.safeRequire('WAWebPollsVotesSchema');
+    Store.PollsSendVote = window.safeRequire('WAWebPollsSendVoteMsgAction');
+
+    Store.Settings = {
         ...window.safeRequire('WAWebUserPrefsGeneral'),
         ...window.safeRequire('WAWebUserPrefsNotifications'),
         setPushname: (() => {
@@ -137,57 +138,57 @@ exports.ExposeStore = () => {
         })()
     };
 
-    
-    window.Store.NumberInfo = {
+
+    Store.NumberInfo = {
         ...window.safeRequire('WAPhoneUtils'),
         ...window.safeRequire('WAPhoneFindCC')
     };
-    window.Store.ForwardUtils = {
+    Store.ForwardUtils = {
         ...window.safeRequire('WAWebChatForwardMessage')
     };
-    window.Store.PinnedMsgUtils = {
+    Store.PinnedMsgUtils = {
         ...window.safeRequire('WAWebPinInChatSchema'),
         ...window.safeRequire('WAWebSendPinMessageAction')
     };
-    window.Store.ScheduledEventMsgUtils = {
+    Store.ScheduledEventMsgUtils = {
         ...window.safeRequire('WAWebGenerateEventCallLink'),
         ...window.safeRequire('WAWebSendEventEditMsgAction'),
         ...window.safeRequire('WAWebSendEventResponseMsgAction')
     };
-    window.Store.VCard = {
+    Store.VCard = {
         ...window.safeRequire('WAWebFrontendVcardUtils'),
         ...window.safeRequire('WAWebVcardParsingUtils'),
         ...window.safeRequire('WAWebVcardGetNameFromParsed')
     };
-    window.Store.StickerTools = {
+    Store.StickerTools = {
         ...window.safeRequire('WAWebImageUtils'),
         ...window.safeRequire('WAWebAddWebpMetadata')
     };
-    window.Store.GroupUtils = {
+    Store.GroupUtils = {
         ...window.safeRequire('WAWebGroupCreateJob'),
         ...window.safeRequire('WAWebGroupModifyInfoJob'),
         ...window.safeRequire('WAWebExitGroupAction'),
         ...window.safeRequire('WAWebContactProfilePicThumbBridge'),
         ...window.safeRequire('WAWebSetPropertyGroupAction')
     };
-    window.Store.GroupParticipants = {
+    Store.GroupParticipants = {
         ...window.safeRequire('WAWebModifyParticipantsGroupAction'),
         ...window.safeRequire('WASmaxGroupsAddParticipantsRPC')
     };
-    window.Store.GroupInvite = {
+    Store.GroupInvite = {
         ...window.safeRequire('WAWebGroupInviteJob'),
         ...window.safeRequire('WAWebGroupQueryJob'),
         ...window.safeRequire('WAWebMexFetchGroupInviteCodeJob')
     };
-    window.Store.GroupInviteV4 = {
+    Store.GroupInviteV4 = {
         ...window.safeRequire('WAWebGroupInviteV4Job'),
         ...window.safeRequire('WAWebChatSendMessages')
     };
-    window.Store.MembershipRequestUtils = {
+    Store.MembershipRequestUtils = {
         ...window.safeRequire('WAWebApiMembershipApprovalRequestStore'),
         ...window.safeRequire('WASmaxGroupsMembershipRequestsActionRPC')
     };
-    window.Store.ChannelUtils = {
+    Store.ChannelUtils = {
         ...window.safeRequire('WAWebLoadNewsletterPreviewChatAction'),
         ...window.safeRequire('WAWebNewsletterMetadataQueryJob'),
         ...window.safeRequire('WAWebNewsletterCreateQueryJob'),
@@ -207,30 +208,30 @@ exports.ExposeStore = () => {
         countryCodesIso: window.safeRequire('WAWebCountriesNativeCountryNames'),
         currentRegion: window.safeRequire('WAWebL10N').getRegion(),
     };
-    window.Store.SendChannelMessage = {
+    Store.SendChannelMessage = {
         ...window.safeRequire('WAWebNewsletterUpdateMsgsRecordsJob'),
         ...window.safeRequire('WAWebMsgDataFromModel'),
         ...window.safeRequire('WAWebNewsletterSendMessageJob'),
         ...window.safeRequire('WAWebNewsletterSendMsgAction'),
         ...window.safeRequire('WAMediaCalculateFilehash')
     };
-    window.Store.ChannelSubscribers = {
+    Store.ChannelSubscribers = {
         ...window.safeRequire('WAWebMexFetchNewsletterSubscribersJob'),
         ...window.safeRequire('WAWebNewsletterSubscriberListAction')
     };
-    window.Store.AddressbookContactUtils = {
+    Store.AddressbookContactUtils = {
         ...window.safeRequire('WAWebSaveContactAction'),
         ...window.safeRequire('WAWebDeleteContactAction')
     };
 
-    if (!window.Store.Chat._find || !window.Store.Chat.findImpl) {
-        window.Store.Chat._find = e => {
-            const target = window.Store.Chat.get(e);
+    if (!Store.Chat._find || !Store.Chat.findImpl) {
+        Store.Chat._find = e => {
+            const target = Store.Chat.get(e);
             return target ? Promise.resolve(target) : Promise.resolve({
                 id: e
             });
         };
-        window.Store.Chat.findImpl = window.Store.Chat._find;
+        Store.Chat.findImpl = Store.Chat._find;
     }
 
     /**
@@ -247,7 +248,7 @@ exports.ExposeStore = () => {
     window.injectToFunction = (target, callback) => {
         try {
             let module = window.safeRequire(target.module);
-            if (!module) return; 
+            if (!module) return;
 
             const path = target.function.split('.');
             const funcName = path.pop();
