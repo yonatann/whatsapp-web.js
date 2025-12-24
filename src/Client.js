@@ -124,6 +124,9 @@ class Client extends EventEmitter {
                 }
                 return window[window.StoreNamespace];
             };
+            window.getWWebJS = () => {
+                return window.getStore().WWebJS;
+            };
         }, this.options.webStorageNamespace);
 
         if (isCometOrAbove) {
@@ -231,7 +234,7 @@ class Client extends EventEmitter {
             this.emit(Events.AUTHENTICATED, authEventPayload);
 
             const injected = await this.pupPage.evaluate(async () => {
-                return window.getStore() && window.getStore().Chat && typeof window.WWebJS !== 'undefined';
+                return window.getStore() && window.getStore().Chat && window.getWWebJS() && typeof window.getWWebJS() !== 'undefined';
             });
 
             if (!injected) {

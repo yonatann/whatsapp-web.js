@@ -1,16 +1,18 @@
 'use strict';
 
 exports.LoadUtils = () => {
-    window.WWebJS = {};
+    const WWebJS = {};
+    window.getStore().WWebJS = WWebJS;
 
-    window.WWebJS.forwardMessage = async (chatId, msgId) => {
+    WWebJS.forwardMessage = async (chatId, msgId) => {
         const msg = window.getStore().Msg.get(msgId) || (await window.getStore().Msg.getMessagesById([msgId]))?.messages?.[0];
-        const chat = await window.WWebJS.getChat(chatId, { getAsModel: false });
+        const chat = await WWebJS.getChat(chatId, { getAsModel: false });
+        // Use WWebJS directly instead of WWebJS
         return await window.getStore().ForwardUtils.forwardMessages({ 'chat': chat, 'msgs': [msg], 'multicast': true, 'includeCaption': true, 'appendedText': undefined });
     };
 
-    window.WWebJS.sendSeen = async (chatId) => {
-        const chat = await window.WWebJS.getChat(chatId, { getAsModel: false });
+    WWebJS.sendSeen = async (chatId) => {
+        const chat = await WWebJS.getChat(chatId, { getAsModel: false });
         if (chat) {
             window.getStore().WAWebStreamModel.Stream.markAvailable();
             await window.getStore().SendSeen.sendSeen(chat);
@@ -20,15 +22,15 @@ exports.LoadUtils = () => {
         return false;
     };
 
-    window.WWebJS.sendMessage = async (chat, content, options = {}) => {
+    WWebJS.sendMessage = async (chat, content, options = {}) => {
         const isChannel = window.getStore().ChatGetters.getIsNewsletter(chat);
         const isStatus = window.getStore().ChatGetters.getIsBroadcast(chat);
 
         let mediaOptions = {};
         if (options.media) {
             mediaOptions = options.sendMediaAsSticker && !isChannel && !isStatus
-                ? await window.WWebJS.processStickerData(options.media)
-                : await window.WWebJS.processMediaData(options.media, {
+                ? await WWebJS.processStickerData(options.media)
+                : await WWebJS.processMediaData(options.media, {
                     forceSticker: options.sendMediaAsSticker,
                     forceGif: options.sendVideoAsGif,
                     forceVoice: options.sendAudioAsVoice,
@@ -349,7 +351,7 @@ exports.LoadUtils = () => {
 
             // for text only
             const statusOptions = {
-                color: backgroundColor && window.WWebJS.assertColor(backgroundColor) || 0xff7acca5,
+                color: backgroundColor && WWebJS.assertColor(backgroundColor) || 0xff7acca5,
                 font: fontStyle >= 0 && fontStyle <= 7 && fontStyle || 0,
                 text: msg.body
             };
@@ -375,7 +377,7 @@ exports.LoadUtils = () => {
         return window.getStore().Msg.get(newMsgKey._serialized);
     };
 
-    window.WWebJS.editMessage = async (msg, content, options = {}) => {
+    WWebJS.editMessage = async (msg, content, options = {}) => {
         const extraOptions = options.extraOptions || {};
         delete options.extraOptions;
 
@@ -412,13 +414,13 @@ exports.LoadUtils = () => {
         return window.getStore().Msg.get(msg.id._serialized);
     };
 
-    window.WWebJS.toStickerData = async (mediaInfo) => {
+    WWebJS.toStickerData = async (mediaInfo) => {
         if (mediaInfo.mimetype == 'image/webp') return mediaInfo;
 
-        const file = window.WWebJS.mediaInfoToFile(mediaInfo);
+        const file = WWebJS.mediaInfoToFile(mediaInfo);
         const webpSticker = await window.getStore().StickerTools.toWebpSticker(file);
         const webpBuffer = await webpSticker.arrayBuffer();
-        const data = window.WWebJS.arrayBufferToBase64(webpBuffer);
+        const data = WWebJS.arrayBufferToBase64(webpBuffer);
 
         return {
             mimetype: 'image/webp',
@@ -426,12 +428,12 @@ exports.LoadUtils = () => {
         };
     };
 
-    window.WWebJS.processStickerData = async (mediaInfo) => {
+    WWebJS.processStickerData = async (mediaInfo) => {
         if (mediaInfo.mimetype !== 'image/webp') throw new Error('Invalid media type');
 
-        const file = window.WWebJS.mediaInfoToFile(mediaInfo);
-        let filehash = await window.WWebJS.getFileHash(file);
-        let mediaKey = await window.WWebJS.generateHash(32);
+        const file = WWebJS.mediaInfoToFile(mediaInfo);
+        let filehash = await WWebJS.getFileHash(file);
+        let mediaKey = await WWebJS.generateHash(32);
 
         const controller = new AbortController();
         const uploadedInfo = await window.getStore().UploadUtils.encryptAndUpload({
@@ -454,8 +456,8 @@ exports.LoadUtils = () => {
         return stickerInfo;
     };
 
-    window.WWebJS.processMediaData = async (mediaInfo, { forceSticker, forceGif, forceVoice, forceDocument, forceMediaHd, sendToChannel, sendToStatus }) => {
-        const file = window.WWebJS.mediaInfoToFile(mediaInfo);
+    WWebJS.processMediaData = async (mediaInfo, { forceSticker, forceGif, forceVoice, forceDocument, forceMediaHd, sendToChannel, sendToStatus }) => {
+        const file = WWebJS.mediaInfoToFile(mediaInfo);
         const opaqueData = await window.getStore().OpaqueData.createFromData(file, file.type);
         const mediaParams = {
             asSticker: forceSticker,
@@ -484,7 +486,7 @@ exports.LoadUtils = () => {
         if ((forceVoice && mediaData.type === 'ptt') || (sendToStatus && mediaData.type === 'audio')) {
             const waveform = mediaObject.contentInfo.waveform;
             mediaData.waveform =
-                waveform || await window.WWebJS.generateWaveform(file);
+                waveform || await WWebJS.generateWaveform(file);
         }
 
         if (!(mediaData.mediaBlob instanceof window.getStore().OpaqueData)) {
@@ -540,7 +542,7 @@ exports.LoadUtils = () => {
         return mediaData;
     };
 
-    window.WWebJS.getMessageModel = (message) => {
+    WWebJS.getMessageModel = (message) => {
         const msg = message.serialize();
 
         msg.isEphemeral = message.isEphemeral;
@@ -569,7 +571,7 @@ exports.LoadUtils = () => {
         return msg;
     };
 
-    window.WWebJS.getChat = async (chatId, { getAsModel = true } = {}) => {
+    WWebJS.getChat = async (chatId, { getAsModel = true } = {}) => {
         const isChannel = /@\w*newsletter\b/.test(chatId);
         const chatWid = window.getStore().WidFactory.createWid(chatId);
         let chat;
@@ -589,11 +591,11 @@ exports.LoadUtils = () => {
         }
 
         return getAsModel && chat
-            ? await window.WWebJS.getChatModel(chat, { isChannel: isChannel })
+            ? await WWebJS.getChatModel(chat, { isChannel: isChannel })
             : chat;
     };
 
-    window.WWebJS.getChannelMetadata = async (inviteCode) => {
+    WWebJS.getChannelMetadata = async (inviteCode) => {
         const response =
             await window.getStore().ChannelUtils.queryNewsletterMetadataByInviteCode(
                 inviteCode,
@@ -622,19 +624,19 @@ exports.LoadUtils = () => {
         };
     };
 
-    window.WWebJS.getChats = async () => {
+    WWebJS.getChats = async () => {
         const chats = window.getStore().Chat.getModelsArray();
-        const chatPromises = chats.map(chat => window.WWebJS.getChatModel(chat));
+        const chatPromises = chats.map(chat => WWebJS.getChatModel(chat));
         return await Promise.all(chatPromises);
     };
 
-    window.WWebJS.getChannels = async () => {
+    WWebJS.getChannels = async () => {
         const channels = window.getStore().NewsletterCollection.getModelsArray();
-        const channelPromises = channels?.map((channel) => window.WWebJS.getChatModel(channel, { isChannel: true }));
+        const channelPromises = channels?.map((channel) => WWebJS.getChatModel(channel, { isChannel: true }));
         return await Promise.all(channelPromises);
     };
 
-    window.WWebJS.getChatModel = async (chat, { isChannel = false } = {}) => {
+    WWebJS.getChatModel = async (chat, { isChannel = false } = {}) => {
         if (!chat) return null;
 
         const model = chat.serialize();
@@ -668,7 +670,7 @@ exports.LoadUtils = () => {
             const lastMessage = chat.lastReceivedKey
                 ? window.getStore().Msg.get(chat.lastReceivedKey._serialized) || (await window.getStore().Msg.getMessagesById([chat.lastReceivedKey._serialized]))?.messages?.[0]
                 : null;
-            lastMessage && (model.lastMessage = window.WWebJS.getMessageModel(lastMessage));
+            lastMessage && (model.lastMessage = WWebJS.getMessageModel(lastMessage));
         }
 
         delete model.msgs;
@@ -678,7 +680,7 @@ exports.LoadUtils = () => {
         return model;
     };
 
-    window.WWebJS.getContactModel = contact => {
+    WWebJS.getContactModel = contact => {
         let res = contact.serialize();
         res.isBusiness = contact.isBusiness === undefined ? false : contact.isBusiness;
 
@@ -704,7 +706,7 @@ exports.LoadUtils = () => {
         return res;
     };
 
-    window.WWebJS.getContact = async contactId => {
+    WWebJS.getContact = async contactId => {
         const wid = window.getStore().WidFactory.createWid(contactId);
         let contact = await window.getStore().Contact.find(wid);
         if (contact.id._serialized.endsWith('@lid')) {
@@ -712,15 +714,15 @@ exports.LoadUtils = () => {
         }
         const bizProfile = await window.getStore().BusinessProfile.fetchBizProfile(wid);
         bizProfile.profileOptions && (contact.businessProfile = bizProfile);
-        return window.WWebJS.getContactModel(contact);
+        return WWebJS.getContactModel(contact);
     };
 
-    window.WWebJS.getContacts = () => {
+    WWebJS.getContacts = () => {
         const contacts = window.getStore().Contact.getModelsArray();
-        return contacts.map(contact => window.WWebJS.getContactModel(contact));
+        return contacts.map(contact => WWebJS.getContactModel(contact));
     };
 
-    window.WWebJS.mediaInfoToFile = ({ data, mimetype, filename }) => {
+    WWebJS.mediaInfoToFile = ({ data, mimetype, filename }) => {
         const binaryData = window.atob(data);
 
         const buffer = new ArrayBuffer(binaryData.length);
@@ -736,7 +738,7 @@ exports.LoadUtils = () => {
         });
     };
 
-    window.WWebJS.arrayBufferToBase64 = (arrayBuffer) => {
+    WWebJS.arrayBufferToBase64 = (arrayBuffer) => {
         let binary = '';
         const bytes = new Uint8Array(arrayBuffer);
         const len = bytes.byteLength;
@@ -746,7 +748,7 @@ exports.LoadUtils = () => {
         return window.btoa(binary);
     };
 
-    window.WWebJS.arrayBufferToBase64Async = (arrayBuffer) =>
+    WWebJS.arrayBufferToBase64Async = (arrayBuffer) =>
         new Promise((resolve, reject) => {
             const blob = new Blob([arrayBuffer], {
                 type: 'application/octet-stream',
@@ -760,13 +762,13 @@ exports.LoadUtils = () => {
             fileReader.readAsDataURL(blob);
         });
 
-    window.WWebJS.getFileHash = async (data) => {
+    WWebJS.getFileHash = async (data) => {
         let buffer = await data.arrayBuffer();
         const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
         return btoa(String.fromCharCode(...new Uint8Array(hashBuffer)));
     };
 
-    window.WWebJS.generateHash = async (length) => {
+    WWebJS.generateHash = async (length) => {
         var result = '';
         var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
         var charactersLength = characters.length;
@@ -776,7 +778,7 @@ exports.LoadUtils = () => {
         return result;
     };
 
-    window.WWebJS.generateWaveform = async (audioFile) => {
+    WWebJS.generateWaveform = async (audioFile) => {
         try {
             const audioData = await audioFile.arrayBuffer();
             const audioContext = new AudioContext();
@@ -808,8 +810,8 @@ exports.LoadUtils = () => {
         }
     };
 
-    window.WWebJS.sendClearChat = async (chatId) => {
-        let chat = await window.WWebJS.getChat(chatId, { getAsModel: false });
+    WWebJS.sendClearChat = async (chatId) => {
+        let chat = await WWebJS.getChat(chatId, { getAsModel: false });
         if (chat !== undefined) {
             await window.getStore().SendClear.sendClear(chat, false);
             return true;
@@ -817,8 +819,8 @@ exports.LoadUtils = () => {
         return false;
     };
 
-    window.WWebJS.sendDeleteChat = async (chatId) => {
-        let chat = await window.WWebJS.getChat(chatId, { getAsModel: false });
+    WWebJS.sendDeleteChat = async (chatId) => {
+        let chat = await WWebJS.getChat(chatId, { getAsModel: false });
         if (chat !== undefined) {
             await window.getStore().SendDelete.sendDelete(chat);
             return true;
@@ -826,7 +828,7 @@ exports.LoadUtils = () => {
         return false;
     };
 
-    window.WWebJS.sendChatstate = async (state, chatId) => {
+    WWebJS.sendChatstate = async (state, chatId) => {
         chatId = window.getStore().WidFactory.createWid(chatId);
 
         switch (state) {
@@ -846,34 +848,34 @@ exports.LoadUtils = () => {
         return true;
     };
 
-    window.WWebJS.getLabelModel = label => {
+    WWebJS.getLabelModel = label => {
         let res = label.serialize();
         res.hexColor = label.hexColor;
 
         return res;
     };
 
-    window.WWebJS.getLabels = () => {
+    WWebJS.getLabels = () => {
         const labels = window.getStore().Label.getModelsArray();
-        return labels.map(label => window.WWebJS.getLabelModel(label));
+        return labels.map(label => WWebJS.getLabelModel(label));
     };
 
-    window.WWebJS.getLabel = (labelId) => {
+    WWebJS.getLabel = (labelId) => {
         const label = window.getStore().Label.get(labelId);
-        return window.WWebJS.getLabelModel(label);
+        return WWebJS.getLabelModel(label);
     };
 
-    window.WWebJS.getChatLabels = async (chatId) => {
-        const chat = await window.WWebJS.getChat(chatId);
-        return (chat.labels || []).map(id => window.WWebJS.getLabel(id));
+    WWebJS.getChatLabels = async (chatId) => {
+        const chat = await WWebJS.getChat(chatId);
+        return (chat.labels || []).map(id => WWebJS.getLabel(id));
     };
 
-    window.WWebJS.getOrderDetail = async (orderId, token, chatId) => {
+    WWebJS.getOrderDetail = async (orderId, token, chatId) => {
         const chatWid = window.getStore().WidFactory.createWid(chatId);
         return window.getStore().QueryOrder.queryOrder(chatWid, orderId, 80, 80, token);
     };
 
-    window.WWebJS.getProductMetadata = async (productId) => {
+    WWebJS.getProductMetadata = async (productId) => {
         let sellerId = window.getStore().Conn.wid;
         let product = await window.getStore().QueryProduct.queryProduct(sellerId, productId);
         if (product && product.data) {
@@ -883,7 +885,7 @@ exports.LoadUtils = () => {
         return undefined;
     };
 
-    window.WWebJS.rejectCall = async (peerJid, id) => {
+    WWebJS.rejectCall = async (peerJid, id) => {
         let userId = window.getStore().User.getMaybeMePnUser()._serialized;
 
         const stanza = window.getStore().SocketWap.wap('call', {
@@ -900,7 +902,7 @@ exports.LoadUtils = () => {
         await window.getStore().Socket.deprecatedCastStanza(stanza);
     };
 
-    window.WWebJS.cropAndResizeImage = async (media, options = {}) => {
+    WWebJS.cropAndResizeImage = async (media, options = {}) => {
         if (!media.mimetype.includes('image'))
             throw new Error('Media is not an image');
 
@@ -938,9 +940,9 @@ exports.LoadUtils = () => {
         });
     };
 
-    window.WWebJS.setPicture = async (chatId, media) => {
-        const thumbnail = await window.WWebJS.cropAndResizeImage(media, { asDataUrl: true, mimetype: 'image/jpeg', size: 96 });
-        const profilePic = await window.WWebJS.cropAndResizeImage(media, { asDataUrl: true, mimetype: 'image/jpeg', size: 640 });
+    WWebJS.setPicture = async (chatId, media) => {
+        const thumbnail = await WWebJS.cropAndResizeImage(media, { asDataUrl: true, mimetype: 'image/jpeg', size: 96 });
+        const profilePic = await WWebJS.cropAndResizeImage(media, { asDataUrl: true, mimetype: 'image/jpeg', size: 640 });
 
         const chatWid = window.getStore().WidFactory.createWid(chatId);
         try {
@@ -955,7 +957,7 @@ exports.LoadUtils = () => {
         }
     };
 
-    window.WWebJS.deletePicture = async (chatid) => {
+    WWebJS.deletePicture = async (chatid) => {
         const chatWid = window.getStore().WidFactory.createWid(chatid);
         try {
             const collection = window.getStore().ProfilePicThumb.get(chatid);
@@ -969,7 +971,7 @@ exports.LoadUtils = () => {
         }
     };
 
-    window.WWebJS.getProfilePicThumbToBase64 = async (chatWid) => {
+    WWebJS.getProfilePicThumbToBase64 = async (chatWid) => {
         const profilePicCollection = await window.getStore().ProfilePicThumb.find(chatWid);
 
         const _readImageAsBase64 = (imageBlob) => {
@@ -1003,7 +1005,7 @@ exports.LoadUtils = () => {
         return undefined;
     };
 
-    window.WWebJS.getAddParticipantsRpcResult = async (groupWid, participantWid) => {
+    WWebJS.getAddParticipantsRpcResult = async (groupWid, participantWid) => {
         const iqTo = window.getStore().WidToJid.widToGroupJid(groupWid);
 
         const participantArgs = [{
@@ -1050,7 +1052,7 @@ exports.LoadUtils = () => {
         return data;
     };
 
-    window.WWebJS.membershipRequestAction = async (groupId, action, requesterIds, sleep) => {
+    WWebJS.membershipRequestAction = async (groupId, action, requesterIds, sleep) => {
         const groupWid = window.getStore().WidFactory.createWid(groupId);
         const group = await window.getStore().Chat.find(groupWid);
         const toApprove = action === 'Approve';
@@ -1145,8 +1147,8 @@ exports.LoadUtils = () => {
         }
     };
 
-    window.WWebJS.subscribeToUnsubscribeFromChannel = async (channelId, action, options = {}) => {
-        const channel = await window.WWebJS.getChat(channelId, { getAsModel: false });
+    WWebJS.subscribeToUnsubscribeFromChannel = async (channelId, action, options = {}) => {
+        const channel = await WWebJS.getChat(channelId, { getAsModel: false });
 
         if (!channel || channel.newsletterMetadata.membershipType === 'owner') return false;
         options = { eventSurface: 3, deleteLocalModels: options.deleteLocalModels ?? true };
@@ -1164,7 +1166,7 @@ exports.LoadUtils = () => {
         }
     };
 
-    window.WWebJS.pinUnpinMsgAction = async (msgId, action, duration) => {
+    WWebJS.pinUnpinMsgAction = async (msgId, action, duration) => {
         const message = window.getStore().Msg.get(msgId) || (await window.getStore().Msg.getMessagesById([msgId]))?.messages?.[0];
         if (!message) return false;
 
@@ -1180,18 +1182,18 @@ exports.LoadUtils = () => {
         return response.messageSendResult === 'OK';
     };
 
-    window.WWebJS.getStatusModel = status => {
+    WWebJS.getStatusModel = status => {
         const res = status.serialize();
         delete res._msgs;
         return res;
     };
 
-    window.WWebJS.getAllStatuses = () => {
+    WWebJS.getAllStatuses = () => {
         const statuses = window.getStore().Status.getModelsArray();
-        return statuses.map(status => window.WWebJS.getStatusModel(status));
+        return statuses.map(status => WWebJS.getStatusModel(status));
     };
 
-    window.WWebJS.enforceLidAndPnRetrieval = async (userId) => {
+    WWebJS.enforceLidAndPnRetrieval = async (userId) => {
         const wid = window.getStore().WidFactory.createWid(userId);
         const isLid = wid.server === 'lid';
 
@@ -1213,7 +1215,7 @@ exports.LoadUtils = () => {
         return { lid, phone };
     };
 
-    window.WWebJS.assertColor = (hex) => {
+    WWebJS.assertColor = (hex) => {
         let color;
         if (typeof hex === 'number') {
             color = hex > 0 ? hex : 0xffffffff + parseInt(hex) + 1;
