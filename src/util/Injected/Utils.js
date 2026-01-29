@@ -581,10 +581,10 @@ exports.LoadUtils = () => {
 
         if (isChannel) {
             try {
-                chat = window.getStore().NewsletterCollection.get(chatId);
+                chat = window.getStore().WAWebNewsletterCollection.get(chatId);
                 if (!chat) {
                     await window.getStore().ChannelUtils.loadNewsletterPreviewChat(chatId);
-                    chat = await window.getStore().NewsletterCollection.find(chatWid);
+                    chat = await window.getStore().WAWebNewsletterCollection.find(chatWid);
                 }
             } catch (err) {
                 chat = null;
@@ -634,7 +634,7 @@ exports.LoadUtils = () => {
     };
 
     WWebJS.getChannels = async () => {
-        const channels = window.getStore().NewsletterCollection.getModelsArray();
+        const channels = window.getStore().WAWebNewsletterCollection.getModelsArray();
         const channelPromises = channels?.map((channel) => WWebJS.getChatModel(channel, { isChannel: true }));
         return await Promise.all(channelPromises);
     };
