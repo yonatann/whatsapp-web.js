@@ -43,7 +43,7 @@ exports.ExposeStore = () => {
         );
     };
 
-    window.getStore() = Object.assign({}, window.require('WAWebCollections'));
+    window.getStore = Object.assign({}, window.require('WAWebCollections'));
     window.getStore().AppState = window.require('WAWebSocketModel').Socket;
     window.getStore().BlockContact = window.require('WAWebBlockContactAction');
     window.getStore().Conn = window.require('WAWebConnModel').Conn;
