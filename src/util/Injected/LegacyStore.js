@@ -4,7 +4,7 @@
 
 // Exposes the internal Store to the WhatsApp Web client
 exports.ExposeLegacyStore = () => {
-    window.getStore() = Object.assign({}, window.mR.findModule(m => m.default && m.default.Chat)[0].default);
+    window.getStore = Object.assign({}, window.mR.findModule(m => m.default && m.default.Chat)[0].default);
     window.getStore().AppState = window.mR.findModule('Socket')[0].Socket;
     window.getStore().Conn = window.mR.findModule('Conn')[0].Conn;
     window.getStore().BlockContact = window.mR.findModule('blockContact')[0];
