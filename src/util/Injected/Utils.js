@@ -653,8 +653,15 @@ exports.LoadUtils = () => {
 
         if (chat.groupMetadata) {
             model.isGroup = true;
-            const chatWid = window.getStore().WidFactory.createWid(chat.id._serialized);
-            await window.getStore().GroupMetadata.update(chatWid);
+            const Store = window.getStore();
+            const chatWid = Store.WidFactory.createWid(chat.id._serialized);
+
+            // WhatsApp module rename fallback (Jan 2026+)
+            const groupMetadata = Store.GroupMetadata || Store.WAWebGroupMetadataCollection;
+            if (!groupMetadata?.update) {
+                throw new Error("Group metadata module not found on Store");
+            }
+            await groupMetadata.update(chatWid);
             chat.groupMetadata.participants._models
                 .filter(x => x.id?._serialized?.endsWith('@lid'))
                 .forEach(x => x.contact?.phoneNumber && (x.id = x.contact.phoneNumber));
