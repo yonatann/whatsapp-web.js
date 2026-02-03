@@ -2,34 +2,34 @@
 <html>
 
 <head>
-  <meta name="generator" content="JSDoc 3.6.11">
-  <meta charset="utf-8">
-  <title>whatsapp-web.js 1.34.6 &raquo; Source: structures/Message.js</title>
-  <link rel="stylesheet" href="https://brick.a.ssl.fastly.net/Karla:400,400i,700,700i" type="text/css">
-  <link rel="stylesheet" href="https://brick.a.ssl.fastly.net/Noto+Serif:400,400i,700,700i" type="text/css">
-  <link rel="stylesheet" href="https://brick.a.ssl.fastly.net/Inconsolata:500" type="text/css">
-  <link href="css/baseline.css" rel="stylesheet">
+    <meta name="generator" content="JSDoc 3.6.11">
+    <meta charset="utf-8">
+    <title>whatsapp-web.js 1.34.6 &raquo; Source: structures/Message.js</title>
+    <link rel="stylesheet" href="https://brick.a.ssl.fastly.net/Karla:400,400i,700,700i" type="text/css">
+    <link rel="stylesheet" href="https://brick.a.ssl.fastly.net/Noto+Serif:400,400i,700,700i" type="text/css">
+    <link rel="stylesheet" href="https://brick.a.ssl.fastly.net/Inconsolata:500" type="text/css">
+    <link href="css/baseline.css" rel="stylesheet">
 </head>
 
 <body onload="prettyPrint()">
-  <nav id="jsdoc-navbar" role="navigation" class="jsdoc-navbar">
-    <div id="jsdoc-navbar-container">
-      <div id="jsdoc-navbar-content">
-        <a href="index.html" class="jsdoc-navbar-package-name">whatsapp-web.<wbr>js 1.<wbr>34.<wbr>6</a>
-      </div>
-    </div>
-  </nav>
-  <div id="jsdoc-body-container">
-    <div id="jsdoc-content">
-      <div id="jsdoc-content-container">
-        <div id="jsdoc-banner" role="banner">
+    <nav id="jsdoc-navbar" role="navigation" class="jsdoc-navbar">
+        <div id="jsdoc-navbar-container">
+            <div id="jsdoc-navbar-content">
+                <a href="index.html" class="jsdoc-navbar-package-name">whatsapp-web.<wbr>js 1.<wbr>34.<wbr>6</a>
+            </div>
         </div>
-        <div id="jsdoc-main" role="main">
-          <header class="page-header">
-            <h1>Source: structures/Message.js</h1>
-          </header>
-          <article>
-            <pre class="prettyprint linenums"><code>&#x27;use strict&#x27;;
+    </nav>
+    <div id="jsdoc-body-container">
+        <div id="jsdoc-content">
+            <div id="jsdoc-content-container">
+                <div id="jsdoc-banner" role="banner">
+                </div>
+                <div id="jsdoc-main" role="main">
+                    <header class="page-header">
+                        <h1>Source: structures/Message.js</h1>
+                    </header>
+                    <article>
+                        <pre class="prettyprint linenums"><code>&#x27;use strict&#x27;;
 
 const Base &#x3D; require(&#x27;./Base&#x27;);
 const MessageMedia &#x3D; require(&#x27;./MessageMedia&#x27;);
@@ -342,9 +342,9 @@ class Message extends Base {
      */
     async reload() {
         const newData &#x3D; await this.client.pupPage.evaluate(async (msgId) &#x3D;&gt; {
-            const msg &#x3D; window.Store.Msg.get(msgId) || (await window.Store.Msg.getMessagesById([msgId]))?.messages?.[0];
+            const msg &#x3D; window.getStore().Msg.get(msgId) || (await window.getStore().Msg.getMessagesById([msgId]))?.messages?.[0];
             if (!msg) return null;
-            return window.WWebJS.getMessageModel(msg);
+            return window.getWWebJS.getMessageModel(msg);
         }, this.id._serialized);
 
         if(!newData) return null;
@@ -401,9 +401,9 @@ class Message extends Base {
         if (!this.hasQuotedMsg) return undefined;
 
         const quotedMsg &#x3D; await this.client.pupPage.evaluate(async (msgId) &#x3D;&gt; {
-            const msg &#x3D; window.Store.Msg.get(msgId) || (await window.Store.Msg.getMessagesById([msgId]))?.messages?.[0];
-            const quotedMsg &#x3D; window.Store.QuotedMsg.getQuotedMsgObj(msg);
-            return window.WWebJS.getMessageModel(quotedMsg);
+            const msg &#x3D; window.getStore().Msg.get(msgId) || (await window.getStore().Msg.getMessagesById([msgId]))?.messages?.[0];
+            const quotedMsg &#x3D; window.getStore().QuotedMsg.getQuotedMsgObj(msg);
+            return window.getWWebJS.getMessageModel(quotedMsg);
         }, this.id._serialized);
 
         return new Message(this.client, quotedMsg);
@@ -441,9 +441,9 @@ class Message extends Base {
         await this.client.pupPage.evaluate(async (messageId, reaction) &#x3D;&gt; {
             if (!messageId) return null;
             const msg &#x3D;
-                window.Store.Msg.get(messageId) || (await window.Store.Msg.getMessagesById([messageId]))?.messages?.[0];
+                window.getStore().Msg.get(messageId) || (await window.getStore().Msg.getMessagesById([messageId]))?.messages?.[0];
             if(!msg) return null;
-            await window.Store.sendReactionToMsg(msg, reaction);
+            await window.getStore().sendReactionToMsg(msg, reaction);
         }, this.id._serialized, reaction);
     }
 
@@ -465,7 +465,7 @@ class Message extends Base {
         const chatId &#x3D; typeof chat &#x3D;&#x3D;&#x3D; &#x27;string&#x27; ? chat : chat.id._serialized;
 
         await this.client.pupPage.evaluate(async (msgId, chatId) &#x3D;&gt; {
-            return window.WWebJS.forwardMessage(chatId, msgId);
+            return window.getWWebJS.forwardMessage(chatId, msgId);
         }, this.id._serialized, chatId);
     }
 
@@ -479,7 +479,7 @@ class Message extends Base {
         }
 
         const result &#x3D; await this.client.pupPage.evaluate(async (msgId) &#x3D;&gt; {
-            const msg &#x3D; window.Store.Msg.get(msgId) || (await window.Store.Msg.getMessagesById([msgId]))?.messages?.[0];
+            const msg &#x3D; window.getStore().Msg.get(msgId) || (await window.getStore().Msg.getMessagesById([msgId]))?.messages?.[0];
 
             // REUPLOADING mediaStage means the media is expired and the download button is spinning, cannot be downloaded now
             if (!msg || !msg.mediaData || msg.mediaData.mediaStage &#x3D;&#x3D;&#x3D; &#x27;REUPLOADING&#x27;) {
@@ -503,7 +503,7 @@ class Message extends Base {
                     addAnnotations: function() { return this; },
                     addPoint: function() { return this; }
                 };
-                const decryptedMedia &#x3D; await window.Store.DownloadManager.downloadAndMaybeDecrypt({
+                const decryptedMedia &#x3D; await window.getStore().DownloadManager.downloadAndMaybeDecrypt({
                     directPath: msg.directPath,
                     encFilehash: msg.encFilehash,
                     filehash: msg.filehash,
@@ -514,7 +514,7 @@ class Message extends Base {
                     downloadQpl: mockQpl
                 });
 
-                const data &#x3D; await window.WWebJS.arrayBufferToBase64Async(decryptedMedia);
+                const data &#x3D; await window.getWWebJS.arrayBufferToBase64Async(decryptedMedia);
 
                 return {
                     data,
@@ -539,21 +539,21 @@ class Message extends Base {
      */
     async delete(everyone, clearMedia &#x3D; true) {
         await this.client.pupPage.evaluate(async (msgId, everyone, clearMedia) &#x3D;&gt; {
-            const msg &#x3D; window.Store.Msg.get(msgId) || (await window.Store.Msg.getMessagesById([msgId]))?.messages?.[0];
-            const chat &#x3D; window.Store.Chat.get(msg.id.remote) || (await window.Store.Chat.find(msg.id.remote));
+            const msg &#x3D; window.getStore().Msg.get(msgId) || (await window.getStore().Msg.getMessagesById([msgId]))?.messages?.[0];
+            const chat &#x3D; window.getStore().Chat.get(msg.id.remote) || (await window.getStore().Chat.find(msg.id.remote));
             
             const canRevoke &#x3D;
-                window.Store.MsgActionChecks.canSenderRevokeMsg(msg) || window.Store.MsgActionChecks.canAdminRevokeMsg(msg);
+                window.getStore().MsgActionChecks.canSenderRevokeMsg(msg) || window.getStore().MsgActionChecks.canAdminRevokeMsg(msg);
 
             if (everyone &amp;amp;&amp;amp; canRevoke) {
                 return window.compareWwebVersions(window.Debug.VERSION, &#x27;&gt;&#x3D;&#x27;, &#x27;2.3000.0&#x27;)
-                    ? window.Store.Cmd.sendRevokeMsgs(chat, { list: [msg], type: &#x27;message&#x27; }, { clearMedia: clearMedia })
-                    : window.Store.Cmd.sendRevokeMsgs(chat, [msg], { clearMedia: true, type: msg.id.fromMe ? &#x27;Sender&#x27; : &#x27;Admin&#x27; });
+                    ? window.getStore().Cmd.sendRevokeMsgs(chat, { list: [msg], type: &#x27;message&#x27; }, { clearMedia: clearMedia })
+                    : window.getStore().Cmd.sendRevokeMsgs(chat, [msg], { clearMedia: true, type: msg.id.fromMe ? &#x27;Sender&#x27; : &#x27;Admin&#x27; });
             }
 
             return window.compareWwebVersions(window.Debug.VERSION, &#x27;&gt;&#x3D;&#x27;, &#x27;2.3000.0&#x27;)
-                ? window.Store.Cmd.sendDeleteMsgs(chat, { list: [msg], type: &#x27;message&#x27; }, clearMedia)
-                : window.Store.Cmd.sendDeleteMsgs(chat, [msg], clearMedia);
+                ? window.getStore().Cmd.sendDeleteMsgs(chat, { list: [msg], type: &#x27;message&#x27; }, clearMedia)
+                : window.getStore().Cmd.sendDeleteMsgs(chat, [msg], clearMedia);
         }, this.id._serialized, everyone, clearMedia);
     }
 
@@ -562,10 +562,10 @@ class Message extends Base {
      */
     async star() {
         await this.client.pupPage.evaluate(async (msgId) &#x3D;&gt; {
-            const msg &#x3D; window.Store.Msg.get(msgId) || (await window.Store.Msg.getMessagesById([msgId]))?.messages?.[0];
-            if (window.Store.MsgActionChecks.canStarMsg(msg)) {
-                let chat &#x3D; await window.Store.Chat.find(msg.id.remote);
-                return window.Store.Cmd.sendStarMsgs(chat, [msg], false);
+            const msg &#x3D; window.getStore().Msg.get(msgId) || (await window.getStore().Msg.getMessagesById([msgId]))?.messages?.[0];
+            if (window.getStore().MsgActionChecks.canStarMsg(msg)) {
+                let chat &#x3D; await window.getStore().Chat.find(msg.id.remote);
+                return window.getStore().Cmd.sendStarMsgs(chat, [msg], false);
             }
         }, this.id._serialized);
     }
@@ -575,10 +575,10 @@ class Message extends Base {
      */
     async unstar() {
         await this.client.pupPage.evaluate(async (msgId) &#x3D;&gt; {
-            const msg &#x3D; window.Store.Msg.get(msgId) || (await window.Store.Msg.getMessagesById([msgId]))?.messages?.[0];
-            if (window.Store.MsgActionChecks.canStarMsg(msg)) {
-                let chat &#x3D; await window.Store.Chat.find(msg.id.remote);
-                return window.Store.Cmd.sendUnstarMsgs(chat, [msg], false);
+            const msg &#x3D; window.getStore().Msg.get(msgId) || (await window.getStore().Msg.getMessagesById([msgId]))?.messages?.[0];
+            if (window.getStore().MsgActionChecks.canStarMsg(msg)) {
+                let chat &#x3D; await window.getStore().Chat.find(msg.id.remote);
+                return window.getStore().Cmd.sendUnstarMsgs(chat, [msg], false);
             }
         }, this.id._serialized);
     }
@@ -590,7 +590,7 @@ class Message extends Base {
      */
     async pin(duration) {
         return await this.client.pupPage.evaluate(async (msgId, duration) &#x3D;&gt; {
-            return await window.WWebJS.pinUnpinMsgAction(msgId, 1, duration);
+            return await window.getWWebJS.pinUnpinMsgAction(msgId, 1, duration);
         }, this.id._serialized, duration);
     }
 
@@ -600,7 +600,7 @@ class Message extends Base {
      */
     async unpin() {
         return await this.client.pupPage.evaluate(async (msgId) &#x3D;&gt; {
-            return await window.WWebJS.pinUnpinMsgAction(msgId, 2, 0);
+            return await window.getWWebJS.pinUnpinMsgAction(msgId, 2, 0);
         }, this.id._serialized);
     }
 
@@ -622,12 +622,12 @@ class Message extends Base {
      */
     async getInfo() {
         const info &#x3D; await this.client.pupPage.evaluate(async (msgId) &#x3D;&gt; {
-            const msg &#x3D; window.Store.Msg.get(msgId) || (await window.Store.Msg.getMessagesById([msgId]))?.messages?.[0];
+            const msg &#x3D; window.getStore().Msg.get(msgId) || (await window.getStore().Msg.getMessagesById([msgId]))?.messages?.[0];
             if (!msg || !msg.id.fromMe) return null;
 
             return new Promise((resolve) &#x3D;&gt; {
                 setTimeout(async () &#x3D;&gt; {
-                    resolve(await window.Store.getMsgInfo(msg.id));
+                    resolve(await window.getStore().getMsgInfo(msg.id));
                 }, (Date.now() - msg.t * 1000 &amp;lt; 1250) &amp;amp;&amp;amp; Math.floor(Math.random() * (1200 - 1100 + 1)) + 1100 || 0);
             });
         }, this.id._serialized);
@@ -642,7 +642,7 @@ class Message extends Base {
     async getOrder() {
         if (this.type &#x3D;&#x3D;&#x3D; MessageTypes.ORDER) {
             const result &#x3D; await this.client.pupPage.evaluate((orderId, token, chatId) &#x3D;&gt; {
-                return window.WWebJS.getOrderDetail(orderId, token, chatId);
+                return window.getWWebJS.getOrderDetail(orderId, token, chatId);
             }, this.orderId, this.token, this._getChatId());
             if (!result) return undefined;
             return new Order(this.client, result);
@@ -656,7 +656,7 @@ class Message extends Base {
     async getPayment() {
         if (this.type &#x3D;&#x3D;&#x3D; MessageTypes.PAYMENT) {
             const msg &#x3D; await this.client.pupPage.evaluate(async (msgId) &#x3D;&gt; {
-                const msg &#x3D; window.Store.Msg.get(msgId) || (await window.Store.Msg.getMessagesById([msgId]))?.messages?.[0];
+                const msg &#x3D; window.getStore().Msg.get(msgId) || (await window.getStore().Msg.getMessagesById([msgId]))?.messages?.[0];
                 if(!msg) return null;
                 return msg.serialize();
             }, this.id._serialized);
@@ -685,7 +685,7 @@ class Message extends Base {
         }
 
         const reactions &#x3D; await this.client.pupPage.evaluate(async (msgId) &#x3D;&gt; {
-            const msgReactions &#x3D; await window.Store.Reactions.find(msgId);
+            const msgReactions &#x3D; await window.getStore().Reactions.find(msgId);
             if (!msgReactions || !msgReactions.reactions.length) return null;
             return msgReactions.reactions.serialize();
         }, this.id._serialized);
@@ -731,12 +731,12 @@ class Message extends Base {
             return null;
         }
         const messageEdit &#x3D; await this.client.pupPage.evaluate(async (msgId, message, options) &#x3D;&gt; {
-            const msg &#x3D; window.Store.Msg.get(msgId) || (await window.Store.Msg.getMessagesById([msgId]))?.messages?.[0];
+            const msg &#x3D; window.getStore().Msg.get(msgId) || (await window.getStore().Msg.getMessagesById([msgId]))?.messages?.[0];
             if (!msg) return null;
 
-            let canEdit &#x3D; window.Store.MsgActionChecks.canEditText(msg) || window.Store.MsgActionChecks.canEditCaption(msg);
+            let canEdit &#x3D; window.getStore().MsgActionChecks.canEditText(msg) || window.getStore().MsgActionChecks.canEditCaption(msg);
             if (canEdit) {
-                const msgEdit &#x3D; await window.WWebJS.editMessage(msg, message, options);
+                const msgEdit &#x3D; await window.getWWebJS.editMessage(msg, message, options);
                 return msgEdit.serialize();
             }
             return null;
@@ -759,7 +759,7 @@ class Message extends Base {
         }
 
         const edittedEventMsg &#x3D; await this.client.pupPage.evaluate(async (msgId, editedEventObject) &#x3D;&gt; {
-            const msg &#x3D; window.Store.Msg.get(msgId) || (await window.Store.Msg.getMessagesById([msgId]))?.messages?.[0];
+            const msg &#x3D; window.getStore().Msg.get(msgId) || (await window.getStore().Msg.getMessagesById([msgId]))?.messages?.[0];
             if (!msg) return null;
 
             const { name, startTimeTs, eventSendOptions } &#x3D; editedEventObject;
@@ -773,8 +773,8 @@ class Message extends Base {
                 isEventCanceled: eventSendOptions.isEventCanceled,
             };
 
-            await window.Store.ScheduledEventMsgUtils.sendEventEditMessage(eventOptions, msg);
-            const editedMsg &#x3D; window.Store.Msg.get(msg.id._serialized);
+            await window.getStore().ScheduledEventMsgUtils.sendEventEditMessage(eventOptions, msg);
+            const editedMsg &#x3D; window.getStore().Msg.get(msg.id._serialized);
             return editedMsg?.serialize();
         }, this.id._serialized, editedEventObject);
 
@@ -801,7 +801,7 @@ class Message extends Base {
             if (!Array.isArray(votes)) votes &#x3D; [votes];
             let localIdSet &#x3D; new Set();
             const msg &#x3D;
-                window.Store.Msg.get(messageId) || (await window.Store.Msg.getMessagesById([messageId]))?.messages?.[0];
+                window.getStore().Msg.get(messageId) || (await window.getStore().Msg.getMessagesById([messageId]))?.messages?.[0];
             if (!msg) return null;
 
             msg.pollOptions.forEach(a &#x3D;&gt; {
@@ -810,32 +810,32 @@ class Message extends Base {
                 }
             });
 
-            await window.Store.PollsSendVote.sendVote(msg, localIdSet);
+            await window.getStore().PollsSendVote.sendVote(msg, localIdSet);
         }, this.id._serialized, selectedOptions);
     }
 }
 
 module.exports &#x3D; Message;
 </code></pre>
-          </article>
+                    </article>
+                </div>
+            </div>
+            <nav id="jsdoc-toc-nav" role="navigation"></nav>
         </div>
-      </div>
-      <nav id="jsdoc-toc-nav" role="navigation"></nav>
     </div>
-  </div>
-  <footer id="jsdoc-footer" class="jsdoc-footer">
-    <div id="jsdoc-footer-container">
-      <p>
-        Generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc</a> 3.6.11 on January 30, 2026.
-      </p>
-    </div>
-  </footer>
-  <script src="scripts/jquery.min.js"></script>
-  <script src="scripts/tree.jquery.js"></script>
-  <script src="scripts/prettify.js"></script>
-  <script src="scripts/jsdoc-toc.js"></script>
-  <script src="scripts/linenumber.js"></script>
-  <script src="scripts/scrollanchor.js"></script>
+    <footer id="jsdoc-footer" class="jsdoc-footer">
+        <div id="jsdoc-footer-container">
+            <p>
+                Generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc</a> 3.6.11 on January 30, 2026.
+            </p>
+        </div>
+    </footer>
+    <script src="scripts/jquery.min.js"></script>
+    <script src="scripts/tree.jquery.js"></script>
+    <script src="scripts/prettify.js"></script>
+    <script src="scripts/jsdoc-toc.js"></script>
+    <script src="scripts/linenumber.js"></script>
+    <script src="scripts/scrollanchor.js"></script>
 </body>
 
 </html>

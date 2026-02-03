@@ -61,7 +61,7 @@ class Util {
         }
 
         return pupPage.evaluate((media) => {
-            return window.WWebJS.toStickerData(media);
+            return window.getWWebJS.toStickerData(media);
         }, media);
     }
 

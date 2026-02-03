@@ -2,34 +2,34 @@
 <html>
 
 <head>
-  <meta name="generator" content="JSDoc 3.6.11">
-  <meta charset="utf-8">
-  <title>whatsapp-web.js 1.34.6 &raquo; Source: structures/Channel.js</title>
-  <link rel="stylesheet" href="https://brick.a.ssl.fastly.net/Karla:400,400i,700,700i" type="text/css">
-  <link rel="stylesheet" href="https://brick.a.ssl.fastly.net/Noto+Serif:400,400i,700,700i" type="text/css">
-  <link rel="stylesheet" href="https://brick.a.ssl.fastly.net/Inconsolata:500" type="text/css">
-  <link href="css/baseline.css" rel="stylesheet">
+    <meta name="generator" content="JSDoc 3.6.11">
+    <meta charset="utf-8">
+    <title>whatsapp-web.js 1.34.6 &raquo; Source: structures/Channel.js</title>
+    <link rel="stylesheet" href="https://brick.a.ssl.fastly.net/Karla:400,400i,700,700i" type="text/css">
+    <link rel="stylesheet" href="https://brick.a.ssl.fastly.net/Noto+Serif:400,400i,700,700i" type="text/css">
+    <link rel="stylesheet" href="https://brick.a.ssl.fastly.net/Inconsolata:500" type="text/css">
+    <link href="css/baseline.css" rel="stylesheet">
 </head>
 
 <body onload="prettyPrint()">
-  <nav id="jsdoc-navbar" role="navigation" class="jsdoc-navbar">
-    <div id="jsdoc-navbar-container">
-      <div id="jsdoc-navbar-content">
-        <a href="index.html" class="jsdoc-navbar-package-name">whatsapp-web.<wbr>js 1.<wbr>34.<wbr>6</a>
-      </div>
-    </div>
-  </nav>
-  <div id="jsdoc-body-container">
-    <div id="jsdoc-content">
-      <div id="jsdoc-content-container">
-        <div id="jsdoc-banner" role="banner">
+    <nav id="jsdoc-navbar" role="navigation" class="jsdoc-navbar">
+        <div id="jsdoc-navbar-container">
+            <div id="jsdoc-navbar-content">
+                <a href="index.html" class="jsdoc-navbar-package-name">whatsapp-web.<wbr>js 1.<wbr>34.<wbr>6</a>
+            </div>
         </div>
-        <div id="jsdoc-main" role="main">
-          <header class="page-header">
-            <h1>Source: structures/Channel.js</h1>
-          </header>
-          <article>
-            <pre class="prettyprint linenums"><code>&#x27;use strict&#x27;;
+    </nav>
+    <div id="jsdoc-body-container">
+        <div id="jsdoc-content">
+            <div id="jsdoc-content-container">
+                <div id="jsdoc-banner" role="banner">
+                </div>
+                <div id="jsdoc-main" role="main">
+                    <header class="page-header">
+                        <h1>Source: structures/Channel.js</h1>
+                    </header>
+                    <article>
+                        <pre class="prettyprint linenums"><code>&#x27;use strict&#x27;;
 
 const Base &#x3D; require(&#x27;./Base&#x27;);
 const Message &#x3D; require(&#x27;./Message&#x27;);
@@ -132,14 +132,14 @@ class Channel extends Base {
      */
     async getSubscribers(limit) {
         return await this.client.pupPage.evaluate(async (channelId, limit) &#x3D;&gt; {
-            const channel &#x3D; await window.WWebJS.getChat(channelId, { getAsModel: false });
+            const channel &#x3D; await window.getWWebJS.getChat(channelId, { getAsModel: false });
             if (!channel) return [];
-            !limit &amp;amp;&amp;amp; (limit &#x3D; window.Store.ChannelUtils.getMaxSubscriberNumber());
-            const response &#x3D; await window.Store.ChannelSubscribers.mexFetchNewsletterSubscribers(channelId, limit);
-            const contacts &#x3D; window.Store.ChannelSubscribers.getSubscribersInContacts(response.subscribers);
+            !limit &amp;amp;&amp;amp; (limit &#x3D; window.getStore().ChannelUtils.getMaxSubscriberNumber());
+            const response &#x3D; await window.getStore().ChannelSubscribers.mexFetchNewsletterSubscribers(channelId, limit);
+            const contacts &#x3D; window.getStore().ChannelSubscribers.getSubscribersInContacts(response.subscribers);
             return Promise.all(contacts.map((obj) &#x3D;&gt; ({
                 ...obj,
-                contact: window.WWebJS.getContactModel(obj.contact)
+                contact: window.getWWebJS.getContactModel(obj.contact)
             })));
         }, this.id._serialized, limit);
     }
@@ -329,12 +329,12 @@ class Channel extends Base {
                 return true;
             };
 
-            const channel &#x3D; await window.WWebJS.getChat(channelId, { getAsModel: false });
+            const channel &#x3D; await window.getWWebJS.getChat(channelId, { getAsModel: false });
             let msgs &#x3D; channel.msgs.getModelsArray().filter(msgFilter);
 
             if (searchOptions &amp;amp;&amp;amp; searchOptions.limit &gt; 0) {
                 while (msgs.length &amp;lt; searchOptions.limit) {
-                    const loadedMessages &#x3D; await window.Store.ConversationMsgs.loadEarlierMsgs(channel);
+                    const loadedMessages &#x3D; await window.getStore().ConversationMsgs.loadEarlierMsgs(channel);
                     if (!loadedMessages || !loadedMessages.length) break;
                     msgs &#x3D; [...loadedMessages.filter(msgFilter), ...msgs];
                 }
@@ -345,7 +345,7 @@ class Channel extends Base {
                 }
             }
 
-            return msgs.map(m &#x3D;&gt; window.WWebJS.getMessageModel(m));
+            return msgs.map(m &#x3D;&gt; window.getWWebJS.getMessageModel(m));
 
         }, this.id._serialized, searchOptions);
 
@@ -368,11 +368,11 @@ class Channel extends Base {
      */
     async _setChannelMetadata(value, property) {
         return await this.client.pupPage.evaluate(async (channelId, value, property) &#x3D;&gt; {
-            const channel &#x3D; await window.WWebJS.getChat(channelId, { getAsModel: false });
+            const channel &#x3D; await window.getWWebJS.getChat(channelId, { getAsModel: false });
             if (!channel) return false;
             if (property.editPicture) {
                 value.picture &#x3D; value.picture
-                    ? await window.WWebJS.cropAndResizeImage(value.picture, {
+                    ? await window.getWWebJS.cropAndResizeImage(value.picture, {
                         asDataUrl: true,
                         mimetype: &#x27;image/jpeg&#x27;,
                         size: 640,
@@ -381,7 +381,7 @@ class Channel extends Base {
                     : null;
             }
             try {
-                await window.Store.ChannelUtils.editNewsletterMetadataAction(channel, property, value);
+                await window.getStore().ChannelUtils.editNewsletterMetadataAction(channel, property, value);
                 return true;
             } catch (err) {
                 if (err.name &#x3D;&#x3D;&#x3D; &#x27;ServerStatusCodeError&#x27;) return false;
@@ -399,8 +399,8 @@ class Channel extends Base {
         return await this.client.pupPage.evaluate(async (channelId, action) &#x3D;&gt; {
             try {
                 action &#x3D;&#x3D;&#x3D; &#x27;MUTE&#x27;
-                    ? await window.Store.ChannelUtils.muteNewsletter([channelId])
-                    : await window.Store.ChannelUtils.unmuteNewsletter([channelId]);
+                    ? await window.getStore().ChannelUtils.muteNewsletter([channelId])
+                    : await window.getStore().ChannelUtils.unmuteNewsletter([channelId]);
                 return true;
             } catch (err) {
                 if (err.name &#x3D;&#x3D;&#x3D; &#x27;ServerStatusCodeError&#x27;) return false;
@@ -412,25 +412,25 @@ class Channel extends Base {
 
 module.exports &#x3D; Channel;
 </code></pre>
-          </article>
+                    </article>
+                </div>
+            </div>
+            <nav id="jsdoc-toc-nav" role="navigation"></nav>
         </div>
-      </div>
-      <nav id="jsdoc-toc-nav" role="navigation"></nav>
     </div>
-  </div>
-  <footer id="jsdoc-footer" class="jsdoc-footer">
-    <div id="jsdoc-footer-container">
-      <p>
-        Generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc</a> 3.6.11 on January 30, 2026.
-      </p>
-    </div>
-  </footer>
-  <script src="scripts/jquery.min.js"></script>
-  <script src="scripts/tree.jquery.js"></script>
-  <script src="scripts/prettify.js"></script>
-  <script src="scripts/jsdoc-toc.js"></script>
-  <script src="scripts/linenumber.js"></script>
-  <script src="scripts/scrollanchor.js"></script>
+    <footer id="jsdoc-footer" class="jsdoc-footer">
+        <div id="jsdoc-footer-container">
+            <p>
+                Generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc</a> 3.6.11 on January 30, 2026.
+            </p>
+        </div>
+    </footer>
+    <script src="scripts/jquery.min.js"></script>
+    <script src="scripts/tree.jquery.js"></script>
+    <script src="scripts/prettify.js"></script>
+    <script src="scripts/jsdoc-toc.js"></script>
+    <script src="scripts/linenumber.js"></script>
+    <script src="scripts/scrollanchor.js"></script>
 </body>
 
 </html>

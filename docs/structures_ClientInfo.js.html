@@ -93,7 +93,7 @@ class ClientInfo extends Base {
      */
     async getBatteryStatus() {
         return await this.client.pupPage.evaluate(() &#x3D;&gt; {
-            const { battery, plugged } &#x3D; window.Store.Conn;
+            const { battery, plugged } &#x3D; window.getStore().Conn;
             return { battery, plugged };
         });
     }

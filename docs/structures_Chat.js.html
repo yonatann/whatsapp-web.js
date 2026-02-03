@@ -2,34 +2,34 @@
 <html>
 
 <head>
-  <meta name="generator" content="JSDoc 3.6.11">
-  <meta charset="utf-8">
-  <title>whatsapp-web.js 1.34.6 &raquo; Source: structures/Chat.js</title>
-  <link rel="stylesheet" href="https://brick.a.ssl.fastly.net/Karla:400,400i,700,700i" type="text/css">
-  <link rel="stylesheet" href="https://brick.a.ssl.fastly.net/Noto+Serif:400,400i,700,700i" type="text/css">
-  <link rel="stylesheet" href="https://brick.a.ssl.fastly.net/Inconsolata:500" type="text/css">
-  <link href="css/baseline.css" rel="stylesheet">
+    <meta name="generator" content="JSDoc 3.6.11">
+    <meta charset="utf-8">
+    <title>whatsapp-web.js 1.34.6 &raquo; Source: structures/Chat.js</title>
+    <link rel="stylesheet" href="https://brick.a.ssl.fastly.net/Karla:400,400i,700,700i" type="text/css">
+    <link rel="stylesheet" href="https://brick.a.ssl.fastly.net/Noto+Serif:400,400i,700,700i" type="text/css">
+    <link rel="stylesheet" href="https://brick.a.ssl.fastly.net/Inconsolata:500" type="text/css">
+    <link href="css/baseline.css" rel="stylesheet">
 </head>
 
 <body onload="prettyPrint()">
-  <nav id="jsdoc-navbar" role="navigation" class="jsdoc-navbar">
-    <div id="jsdoc-navbar-container">
-      <div id="jsdoc-navbar-content">
-        <a href="index.html" class="jsdoc-navbar-package-name">whatsapp-web.<wbr>js 1.<wbr>34.<wbr>6</a>
-      </div>
-    </div>
-  </nav>
-  <div id="jsdoc-body-container">
-    <div id="jsdoc-content">
-      <div id="jsdoc-content-container">
-        <div id="jsdoc-banner" role="banner">
+    <nav id="jsdoc-navbar" role="navigation" class="jsdoc-navbar">
+        <div id="jsdoc-navbar-container">
+            <div id="jsdoc-navbar-content">
+                <a href="index.html" class="jsdoc-navbar-package-name">whatsapp-web.<wbr>js 1.<wbr>34.<wbr>6</a>
+            </div>
         </div>
-        <div id="jsdoc-main" role="main">
-          <header class="page-header">
-            <h1>Source: structures/Chat.js</h1>
-          </header>
-          <article>
-            <pre class="prettyprint linenums"><code>&#x27;use strict&#x27;;
+    </nav>
+    <div id="jsdoc-body-container">
+        <div id="jsdoc-content">
+            <div id="jsdoc-content-container">
+                <div id="jsdoc-banner" role="banner">
+                </div>
+                <div id="jsdoc-main" role="main">
+                    <header class="page-header">
+                        <h1>Source: structures/Chat.js</h1>
+                    </header>
+                    <article>
+                        <pre class="prettyprint linenums"><code>&#x27;use strict&#x27;;
 
 const Base &#x3D; require(&#x27;./Base&#x27;);
 const Message &#x3D; require(&#x27;./Message&#x27;);
@@ -139,7 +139,7 @@ class Chat extends Base {
      */
     async clearMessages() {
         return this.client.pupPage.evaluate(chatId &#x3D;&gt; {
-            return window.WWebJS.sendClearChat(chatId);
+            return window.getWWebJS.sendClearChat(chatId);
         }, this.id._serialized);
     }
 
@@ -149,7 +149,7 @@ class Chat extends Base {
      */
     async delete() {
         return this.client.pupPage.evaluate(chatId &#x3D;&gt; {
-            return window.WWebJS.sendDeleteChat(chatId);
+            return window.getWWebJS.sendDeleteChat(chatId);
         }, this.id._serialized);
     }
 
@@ -232,12 +232,12 @@ class Chat extends Base {
                 return true;
             };
 
-            const chat &#x3D; await window.WWebJS.getChat(chatId, { getAsModel: false });
+            const chat &#x3D; await window.getWWebJS.getChat(chatId, { getAsModel: false });
             let msgs &#x3D; chat.msgs.getModelsArray().filter(msgFilter);
 
             if (searchOptions &amp;amp;&amp;amp; searchOptions.limit &gt; 0) {
                 while (msgs.length &amp;lt; searchOptions.limit) {
-                    const loadedMessages &#x3D; await window.Store.ConversationMsgs.loadEarlierMsgs(chat,chat.msgs);
+                    const loadedMessages &#x3D; await window.getStore().ConversationMsgs.loadEarlierMsgs(chat,chat.msgs);
                     if (!loadedMessages || !loadedMessages.length) break;
                     msgs &#x3D; [...loadedMessages.filter(msgFilter), ...msgs];
                 }
@@ -248,7 +248,7 @@ class Chat extends Base {
                 }
             }
 
-            return msgs.map(m &#x3D;&gt; window.WWebJS.getMessageModel(m));
+            return msgs.map(m &#x3D;&gt; window.getWWebJS.getMessageModel(m));
 
         }, this.id._serialized, searchOptions);
 
@@ -260,7 +260,7 @@ class Chat extends Base {
      */
     async sendStateTyping() {
         return this.client.pupPage.evaluate(chatId &#x3D;&gt; {
-            window.WWebJS.sendChatstate(&#x27;typing&#x27;, chatId);
+            window.getWWebJS.sendChatstate(&#x27;typing&#x27;, chatId);
             return true;
         }, this.id._serialized);
     }
@@ -270,7 +270,7 @@ class Chat extends Base {
      */
     async sendStateRecording() {
         return this.client.pupPage.evaluate(chatId &#x3D;&gt; {
-            window.WWebJS.sendChatstate(&#x27;recording&#x27;, chatId);
+            window.getWWebJS.sendChatstate(&#x27;recording&#x27;, chatId);
             return true;
         }, this.id._serialized);
     }
@@ -280,7 +280,7 @@ class Chat extends Base {
      */
     async clearState() {
         return this.client.pupPage.evaluate(chatId &#x3D;&gt; {
-            window.WWebJS.sendChatstate(&#x27;stop&#x27;, chatId);
+            window.getWWebJS.sendChatstate(&#x27;stop&#x27;, chatId);
             return true;
         }, this.id._serialized);
     }
@@ -359,25 +359,25 @@ class Chat extends Base {
 
 module.exports &#x3D; Chat;
 </code></pre>
-          </article>
+                    </article>
+                </div>
+            </div>
+            <nav id="jsdoc-toc-nav" role="navigation"></nav>
         </div>
-      </div>
-      <nav id="jsdoc-toc-nav" role="navigation"></nav>
     </div>
-  </div>
-  <footer id="jsdoc-footer" class="jsdoc-footer">
-    <div id="jsdoc-footer-container">
-      <p>
-        Generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc</a> 3.6.11 on January 30, 2026.
-      </p>
-    </div>
-  </footer>
-  <script src="scripts/jquery.min.js"></script>
-  <script src="scripts/tree.jquery.js"></script>
-  <script src="scripts/prettify.js"></script>
-  <script src="scripts/jsdoc-toc.js"></script>
-  <script src="scripts/linenumber.js"></script>
-  <script src="scripts/scrollanchor.js"></script>
+    <footer id="jsdoc-footer" class="jsdoc-footer">
+        <div id="jsdoc-footer-container">
+            <p>
+                Generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc</a> 3.6.11 on January 30, 2026.
+            </p>
+        </div>
+    </footer>
+    <script src="scripts/jquery.min.js"></script>
+    <script src="scripts/tree.jquery.js"></script>
+    <script src="scripts/prettify.js"></script>
+    <script src="scripts/jsdoc-toc.js"></script>
+    <script src="scripts/linenumber.js"></script>
+    <script src="scripts/scrollanchor.js"></script>
 </body>
 
 </html>

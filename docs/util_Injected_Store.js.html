@@ -2,34 +2,34 @@
 <html>
 
 <head>
-  <meta name="generator" content="JSDoc 3.6.11">
-  <meta charset="utf-8">
-  <title>whatsapp-web.js 1.34.6 &raquo; Source: util/Injected/Store.js</title>
-  <link rel="stylesheet" href="https://brick.a.ssl.fastly.net/Karla:400,400i,700,700i" type="text/css">
-  <link rel="stylesheet" href="https://brick.a.ssl.fastly.net/Noto+Serif:400,400i,700,700i" type="text/css">
-  <link rel="stylesheet" href="https://brick.a.ssl.fastly.net/Inconsolata:500" type="text/css">
-  <link href="css/baseline.css" rel="stylesheet">
+    <meta name="generator" content="JSDoc 3.6.11">
+    <meta charset="utf-8">
+    <title>whatsapp-web.js 1.34.6 &raquo; Source: util/Injected/Store.js</title>
+    <link rel="stylesheet" href="https://brick.a.ssl.fastly.net/Karla:400,400i,700,700i" type="text/css">
+    <link rel="stylesheet" href="https://brick.a.ssl.fastly.net/Noto+Serif:400,400i,700,700i" type="text/css">
+    <link rel="stylesheet" href="https://brick.a.ssl.fastly.net/Inconsolata:500" type="text/css">
+    <link href="css/baseline.css" rel="stylesheet">
 </head>
 
 <body onload="prettyPrint()">
-  <nav id="jsdoc-navbar" role="navigation" class="jsdoc-navbar">
-    <div id="jsdoc-navbar-container">
-      <div id="jsdoc-navbar-content">
-        <a href="index.html" class="jsdoc-navbar-package-name">whatsapp-web.<wbr>js 1.<wbr>34.<wbr>6</a>
-      </div>
-    </div>
-  </nav>
-  <div id="jsdoc-body-container">
-    <div id="jsdoc-content">
-      <div id="jsdoc-content-container">
-        <div id="jsdoc-banner" role="banner">
+    <nav id="jsdoc-navbar" role="navigation" class="jsdoc-navbar">
+        <div id="jsdoc-navbar-container">
+            <div id="jsdoc-navbar-content">
+                <a href="index.html" class="jsdoc-navbar-package-name">whatsapp-web.<wbr>js 1.<wbr>34.<wbr>6</a>
+            </div>
         </div>
-        <div id="jsdoc-main" role="main">
-          <header class="page-header">
-            <h1>Source: util/Injected/Store.js</h1>
-          </header>
-          <article>
-            <pre class="prettyprint linenums"><code>&#x27;use strict&#x27;;
+    </nav>
+    <div id="jsdoc-body-container">
+        <div id="jsdoc-content">
+            <div id="jsdoc-content-container">
+                <div id="jsdoc-banner" role="banner">
+                </div>
+                <div id="jsdoc-main" role="main">
+                    <header class="page-header">
+                        <h1>Source: util/Injected/Store.js</h1>
+                    </header>
+                    <article>
+                        <pre class="prettyprint linenums"><code>&#x27;use strict&#x27;;
 
 exports.ExposeStore &#x3D; () &#x3D;&gt; {
     /**
@@ -74,132 +74,132 @@ exports.ExposeStore &#x3D; () &#x3D;&gt; {
         );
     };
 
-    window.Store &#x3D; Object.assign({}, window.require(&#x27;WAWebCollections&#x27;));
-    window.Store.AppState &#x3D; window.require(&#x27;WAWebSocketModel&#x27;).Socket;
-    window.Store.BlockContact &#x3D; window.require(&#x27;WAWebBlockContactAction&#x27;);
-    window.Store.Conn &#x3D; window.require(&#x27;WAWebConnModel&#x27;).Conn;
-    window.Store.Cmd &#x3D; window.require(&#x27;WAWebCmd&#x27;).Cmd;
-    window.Store.DownloadManager &#x3D; window.require(&#x27;WAWebDownloadManager&#x27;).downloadManager;
-    window.Store.GroupQueryAndUpdate &#x3D; window.require(&#x27;WAWebGroupQueryJob&#x27;).queryAndUpdateGroupMetadataById;
-    window.Store.MediaPrep &#x3D; window.require(&#x27;WAWebPrepRawMedia&#x27;);
-    window.Store.MediaObject &#x3D; window.require(&#x27;WAWebMediaStorage&#x27;);
-    window.Store.MediaTypes &#x3D; window.require(&#x27;WAWebMmsMediaTypes&#x27;);
-    window.Store.MediaUpload &#x3D; {
+    window.getStore() &#x3D; Object.assign({}, window.require(&#x27;WAWebCollections&#x27;));
+    window.getStore().AppState &#x3D; window.require(&#x27;WAWebSocketModel&#x27;).Socket;
+    window.getStore().BlockContact &#x3D; window.require(&#x27;WAWebBlockContactAction&#x27;);
+    window.getStore().Conn &#x3D; window.require(&#x27;WAWebConnModel&#x27;).Conn;
+    window.getStore().Cmd &#x3D; window.require(&#x27;WAWebCmd&#x27;).Cmd;
+    window.getStore().DownloadManager &#x3D; window.require(&#x27;WAWebDownloadManager&#x27;).downloadManager;
+    window.getStore().GroupQueryAndUpdate &#x3D; window.require(&#x27;WAWebGroupQueryJob&#x27;).queryAndUpdateGroupMetadataById;
+    window.getStore().MediaPrep &#x3D; window.require(&#x27;WAWebPrepRawMedia&#x27;);
+    window.getStore().MediaObject &#x3D; window.require(&#x27;WAWebMediaStorage&#x27;);
+    window.getStore().MediaTypes &#x3D; window.require(&#x27;WAWebMmsMediaTypes&#x27;);
+    window.getStore().MediaUpload &#x3D; {
         ...window.require(&#x27;WAWebMediaMmsV4Upload&#x27;),
         ...window.require(&#x27;WAWebStartMediaUploadQpl&#x27;)
     };
-    window.Store.MediaUpdate &#x3D; window.require(&#x27;WAWebMediaUpdateMsg&#x27;);
-    window.Store.MsgKey &#x3D; window.require(&#x27;WAWebMsgKey&#x27;);
-    window.Store.OpaqueData &#x3D; window.require(&#x27;WAWebMediaOpaqueData&#x27;);
-    window.Store.QueryProduct &#x3D; window.require(&#x27;WAWebBizProductCatalogBridge&#x27;);
-    window.Store.QueryOrder &#x3D; window.require(&#x27;WAWebBizOrderBridge&#x27;);
-    window.Store.SendClear &#x3D; window.require(&#x27;WAWebChatClearBridge&#x27;);
-    window.Store.SendDelete &#x3D; window.require(&#x27;WAWebDeleteChatAction&#x27;);
-    window.Store.SendMessage &#x3D; window.require(&#x27;WAWebSendMsgChatAction&#x27;);
-    window.Store.EditMessage &#x3D; window.require(&#x27;WAWebSendMessageEditAction&#x27;);
-    window.Store.MediaDataUtils &#x3D; window.require(&#x27;WAWebMediaDataUtils&#x27;);
-    window.Store.BlobCache &#x3D; window.require(&#x27;WAWebMediaInMemoryBlobCache&#x27;);
-    window.Store.SendSeen &#x3D; window.require(&#x27;WAWebUpdateUnreadChatAction&#x27;);
-    window.Store.User &#x3D; window.require(&#x27;WAWebUserPrefsMeUser&#x27;);
-    window.Store.ContactMethods &#x3D; {
+    window.getStore().MediaUpdate &#x3D; window.require(&#x27;WAWebMediaUpdateMsg&#x27;);
+    window.getStore().MsgKey &#x3D; window.require(&#x27;WAWebMsgKey&#x27;);
+    window.getStore().OpaqueData &#x3D; window.require(&#x27;WAWebMediaOpaqueData&#x27;);
+    window.getStore().QueryProduct &#x3D; window.require(&#x27;WAWebBizProductCatalogBridge&#x27;);
+    window.getStore().QueryOrder &#x3D; window.require(&#x27;WAWebBizOrderBridge&#x27;);
+    window.getStore().SendClear &#x3D; window.require(&#x27;WAWebChatClearBridge&#x27;);
+    window.getStore().SendDelete &#x3D; window.require(&#x27;WAWebDeleteChatAction&#x27;);
+    window.getStore().SendMessage &#x3D; window.require(&#x27;WAWebSendMsgChatAction&#x27;);
+    window.getStore().EditMessage &#x3D; window.require(&#x27;WAWebSendMessageEditAction&#x27;);
+    window.getStore().MediaDataUtils &#x3D; window.require(&#x27;WAWebMediaDataUtils&#x27;);
+    window.getStore().BlobCache &#x3D; window.require(&#x27;WAWebMediaInMemoryBlobCache&#x27;);
+    window.getStore().SendSeen &#x3D; window.require(&#x27;WAWebUpdateUnreadChatAction&#x27;);
+    window.getStore().User &#x3D; window.require(&#x27;WAWebUserPrefsMeUser&#x27;);
+    window.getStore().ContactMethods &#x3D; {
         ...window.require(&#x27;WAWebContactGetters&#x27;),
         ...window.require(&#x27;WAWebFrontendContactGetters&#x27;)
     };
-    window.Store.UserConstructor &#x3D; window.require(&#x27;WAWebWid&#x27;);
-    window.Store.Validators &#x3D; window.require(&#x27;WALinkify&#x27;);
-    window.Store.WidFactory &#x3D; window.require(&#x27;WAWebWidFactory&#x27;);
-    window.Store.ProfilePic &#x3D; window.require(&#x27;WAWebContactProfilePicThumbBridge&#x27;);
-    window.Store.PresenceUtils &#x3D; window.require(&#x27;WAWebPresenceChatAction&#x27;);
-    window.Store.ChatState &#x3D; window.require(&#x27;WAWebChatStateBridge&#x27;);
-    window.Store.findCommonGroups &#x3D; window.require(&#x27;WAWebFindCommonGroupsContactAction&#x27;).findCommonGroups;
-    window.Store.ConversationMsgs &#x3D; window.require(&#x27;WAWebChatLoadMessages&#x27;);
-    window.Store.sendReactionToMsg &#x3D; window.require(&#x27;WAWebSendReactionMsgAction&#x27;).sendReactionToMsg;
-    window.Store.createOrUpdateReactionsModule &#x3D; window.require(&#x27;WAWebDBCreateOrUpdateReactions&#x27;);
-    window.Store.EphemeralFields &#x3D; window.require(&#x27;WAWebGetEphemeralFieldsMsgActionsUtils&#x27;);
-    window.Store.MsgActionChecks &#x3D; window.require(&#x27;WAWebMsgActionCapability&#x27;);
-    window.Store.QuotedMsg &#x3D; window.require(&#x27;WAWebQuotedMsgModelUtils&#x27;);
-    window.Store.LinkPreview &#x3D; window.require(&#x27;WAWebLinkPreviewChatAction&#x27;);
-    window.Store.Socket &#x3D; window.require(&#x27;WADeprecatedSendIq&#x27;);
-    window.Store.SocketWap &#x3D; window.require(&#x27;WAWap&#x27;);
-    window.Store.SearchContext &#x3D; window.require(&#x27;WAWebChatMessageSearch&#x27;);
-    window.Store.DrawerManager &#x3D; window.require(&#x27;WAWebDrawerManager&#x27;).DrawerManager;
-    window.Store.LidUtils &#x3D; window.require(&#x27;WAWebApiContact&#x27;);
-    window.Store.WidToJid &#x3D; window.require(&#x27;WAWebWidToJid&#x27;);
-    window.Store.JidToWid &#x3D; window.require(&#x27;WAWebJidToWid&#x27;);
-    window.Store.getMsgInfo &#x3D; window.require(&#x27;WAWebApiMessageInfoStore&#x27;).queryMsgInfo;
-    window.Store.QueryExist &#x3D; window.require(&#x27;WAWebQueryExistsJob&#x27;).queryWidExists;
-    window.Store.ReplyUtils &#x3D; window.require(&#x27;WAWebMsgReply&#x27;);
-    window.Store.BotSecret &#x3D; window.require(&#x27;WAWebBotMessageSecret&#x27;);
-    window.Store.BotProfiles &#x3D; window.require(&#x27;WAWebBotProfileCollection&#x27;);
-    window.Store.ContactCollection &#x3D; window.require(&#x27;WAWebContactCollection&#x27;).ContactCollection;
-    window.Store.DeviceList &#x3D; window.require(&#x27;WAWebApiDeviceList&#x27;);
-    window.Store.HistorySync &#x3D; window.require(&#x27;WAWebSendNonMessageDataRequest&#x27;);
-    window.Store.AddonReactionTable &#x3D; window.require(&#x27;WAWebAddonReactionTableMode&#x27;).reactionTableMode;
-    window.Store.AddonPollVoteTable &#x3D; window.require(&#x27;WAWebAddonPollVoteTableMode&#x27;).pollVoteTableMode;
-    window.Store.ChatGetters &#x3D; window.require(&#x27;WAWebChatGetters&#x27;);
-    window.Store.UploadUtils &#x3D; window.require(&#x27;WAWebUploadManager&#x27;);
-    window.Store.WAWebStreamModel &#x3D; window.require(&#x27;WAWebStreamModel&#x27;);
-    window.Store.FindOrCreateChat &#x3D; window.require(&#x27;WAWebFindChatAction&#x27;);
-    window.Store.CustomerNoteUtils &#x3D; window.require(&#x27;WAWebNoteAction&#x27;);
-    window.Store.BusinessGatingUtils &#x3D; window.require(&#x27;WAWebBizGatingUtils&#x27;);
-    window.Store.PollsVotesSchema &#x3D; window.require(&#x27;WAWebPollsVotesSchema&#x27;);
-    window.Store.PollsSendVote &#x3D; window.require(&#x27;WAWebPollsSendVoteMsgAction&#x27;);
+    window.getStore().UserConstructor &#x3D; window.require(&#x27;WAWebWid&#x27;);
+    window.getStore().Validators &#x3D; window.require(&#x27;WALinkify&#x27;);
+    window.getStore().WidFactory &#x3D; window.require(&#x27;WAWebWidFactory&#x27;);
+    window.getStore().ProfilePic &#x3D; window.require(&#x27;WAWebContactProfilePicThumbBridge&#x27;);
+    window.getStore().PresenceUtils &#x3D; window.require(&#x27;WAWebPresenceChatAction&#x27;);
+    window.getStore().ChatState &#x3D; window.require(&#x27;WAWebChatStateBridge&#x27;);
+    window.getStore().findCommonGroups &#x3D; window.require(&#x27;WAWebFindCommonGroupsContactAction&#x27;).findCommonGroups;
+    window.getStore().ConversationMsgs &#x3D; window.require(&#x27;WAWebChatLoadMessages&#x27;);
+    window.getStore().sendReactionToMsg &#x3D; window.require(&#x27;WAWebSendReactionMsgAction&#x27;).sendReactionToMsg;
+    window.getStore().createOrUpdateReactionsModule &#x3D; window.require(&#x27;WAWebDBCreateOrUpdateReactions&#x27;);
+    window.getStore().EphemeralFields &#x3D; window.require(&#x27;WAWebGetEphemeralFieldsMsgActionsUtils&#x27;);
+    window.getStore().MsgActionChecks &#x3D; window.require(&#x27;WAWebMsgActionCapability&#x27;);
+    window.getStore().QuotedMsg &#x3D; window.require(&#x27;WAWebQuotedMsgModelUtils&#x27;);
+    window.getStore().LinkPreview &#x3D; window.require(&#x27;WAWebLinkPreviewChatAction&#x27;);
+    window.getStore().Socket &#x3D; window.require(&#x27;WADeprecatedSendIq&#x27;);
+    window.getStore().SocketWap &#x3D; window.require(&#x27;WAWap&#x27;);
+    window.getStore().SearchContext &#x3D; window.require(&#x27;WAWebChatMessageSearch&#x27;);
+    window.getStore().DrawerManager &#x3D; window.require(&#x27;WAWebDrawerManager&#x27;).DrawerManager;
+    window.getStore().LidUtils &#x3D; window.require(&#x27;WAWebApiContact&#x27;);
+    window.getStore().WidToJid &#x3D; window.require(&#x27;WAWebWidToJid&#x27;);
+    window.getStore().JidToWid &#x3D; window.require(&#x27;WAWebJidToWid&#x27;);
+    window.getStore().getMsgInfo &#x3D; window.require(&#x27;WAWebApiMessageInfoStore&#x27;).queryMsgInfo;
+    window.getStore().QueryExist &#x3D; window.require(&#x27;WAWebQueryExistsJob&#x27;).queryWidExists;
+    window.getStore().ReplyUtils &#x3D; window.require(&#x27;WAWebMsgReply&#x27;);
+    window.getStore().BotSecret &#x3D; window.require(&#x27;WAWebBotMessageSecret&#x27;);
+    window.getStore().BotProfiles &#x3D; window.require(&#x27;WAWebBotProfileCollection&#x27;);
+    window.getStore().ContactCollection &#x3D; window.require(&#x27;WAWebContactCollection&#x27;).ContactCollection;
+    window.getStore().DeviceList &#x3D; window.require(&#x27;WAWebApiDeviceList&#x27;);
+    window.getStore().HistorySync &#x3D; window.require(&#x27;WAWebSendNonMessageDataRequest&#x27;);
+    window.getStore().AddonReactionTable &#x3D; window.require(&#x27;WAWebAddonReactionTableMode&#x27;).reactionTableMode;
+    window.getStore().AddonPollVoteTable &#x3D; window.require(&#x27;WAWebAddonPollVoteTableMode&#x27;).pollVoteTableMode;
+    window.getStore().ChatGetters &#x3D; window.require(&#x27;WAWebChatGetters&#x27;);
+    window.getStore().UploadUtils &#x3D; window.require(&#x27;WAWebUploadManager&#x27;);
+    window.getStore().WAWebStreamModel &#x3D; window.require(&#x27;WAWebStreamModel&#x27;);
+    window.getStore().FindOrCreateChat &#x3D; window.require(&#x27;WAWebFindChatAction&#x27;);
+    window.getStore().CustomerNoteUtils &#x3D; window.require(&#x27;WAWebNoteAction&#x27;);
+    window.getStore().BusinessGatingUtils &#x3D; window.require(&#x27;WAWebBizGatingUtils&#x27;);
+    window.getStore().PollsVotesSchema &#x3D; window.require(&#x27;WAWebPollsVotesSchema&#x27;);
+    window.getStore().PollsSendVote &#x3D; window.require(&#x27;WAWebPollsSendVoteMsgAction&#x27;);
 
-    window.Store.Settings &#x3D; {
+    window.getStore().Settings &#x3D; {
         ...window.require(&#x27;WAWebUserPrefsGeneral&#x27;),
         ...window.require(&#x27;WAWebUserPrefsNotifications&#x27;),
         setPushname: window.require(&#x27;WAWebSetPushnameConnAction&#x27;).setPushname
     };
-    window.Store.NumberInfo &#x3D; {
+    window.getStore().NumberInfo &#x3D; {
         ...window.require(&#x27;WAPhoneUtils&#x27;),
         ...window.require(&#x27;WAPhoneFindCC&#x27;)
     };
-    window.Store.ForwardUtils &#x3D; {
+    window.getStore().ForwardUtils &#x3D; {
         ...window.require(&#x27;WAWebChatForwardMessage&#x27;)
     };
-    window.Store.PinnedMsgUtils &#x3D; {
+    window.getStore().PinnedMsgUtils &#x3D; {
         ...window.require(&#x27;WAWebPinInChatSchema&#x27;),
         ...window.require(&#x27;WAWebSendPinMessageAction&#x27;)
     };
-    window.Store.ScheduledEventMsgUtils &#x3D; {
+    window.getStore().ScheduledEventMsgUtils &#x3D; {
         ...window.require(&#x27;WAWebGenerateEventCallLink&#x27;),
         ...window.require(&#x27;WAWebSendEventEditMsgAction&#x27;),
         ...window.require(&#x27;WAWebSendEventResponseMsgAction&#x27;)
     };
-    window.Store.VCard &#x3D; {
+    window.getStore().VCard &#x3D; {
         ...window.require(&#x27;WAWebFrontendVcardUtils&#x27;),
         ...window.require(&#x27;WAWebVcardParsingUtils&#x27;),
         ...window.require(&#x27;WAWebVcardGetNameFromParsed&#x27;)
     };
-    window.Store.StickerTools &#x3D; {
+    window.getStore().StickerTools &#x3D; {
         ...window.require(&#x27;WAWebImageUtils&#x27;),
         ...window.require(&#x27;WAWebAddWebpMetadata&#x27;)
     };
-    window.Store.GroupUtils &#x3D; {
+    window.getStore().GroupUtils &#x3D; {
         ...window.require(&#x27;WAWebGroupCreateJob&#x27;),
         ...window.require(&#x27;WAWebGroupModifyInfoJob&#x27;),
         ...window.require(&#x27;WAWebExitGroupAction&#x27;),
         ...window.require(&#x27;WAWebContactProfilePicThumbBridge&#x27;),
         ...window.require(&#x27;WAWebSetPropertyGroupAction&#x27;)
     };
-    window.Store.GroupParticipants &#x3D; {
+    window.getStore().GroupParticipants &#x3D; {
         ...window.require(&#x27;WAWebModifyParticipantsGroupAction&#x27;),
         ...window.require(&#x27;WASmaxGroupsAddParticipantsRPC&#x27;)
     };
-    window.Store.GroupInvite &#x3D; {
+    window.getStore().GroupInvite &#x3D; {
         ...window.require(&#x27;WAWebGroupInviteJob&#x27;),
         ...window.require(&#x27;WAWebGroupQueryJob&#x27;),
         ...window.require(&#x27;WAWebMexFetchGroupInviteCodeJob&#x27;)
     };
-    window.Store.GroupInviteV4 &#x3D; {
+    window.getStore().GroupInviteV4 &#x3D; {
         ...window.require(&#x27;WAWebGroupInviteV4Job&#x27;),
         ...window.require(&#x27;WAWebChatSendMessages&#x27;)
     };
-    window.Store.MembershipRequestUtils &#x3D; {
+    window.getStore().MembershipRequestUtils &#x3D; {
         ...window.require(&#x27;WAWebApiMembershipApprovalRequestStore&#x27;),
         ...window.require(&#x27;WASmaxGroupsMembershipRequestsActionRPC&#x27;)
     };
-    window.Store.ChannelUtils &#x3D; {
+    window.getStore().ChannelUtils &#x3D; {
         ...window.require(&#x27;WAWebLoadNewsletterPreviewChatAction&#x27;),
         ...window.require(&#x27;WAWebNewsletterMetadataQueryJob&#x27;),
         ...window.require(&#x27;WAWebNewsletterCreateQueryJob&#x27;),
@@ -218,36 +218,36 @@ exports.ExposeStore &#x3D; () &#x3D;&gt; {
         countryCodesIso: window.require(&#x27;WAWebCountriesNativeCountryNames&#x27;),
         currentRegion: window.require(&#x27;WAWebL10N&#x27;).getRegion(),
     };
-    window.Store.SendChannelMessage &#x3D; {
+    window.getStore().SendChannelMessage &#x3D; {
         ...window.require(&#x27;WAWebNewsletterUpdateMsgsRecordsJob&#x27;),
         ...window.require(&#x27;WAWebMsgDataFromModel&#x27;),
         ...window.require(&#x27;WAWebNewsletterSendMessageJob&#x27;),
         ...window.require(&#x27;WAWebNewsletterSendMsgAction&#x27;),
         ...window.require(&#x27;WAMediaCalculateFilehash&#x27;)
     };
-    window.Store.ChannelSubscribers &#x3D; {
+    window.getStore().ChannelSubscribers &#x3D; {
         ...window.require(&#x27;WAWebMexFetchNewsletterSubscribersJob&#x27;),
         ...window.require(&#x27;WAWebNewsletterSubscriberListAction&#x27;)
     };
-    window.Store.AddressbookContactUtils &#x3D; {
+    window.getStore().AddressbookContactUtils &#x3D; {
         ...window.require(&#x27;WAWebSaveContactAction&#x27;),
         ...window.require(&#x27;WAWebDeleteContactAction&#x27;)
     };
-    window.Store.StatusUtils &#x3D; {
+    window.getStore().StatusUtils &#x3D; {
         ...window.require(&#x27;WAWebContactStatusBridge&#x27;),
         ...window.require(&#x27;WAWebSendStatusMsgAction&#x27;),
         ...window.require(&#x27;WAWebRevokeStatusAction&#x27;),
         ...window.require(&#x27;WAWebStatusGatingUtils&#x27;)
     };
 
-    if (!window.Store.Chat._find || !window.Store.Chat.findImpl) {
-        window.Store.Chat._find &#x3D; e &#x3D;&gt; {
-            const target &#x3D; window.Store.Chat.get(e);
+    if (!window.getStore().Chat._find || !window.getStore().Chat.findImpl) {
+        window.getStore().Chat._find &#x3D; e &#x3D;&gt; {
+            const target &#x3D; window.getStore().Chat.get(e);
             return target ? Promise.resolve(target) : Promise.resolve({
                 id: e
             });
         };
-        window.Store.Chat.findImpl &#x3D; window.Store.Chat._find;
+        window.getStore().Chat.findImpl &#x3D; window.getStore().Chat._find;
     }
 
     /**
@@ -295,25 +295,25 @@ exports.ExposeStore &#x3D; () &#x3D;&gt; {
     window.injectToFunction({ module: &#x27;WAWebE2EProtoUtils&#x27;, function: &#x27;typeAttributeFromProtobuf&#x27; }, (func, ...args) &#x3D;&gt; { const [proto] &#x3D; args; return proto.locationMessage || proto.groupInviteMessage ? &#x27;text&#x27; : func(...args); });
 };
 </code></pre>
-          </article>
+                    </article>
+                </div>
+            </div>
+            <nav id="jsdoc-toc-nav" role="navigation"></nav>
         </div>
-      </div>
-      <nav id="jsdoc-toc-nav" role="navigation"></nav>
     </div>
-  </div>
-  <footer id="jsdoc-footer" class="jsdoc-footer">
-    <div id="jsdoc-footer-container">
-      <p>
-        Generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc</a> 3.6.11 on January 30, 2026.
-      </p>
-    </div>
-  </footer>
-  <script src="scripts/jquery.min.js"></script>
-  <script src="scripts/tree.jquery.js"></script>
-  <script src="scripts/prettify.js"></script>
-  <script src="scripts/jsdoc-toc.js"></script>
-  <script src="scripts/linenumber.js"></script>
-  <script src="scripts/scrollanchor.js"></script>
+    <footer id="jsdoc-footer" class="jsdoc-footer">
+        <div id="jsdoc-footer-container">
+            <p>
+                Generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc</a> 3.6.11 on January 30, 2026.
+            </p>
+        </div>
+    </footer>
+    <script src="scripts/jquery.min.js"></script>
+    <script src="scripts/tree.jquery.js"></script>
+    <script src="scripts/prettify.js"></script>
+    <script src="scripts/jsdoc-toc.js"></script>
+    <script src="scripts/linenumber.js"></script>
+    <script src="scripts/scrollanchor.js"></script>
 </body>
 
 </html>

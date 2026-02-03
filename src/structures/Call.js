@@ -59,7 +59,7 @@ class Call extends Base {
          * @type {object}
          */
         this.participants = data.participants;
-        
+
         return super._patch(data);
     }
 
@@ -68,7 +68,7 @@ class Call extends Base {
     */
     async reject() {
         return this.client.pupPage.evaluate((peerJid, id) => {
-            return window.WWebJS.rejectCall(peerJid, id);
+            return window.getWWebJS.rejectCall(peerJid, id);
         }, this.from, this.id);
     }
 }

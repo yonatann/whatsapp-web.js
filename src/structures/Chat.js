@@ -80,7 +80,7 @@ class Chat extends Base {
          * @type {Message}
          */
         this.lastMessage = data.lastMessage ? new Message(this.client, data.lastMessage) : undefined;
-        
+
         return super._patch(data);
     }
 
@@ -108,7 +108,7 @@ class Chat extends Base {
      */
     async clearMessages() {
         return this.client.pupPage.evaluate(chatId => {
-            return window.WWebJS.sendClearChat(chatId);
+            return window.getWWebJS.sendClearChat(chatId);
         }, this.id._serialized);
     }
 
@@ -118,7 +118,7 @@ class Chat extends Base {
      */
     async delete() {
         return this.client.pupPage.evaluate(chatId => {
-            return window.WWebJS.sendDeleteChat(chatId);
+            return window.getWWebJS.sendDeleteChat(chatId);
         }, this.id._serialized);
     }
 
@@ -178,7 +178,7 @@ class Chat extends Base {
     /**
      * Mark this chat as unread
      */
-    async markUnread(){
+    async markUnread() {
         return this.client.markChatUnread(this.id._serialized);
     }
 
@@ -201,23 +201,23 @@ class Chat extends Base {
                 return true;
             };
 
-            const chat = await window.WWebJS.getChat(chatId, { getAsModel: false });
+            const chat = await window.getWWebJS.getChat(chatId, { getAsModel: false });
             let msgs = chat.msgs.getModelsArray().filter(msgFilter);
 
             if (searchOptions && searchOptions.limit > 0) {
                 while (msgs.length < searchOptions.limit) {
-                    const loadedMessages = await window.Store.ConversationMsgs.loadEarlierMsgs(chat,chat.msgs);
+                    const loadedMessages = await window.getStore().ConversationMsgs.loadEarlierMsgs(chat, chat.msgs);
                     if (!loadedMessages || !loadedMessages.length) break;
                     msgs = [...loadedMessages.filter(msgFilter), ...msgs];
                 }
-                
+
                 if (msgs.length > searchOptions.limit) {
                     msgs.sort((a, b) => (a.t > b.t) ? 1 : -1);
                     msgs = msgs.splice(msgs.length - searchOptions.limit);
                 }
             }
 
-            return msgs.map(m => window.WWebJS.getMessageModel(m));
+            return msgs.map(m => window.getWWebJS.getMessageModel(m));
 
         }, this.id._serialized, searchOptions);
 
@@ -229,7 +229,7 @@ class Chat extends Base {
      */
     async sendStateTyping() {
         return this.client.pupPage.evaluate(chatId => {
-            window.WWebJS.sendChatstate('typing', chatId);
+            window.getWWebJS.sendChatstate('typing', chatId);
             return true;
         }, this.id._serialized);
     }
@@ -239,7 +239,7 @@ class Chat extends Base {
      */
     async sendStateRecording() {
         return this.client.pupPage.evaluate(chatId => {
-            window.WWebJS.sendChatstate('recording', chatId);
+            window.getWWebJS.sendChatstate('recording', chatId);
             return true;
         }, this.id._serialized);
     }
@@ -249,7 +249,7 @@ class Chat extends Base {
      */
     async clearState() {
         return this.client.pupPage.evaluate(chatId => {
-            window.WWebJS.sendChatstate('stop', chatId);
+            window.getWWebJS.sendChatstate('stop', chatId);
             return true;
         }, this.id._serialized);
     }
@@ -286,7 +286,7 @@ class Chat extends Base {
     async getPinnedMessages() {
         return this.client.getPinnedMessages(this.id._serialized);
     }
-    
+
     /**
      * Sync chat history conversation
      * @return {Promise<boolean>} True if operation completed successfully, false otherwise.
@@ -321,7 +321,7 @@ class Chat extends Base {
      */
     async getCustomerNote() {
         if (this.isGroup || this.isChannel) return null;
-        
+
         return this.client.getCustomerNote(this.id._serialized);
     }
 }

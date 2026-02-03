@@ -84,7 +84,7 @@ class Product extends Base {
     async getData() {
         if (this.data &#x3D;&#x3D;&#x3D; null) {
             let result &#x3D; await this.client.pupPage.evaluate((productId) &#x3D;&gt; {
-                return window.WWebJS.getProductMetadata(productId);
+                return window.getWWebJS.getProductMetadata(productId);
             }, this.id);
             if (!result) {
                 this.data &#x3D; undefined;

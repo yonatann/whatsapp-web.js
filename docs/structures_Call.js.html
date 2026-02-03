@@ -99,7 +99,7 @@ class Call extends Base {
     */
     async reject() {
         return this.client.pupPage.evaluate((peerJid, id) &#x3D;&gt; {
-            return window.WWebJS.rejectCall(peerJid, id);
+            return window.getWWebJS.rejectCall(peerJid, id);
         }, this.from, this.id);
     }
 }

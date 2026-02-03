@@ -15,8 +15,8 @@ class InterfaceController {
      */
     async openChatWindow(chatId) {
         return await this.pupPage.evaluate(async (chatId) => {
-            const chat = await window.WWebJS.getChat(chatId, { getAsModel: false });
-            return await window.Store.Cmd.openChatBottom({'chat':chat});
+            const chat = await window.getWWebJS.getChat(chatId, { getAsModel: false });
+            return await window.getStore().Cmd.openChatBottom({ 'chat': chat });
         }, chatId);
     }
 
@@ -26,8 +26,8 @@ class InterfaceController {
      */
     async openChatDrawer(chatId) {
         await this.pupPage.evaluate(async chatId => {
-            let chat = await window.WWebJS.getChat(chatId, { getAsModel: false });
-            await window.Store.Cmd.openDrawerMid(chat);
+            let chat = await window.getWWebJS.getChat(chatId, { getAsModel: false });
+            await window.getStore().Cmd.openDrawerMid(chat);
         }, chatId);
     }
 
@@ -37,8 +37,8 @@ class InterfaceController {
      */
     async openChatSearch(chatId) {
         await this.pupPage.evaluate(async chatId => {
-            let chat = await window.WWebJS.getChat(chatId, { getAsModel: false });
-            await window.Store.Cmd.chatSearch(chat);
+            let chat = await window.getWWebJS.getChat(chatId, { getAsModel: false });
+            await window.getStore().Cmd.chatSearch(chat);
         }, chatId);
     }
 
@@ -48,10 +48,10 @@ class InterfaceController {
      */
     async openChatWindowAt(msgId) {
         await this.pupPage.evaluate(async (msgId) => {
-            const msg = window.Store.Msg.get(msgId) || (await window.Store.Msg.getMessagesById([msgId]))?.messages?.[0];
-            const chat = window.Store.Chat.get(msg.id.remote) ?? await window.Store.Chat.find(msg.id.remote);
-            const searchContext = await window.Store.SearchContext.getSearchContext(chat, msg.id);
-            await window.Store.Cmd.openChatAt({ chat: chat, msgContext: searchContext });
+            const msg = window.getStore().Msg.get(msgId) || (await window.getStore().Msg.getMessagesById([msgId]))?.messages?.[0];
+            const chat = window.getStore().Chat.get(msg.id.remote) ?? await window.getStore().Chat.find(msg.id.remote);
+            const searchContext = await window.getStore().SearchContext.getSearchContext(chat, msg.id);
+            await window.getStore().Cmd.openChatAt({ chat: chat, msgContext: searchContext });
         }, msgId);
     }
 
@@ -61,8 +61,8 @@ class InterfaceController {
      */
     async openMessageDrawer(msgId) {
         await this.pupPage.evaluate(async msgId => {
-            const msg = window.Store.Msg.get(msgId) || (await window.Store.Msg.getMessagesById([msgId]))?.messages?.[0];
-            await window.Store.Cmd.msgInfoDrawer(msg);
+            const msg = window.getStore().Msg.get(msgId) || (await window.getStore().Msg.getMessagesById([msgId]))?.messages?.[0];
+            await window.getStore().Cmd.msgInfoDrawer(msg);
         }, msgId);
     }
 
@@ -71,7 +71,7 @@ class InterfaceController {
      */
     async closeRightDrawer() {
         await this.pupPage.evaluate(async () => {
-            await window.Store.DrawerManager.closeDrawerRight();
+            await window.getStore().DrawerManager.closeDrawerRight();
         });
     }
 
@@ -80,8 +80,8 @@ class InterfaceController {
      */
     async getFeatures() {
         return await this.pupPage.evaluate(() => {
-            if(!window.Store.Features) throw new Error('This version of Whatsapp Web does not support features');
-            return window.Store.Features.F;
+            if (!window.getStore().Features) throw new Error('This version of Whatsapp Web does not support features');
+            return window.getStore().Features.F;
         });
     }
 
@@ -91,8 +91,8 @@ class InterfaceController {
      */
     async checkFeatureStatus(feature) {
         return await this.pupPage.evaluate((feature) => {
-            if(!window.Store.Features) throw new Error('This version of Whatsapp Web does not support features');
-            return window.Store.Features.supportsFeature(feature);
+            if (!window.getStore().Features) throw new Error('This version of Whatsapp Web does not support features');
+            return window.getStore().Features.supportsFeature(feature);
         }, feature);
     }
 
@@ -102,9 +102,9 @@ class InterfaceController {
      */
     async enableFeatures(features) {
         await this.pupPage.evaluate((features) => {
-            if(!window.Store.Features) throw new Error('This version of Whatsapp Web does not support features');
+            if (!window.getStore().Features) throw new Error('This version of Whatsapp Web does not support features');
             for (const feature in features) {
-                window.Store.Features.setFeature(features[feature], true);
+                window.getStore().Features.setFeature(features[feature], true);
             }
         }, features);
     }
@@ -115,9 +115,9 @@ class InterfaceController {
      */
     async disableFeatures(features) {
         await this.pupPage.evaluate((features) => {
-            if(!window.Store.Features) throw new Error('This version of Whatsapp Web does not support features');
+            if (!window.getStore().Features) throw new Error('This version of Whatsapp Web does not support features');
             for (const feature in features) {
-                window.Store.Features.setFeature(features[feature], false);
+                window.getStore().Features.setFeature(features[feature], false);
             }
         }, features);
     }

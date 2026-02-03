@@ -23,13 +23,13 @@ class Message extends Base {
 
     _patch(data) {
         this._data = data;
-        
+
         /**
          * MediaKey that represents the sticker 'ID'
          * @type {string}
          */
         this.mediaKey = data.mediaKey;
-        
+
         /**
          * ID that represents the message
          * @type {object}
@@ -257,7 +257,7 @@ class Message extends Base {
         if (data.latestEditMsgKey) {
             this.latestEditMsgKey = data.latestEditMsgKey;
         }
-        
+
         /**
          * Protocol message key.
          * Can be used to retrieve the ID of an original message that was revoked.
@@ -311,13 +311,13 @@ class Message extends Base {
      */
     async reload() {
         const newData = await this.client.pupPage.evaluate(async (msgId) => {
-            const msg = window.Store.Msg.get(msgId) || (await window.Store.Msg.getMessagesById([msgId]))?.messages?.[0];
+            const msg = window.getStore().Msg.get(msgId) || (await window.getStore().Msg.getMessagesById([msgId]))?.messages?.[0];
             if (!msg) return null;
-            return window.WWebJS.getMessageModel(msg);
+            return window.getWWebJS.getMessageModel(msg);
         }, this.id._serialized);
 
-        if(!newData) return null;
-        
+        if (!newData) return null;
+
         this._patch(newData);
         return this;
     }
@@ -329,7 +329,7 @@ class Message extends Base {
     get rawData() {
         return this._data;
     }
-    
+
     /**
      * Returns the Chat this message was sent in
      * @returns {Promise<Chat>}
@@ -353,7 +353,7 @@ class Message extends Base {
     async getMentions() {
         return await Promise.all(this.mentionedIds.map(async m => await this.client.getContactById(m)));
     }
-    
+
     /**
      * Returns groups mentioned in this message
      * @returns {Promise<Array<GroupChat>>}
@@ -370,9 +370,9 @@ class Message extends Base {
         if (!this.hasQuotedMsg) return undefined;
 
         const quotedMsg = await this.client.pupPage.evaluate(async (msgId) => {
-            const msg = window.Store.Msg.get(msgId) || (await window.Store.Msg.getMessagesById([msgId]))?.messages?.[0];
-            const quotedMsg = window.Store.QuotedMsg.getQuotedMsgObj(msg);
-            return window.WWebJS.getMessageModel(quotedMsg);
+            const msg = window.getStore().Msg.get(msgId) || (await window.getStore().Msg.getMessagesById([msgId]))?.messages?.[0];
+            const quotedMsg = window.getStore().QuotedMsg.getQuotedMsgObj(msg);
+            return window.getWWebJS.getMessageModel(quotedMsg);
         }, this.id._serialized);
 
         return new Message(this.client, quotedMsg);
@@ -406,13 +406,13 @@ class Message extends Base {
      * @param {string} reaction - Emoji to react with. Send an empty string to remove the reaction.
      * @return {Promise}
      */
-    async react(reaction){
+    async react(reaction) {
         await this.client.pupPage.evaluate(async (messageId, reaction) => {
             if (!messageId) return null;
             const msg =
-                window.Store.Msg.get(messageId) || (await window.Store.Msg.getMessagesById([messageId]))?.messages?.[0];
-            if(!msg) return null;
-            await window.Store.sendReactionToMsg(msg, reaction);
+                window.getStore().Msg.get(messageId) || (await window.getStore().Msg.getMessagesById([messageId]))?.messages?.[0];
+            if (!msg) return null;
+            await window.getStore().sendReactionToMsg(msg, reaction);
         }, this.id._serialized, reaction);
     }
 
@@ -434,7 +434,7 @@ class Message extends Base {
         const chatId = typeof chat === 'string' ? chat : chat.id._serialized;
 
         await this.client.pupPage.evaluate(async (msgId, chatId) => {
-            return window.WWebJS.forwardMessage(chatId, msgId);
+            return window.getWWebJS.forwardMessage(chatId, msgId);
         }, this.id._serialized, chatId);
     }
 
@@ -448,7 +448,7 @@ class Message extends Base {
         }
 
         const result = await this.client.pupPage.evaluate(async (msgId) => {
-            const msg = window.Store.Msg.get(msgId) || (await window.Store.Msg.getMessagesById([msgId]))?.messages?.[0];
+            const msg = window.getStore().Msg.get(msgId) || (await window.getStore().Msg.getMessagesById([msgId]))?.messages?.[0];
 
             // REUPLOADING mediaStage means the media is expired and the download button is spinning, cannot be downloaded now
             if (!msg || !msg.mediaData || msg.mediaData.mediaStage === 'REUPLOADING') {
@@ -469,10 +469,10 @@ class Message extends Base {
 
             try {
                 const mockQpl = {
-                    addAnnotations: function() { return this; },
-                    addPoint: function() { return this; }
+                    addAnnotations: function () { return this; },
+                    addPoint: function () { return this; }
                 };
-                const decryptedMedia = await window.Store.DownloadManager.downloadAndMaybeDecrypt({
+                const decryptedMedia = await window.getStore().DownloadManager.downloadAndMaybeDecrypt({
                     directPath: msg.directPath,
                     encFilehash: msg.encFilehash,
                     filehash: msg.filehash,
@@ -483,7 +483,7 @@ class Message extends Base {
                     downloadQpl: mockQpl
                 });
 
-                const data = await window.WWebJS.arrayBufferToBase64Async(decryptedMedia);
+                const data = await window.getWWebJS.arrayBufferToBase64Async(decryptedMedia);
 
                 return {
                     data,
@@ -492,7 +492,7 @@ class Message extends Base {
                     filesize: msg.size
                 };
             } catch (e) {
-                if(e.status && e.status === 404) return undefined;
+                if (e.status && e.status === 404) return undefined;
                 throw e;
             }
         }, this.id._serialized);
@@ -508,21 +508,21 @@ class Message extends Base {
      */
     async delete(everyone, clearMedia = true) {
         await this.client.pupPage.evaluate(async (msgId, everyone, clearMedia) => {
-            const msg = window.Store.Msg.get(msgId) || (await window.Store.Msg.getMessagesById([msgId]))?.messages?.[0];
-            const chat = window.Store.Chat.get(msg.id.remote) || (await window.Store.Chat.find(msg.id.remote));
-            
+            const msg = window.getStore().Msg.get(msgId) || (await window.getStore().Msg.getMessagesById([msgId]))?.messages?.[0];
+            const chat = window.getStore().Chat.get(msg.id.remote) || (await window.getStore().Chat.find(msg.id.remote));
+
             const canRevoke =
-                window.Store.MsgActionChecks.canSenderRevokeMsg(msg) || window.Store.MsgActionChecks.canAdminRevokeMsg(msg);
+                window.getStore().MsgActionChecks.canSenderRevokeMsg(msg) || window.getStore().MsgActionChecks.canAdminRevokeMsg(msg);
 
             if (everyone && canRevoke) {
                 return window.compareWwebVersions(window.Debug.VERSION, '>=', '2.3000.0')
-                    ? window.Store.Cmd.sendRevokeMsgs(chat, { list: [msg], type: 'message' }, { clearMedia: clearMedia })
-                    : window.Store.Cmd.sendRevokeMsgs(chat, [msg], { clearMedia: true, type: msg.id.fromMe ? 'Sender' : 'Admin' });
+                    ? window.getStore().Cmd.sendRevokeMsgs(chat, { list: [msg], type: 'message' }, { clearMedia: clearMedia })
+                    : window.getStore().Cmd.sendRevokeMsgs(chat, [msg], { clearMedia: true, type: msg.id.fromMe ? 'Sender' : 'Admin' });
             }
 
             return window.compareWwebVersions(window.Debug.VERSION, '>=', '2.3000.0')
-                ? window.Store.Cmd.sendDeleteMsgs(chat, { list: [msg], type: 'message' }, clearMedia)
-                : window.Store.Cmd.sendDeleteMsgs(chat, [msg], clearMedia);
+                ? window.getStore().Cmd.sendDeleteMsgs(chat, { list: [msg], type: 'message' }, clearMedia)
+                : window.getStore().Cmd.sendDeleteMsgs(chat, [msg], clearMedia);
         }, this.id._serialized, everyone, clearMedia);
     }
 
@@ -531,10 +531,10 @@ class Message extends Base {
      */
     async star() {
         await this.client.pupPage.evaluate(async (msgId) => {
-            const msg = window.Store.Msg.get(msgId) || (await window.Store.Msg.getMessagesById([msgId]))?.messages?.[0];
-            if (window.Store.MsgActionChecks.canStarMsg(msg)) {
-                let chat = await window.Store.Chat.find(msg.id.remote);
-                return window.Store.Cmd.sendStarMsgs(chat, [msg], false);
+            const msg = window.getStore().Msg.get(msgId) || (await window.getStore().Msg.getMessagesById([msgId]))?.messages?.[0];
+            if (window.getStore().MsgActionChecks.canStarMsg(msg)) {
+                let chat = await window.getStore().Chat.find(msg.id.remote);
+                return window.getStore().Cmd.sendStarMsgs(chat, [msg], false);
             }
         }, this.id._serialized);
     }
@@ -544,10 +544,10 @@ class Message extends Base {
      */
     async unstar() {
         await this.client.pupPage.evaluate(async (msgId) => {
-            const msg = window.Store.Msg.get(msgId) || (await window.Store.Msg.getMessagesById([msgId]))?.messages?.[0];
-            if (window.Store.MsgActionChecks.canStarMsg(msg)) {
-                let chat = await window.Store.Chat.find(msg.id.remote);
-                return window.Store.Cmd.sendUnstarMsgs(chat, [msg], false);
+            const msg = window.getStore().Msg.get(msgId) || (await window.getStore().Msg.getMessagesById([msgId]))?.messages?.[0];
+            if (window.getStore().MsgActionChecks.canStarMsg(msg)) {
+                let chat = await window.getStore().Chat.find(msg.id.remote);
+                return window.getStore().Cmd.sendUnstarMsgs(chat, [msg], false);
             }
         }, this.id._serialized);
     }
@@ -559,7 +559,7 @@ class Message extends Base {
      */
     async pin(duration) {
         return await this.client.pupPage.evaluate(async (msgId, duration) => {
-            return await window.WWebJS.pinUnpinMsgAction(msgId, 1, duration);
+            return await window.getWWebJS.pinUnpinMsgAction(msgId, 1, duration);
         }, this.id._serialized, duration);
     }
 
@@ -569,7 +569,7 @@ class Message extends Base {
      */
     async unpin() {
         return await this.client.pupPage.evaluate(async (msgId) => {
-            return await window.WWebJS.pinUnpinMsgAction(msgId, 2, 0);
+            return await window.getWWebJS.pinUnpinMsgAction(msgId, 2, 0);
         }, this.id._serialized);
     }
 
@@ -591,12 +591,12 @@ class Message extends Base {
      */
     async getInfo() {
         const info = await this.client.pupPage.evaluate(async (msgId) => {
-            const msg = window.Store.Msg.get(msgId) || (await window.Store.Msg.getMessagesById([msgId]))?.messages?.[0];
+            const msg = window.getStore().Msg.get(msgId) || (await window.getStore().Msg.getMessagesById([msgId]))?.messages?.[0];
             if (!msg || !msg.id.fromMe) return null;
 
             return new Promise((resolve) => {
                 setTimeout(async () => {
-                    resolve(await window.Store.getMsgInfo(msg.id));
+                    resolve(await window.getStore().getMsgInfo(msg.id));
                 }, (Date.now() - msg.t * 1000 < 1250) && Math.floor(Math.random() * (1200 - 1100 + 1)) + 1100 || 0);
             });
         }, this.id._serialized);
@@ -611,7 +611,7 @@ class Message extends Base {
     async getOrder() {
         if (this.type === MessageTypes.ORDER) {
             const result = await this.client.pupPage.evaluate((orderId, token, chatId) => {
-                return window.WWebJS.getOrderDetail(orderId, token, chatId);
+                return window.getWWebJS.getOrderDetail(orderId, token, chatId);
             }, this.orderId, this.token, this._getChatId());
             if (!result) return undefined;
             return new Order(this.client, result);
@@ -625,8 +625,8 @@ class Message extends Base {
     async getPayment() {
         if (this.type === MessageTypes.PAYMENT) {
             const msg = await this.client.pupPage.evaluate(async (msgId) => {
-                const msg = window.Store.Msg.get(msgId) || (await window.Store.Msg.getMessagesById([msgId]))?.messages?.[0];
-                if(!msg) return null;
+                const msg = window.getStore().Msg.get(msgId) || (await window.getStore().Msg.getMessagesById([msgId]))?.messages?.[0];
+                if (!msg) return null;
                 return msg.serialize();
             }, this.id._serialized);
             return new Payment(this.client, msg);
@@ -654,7 +654,7 @@ class Message extends Base {
         }
 
         const reactions = await this.client.pupPage.evaluate(async (msgId) => {
-            const msgReactions = await window.Store.Reactions.find(msgId);
+            const msgReactions = await window.getStore().Reactions.find(msgId);
             if (!msgReactions || !msgReactions.reactions.length) return null;
             return msgReactions.reactions.serialize();
         }, this.id._serialized);
@@ -695,17 +695,17 @@ class Message extends Base {
             groupMentions: options.groupMentions,
             extraOptions: options.extra
         };
-        
+
         if (!this.fromMe) {
             return null;
         }
         const messageEdit = await this.client.pupPage.evaluate(async (msgId, message, options) => {
-            const msg = window.Store.Msg.get(msgId) || (await window.Store.Msg.getMessagesById([msgId]))?.messages?.[0];
+            const msg = window.getStore().Msg.get(msgId) || (await window.getStore().Msg.getMessagesById([msgId]))?.messages?.[0];
             if (!msg) return null;
 
-            let canEdit = window.Store.MsgActionChecks.canEditText(msg) || window.Store.MsgActionChecks.canEditCaption(msg);
+            let canEdit = window.getStore().MsgActionChecks.canEditText(msg) || window.getStore().MsgActionChecks.canEditCaption(msg);
             if (canEdit) {
-                const msgEdit = await window.WWebJS.editMessage(msg, message, options);
+                const msgEdit = await window.getWWebJS.editMessage(msg, message, options);
                 return msgEdit.serialize();
             }
             return null;
@@ -728,7 +728,7 @@ class Message extends Base {
         }
 
         const edittedEventMsg = await this.client.pupPage.evaluate(async (msgId, editedEventObject) => {
-            const msg = window.Store.Msg.get(msgId) || (await window.Store.Msg.getMessagesById([msgId]))?.messages?.[0];
+            const msg = window.getStore().Msg.get(msgId) || (await window.getStore().Msg.getMessagesById([msgId]))?.messages?.[0];
             if (!msg) return null;
 
             const { name, startTimeTs, eventSendOptions } = editedEventObject;
@@ -742,8 +742,8 @@ class Message extends Base {
                 isEventCanceled: eventSendOptions.isEventCanceled,
             };
 
-            await window.Store.ScheduledEventMsgUtils.sendEventEditMessage(eventOptions, msg);
-            const editedMsg = window.Store.Msg.get(msg.id._serialized);
+            await window.getStore().ScheduledEventMsgUtils.sendEventEditMessage(eventOptions, msg);
+            const editedMsg = window.getStore().Msg.get(msg.id._serialized);
             return editedMsg?.serialize();
         }, this.id._serialized, editedEventObject);
 
@@ -770,7 +770,7 @@ class Message extends Base {
             if (!Array.isArray(votes)) votes = [votes];
             let localIdSet = new Set();
             const msg =
-                window.Store.Msg.get(messageId) || (await window.Store.Msg.getMessagesById([messageId]))?.messages?.[0];
+                window.getStore().Msg.get(messageId) || (await window.getStore().Msg.getMessagesById([messageId]))?.messages?.[0];
             if (!msg) return null;
 
             msg.pollOptions.forEach(a => {
@@ -779,7 +779,7 @@ class Message extends Base {
                 }
             });
 
-            await window.Store.PollsSendVote.sendVote(msg, localIdSet);
+            await window.getStore().PollsSendVote.sendVote(msg, localIdSet);
         }, this.id._serialized, selectedOptions);
     }
 }

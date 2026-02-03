@@ -186,8 +186,8 @@ class Contact extends Base {
         if(this.isGroup) return false;
 
         await this.client.pupPage.evaluate(async (contactId) &#x3D;&gt; {
-            const contact &#x3D; window.Store.Contact.get(contactId);
-            await window.Store.BlockContact.blockContact({contact});
+            const contact &#x3D; window.getStore().Contact.get(contactId);
+            await window.getStore().BlockContact.blockContact({contact});
         }, this.id._serialized);
 
         this.isBlocked &#x3D; true;
@@ -202,8 +202,8 @@ class Contact extends Base {
         if(this.isGroup) return false;
 
         await this.client.pupPage.evaluate(async (contactId) &#x3D;&gt; {
-            const contact &#x3D; window.Store.Contact.get(contactId);
-            await window.Store.BlockContact.unblockContact(contact);
+            const contact &#x3D; window.getStore().Contact.get(contactId);
+            await window.getStore().BlockContact.unblockContact(contact);
         }, this.id._serialized);
 
         this.isBlocked &#x3D; false;
@@ -216,8 +216,8 @@ class Contact extends Base {
      */
     async getAbout() {
         const about &#x3D; await this.client.pupPage.evaluate(async (contactId) &#x3D;&gt; {
-            const wid &#x3D; window.Store.WidFactory.createWid(contactId);
-            return window.Store.StatusUtils.getStatus({&#x27;token&#x27;:&#x27;&#x27;, &#x27;wid&#x27;: wid});
+            const wid &#x3D; window.getStore().WidFactory.createWid(contactId);
+            return window.getStore().StatusUtils.getStatus({&#x27;token&#x27;:&#x27;&#x27;, &#x27;wid&#x27;: wid});
         }, this.id._serialized);
 
         if (typeof about.status !&#x3D;&#x3D; &#x27;string&#x27;)
