@@ -108,7 +108,7 @@ class Chat extends Base {
      */
     async clearMessages() {
         return this.client.pupPage.evaluate(chatId => {
-            return window.WWebJS.sendClearChat(chatId);
+            return window.getWWebJS.sendClearChat(chatId);
         }, this.id._serialized);
     }
 
@@ -118,7 +118,7 @@ class Chat extends Base {
      */
     async delete() {
         return this.client.pupPage.evaluate(chatId => {
-            return window.WWebJS.sendDeleteChat(chatId);
+            return window.getWWebJS.sendDeleteChat(chatId);
         }, this.id._serialized);
     }
 
@@ -201,12 +201,12 @@ class Chat extends Base {
                 return true;
             };
 
-            const chat = await window.WWebJS.getChat(chatId, { getAsModel: false });
+            const chat = await window.getWWebJS.getChat(chatId, { getAsModel: false });
             let msgs = chat.msgs.getModelsArray().filter(msgFilter);
 
             if (searchOptions && searchOptions.limit > 0) {
                 while (msgs.length < searchOptions.limit) {
-                    const loadedMessages = await window.Store.ConversationMsgs.loadEarlierMsgs(chat,chat.msgs);
+                    const loadedMessages = await window.getStore().ConversationMsgs.loadEarlierMsgs(chat,chat.msgs);
                     if (!loadedMessages || !loadedMessages.length) break;
                     msgs = [...loadedMessages.filter(msgFilter), ...msgs];
                 }
@@ -217,7 +217,7 @@ class Chat extends Base {
                 }
             }
 
-            return msgs.map(m => window.WWebJS.getMessageModel(m));
+            return msgs.map(m => window.getWWebJS.getMessageModel(m));
 
         }, this.id._serialized, searchOptions);
 
@@ -229,7 +229,7 @@ class Chat extends Base {
      */
     async sendStateTyping() {
         return this.client.pupPage.evaluate(chatId => {
-            window.WWebJS.sendChatstate('typing', chatId);
+            window.getWWebJS.sendChatstate('typing', chatId);
             return true;
         }, this.id._serialized);
     }
@@ -239,7 +239,7 @@ class Chat extends Base {
      */
     async sendStateRecording() {
         return this.client.pupPage.evaluate(chatId => {
-            window.WWebJS.sendChatstate('recording', chatId);
+            window.getWWebJS.sendChatstate('recording', chatId);
             return true;
         }, this.id._serialized);
     }
@@ -249,7 +249,7 @@ class Chat extends Base {
      */
     async clearState() {
         return this.client.pupPage.evaluate(chatId => {
-            window.WWebJS.sendChatstate('stop', chatId);
+            window.getWWebJS.sendChatstate('stop', chatId);
             return true;
         }, this.id._serialized);
     }
