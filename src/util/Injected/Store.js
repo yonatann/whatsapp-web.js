@@ -43,7 +43,19 @@ exports.ExposeStore = () => {
         );
     };
 
-    // Use the existing namespaced store instead of creating a new one
+    // Use the existing namespaced store if available, otherwise create one
+    // If window.getStore is not defined, initialize it with a default namespace
+    if (typeof window.getStore !== 'function') {
+        console.warn('[whatsapp-web.js] window.getStore not defined - initializing default namespace');
+        window.StoreNamespace = "BlueticksStore";
+        window.getStore = () => {
+            if (!window[window.StoreNamespace]) {
+                window[window.StoreNamespace] = {};
+            }
+            return window[window.StoreNamespace];
+        };
+    }
+
     const Store = window.getStore();
     Object.assign(Store, window.require('WAWebCollections'));
     Store.AppState = window.require('WAWebSocketModel').Socket;
