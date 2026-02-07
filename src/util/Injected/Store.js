@@ -43,7 +43,9 @@ exports.ExposeStore = () => {
         );
     };
 
-    const Store = Object.assign({}, window.require('WAWebCollections'));
+    // Use the existing namespaced store instead of creating a new one
+    const Store = window.getStore();
+    Object.assign(Store, window.require('WAWebCollections'));
     Store.AppState = window.require('WAWebSocketModel').Socket;
     Store.BlockContact = window.require('WAWebBlockContactAction');
     Store.Conn = window.require('WAWebConnModel').Conn;
@@ -219,9 +221,8 @@ exports.ExposeStore = () => {
         Store.Chat.findImpl = Store.Chat._find;
     }
 
-    // Expose Store on window object
-    window.Store = Store;
-    window.getStore = () => Store;
+    // Store is already exposed via window.getStore() - no need to assign to window.Store
+    // This preserves namespace isolation (e.g., window.BlueticksStore instead of window.Store)
 
     /**
      * Target options object description
