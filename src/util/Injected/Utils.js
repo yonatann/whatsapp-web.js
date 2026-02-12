@@ -1,7 +1,57 @@
 'use strict';
 
+// Helper to track Utils initialization errors
+const trackUtilsError = (stepNumber, stepName, error, context = {}) => {
+    const errorData = {
+        stepNumber,
+        stepName,
+        error: error?.message || String(error),
+        stack: error?.stack,
+        context,
+        timestamp: new Date().toISOString()
+    };
+
+    // Store errors in window for later retrieval
+    if (!window.__utilsInitErrors) {
+        window.__utilsInitErrors = [];
+    }
+    window.__utilsInitErrors.push(errorData);
+
+    console.log(`%c[INIT Utils.js ${stepNumber}] ❌ FAILED: ${stepName}`, 'color: #f44336; font-weight: bold;');
+    console.log(`%c  Error: ${errorData.error}`, 'color: #f44336;');
+    if (error?.stack) {
+        console.log(`%c  Stack:`, 'color: #ff9800; font-size: 10px;', error.stack.split('\n').slice(0, 3).join('\n'));
+    }
+
+    // Notify initErrorTracker if available
+    if (window.initErrorTracker?.failStep) {
+        window.initErrorTracker.failStep(stepNumber, stepName, error, context);
+    }
+};
+
+const trackUtilsStep = (stepNumber, stepName, status = 'start') => {
+    const color = status === 'start' ? '#2196F3' : '#4CAF50';
+    const icon = status === 'start' ? '🚀' : '✅';
+    console.log(`%c[INIT Utils.js ${stepNumber}] ${icon} ${status === 'start' ? 'Starting' : 'Completed'}: ${stepName}`, `color: ${color}; font-weight: bold;`);
+
+    if (window.initErrorTracker) {
+        if (status === 'start') {
+            window.initErrorTracker.startStep?.(stepNumber, stepName);
+        } else {
+            window.initErrorTracker.completeStep?.(stepNumber, stepName);
+        }
+    }
+};
+
 exports.LoadUtils = () => {
+    trackUtilsStep('8.0', 'LoadUtils initialization', 'start');
+
+    trackUtilsStep('8.1', 'Create WWebJS object', 'start');
     const WWebJS = {};
+    trackUtilsStep('8.1', 'Create WWebJS object', 'complete');
+
+    trackUtilsStep('8.2', 'Define WWebJS methods', 'start');
+    let failedMethods = [];
 
     WWebJS.forwardMessage = async (chatId, msgId) => {
         const msg = window.getStore().Msg.get(msgId) || (await window.getStore().Msg.getMessagesById([msgId]))?.messages?.[0];
@@ -941,13 +991,47 @@ exports.LoadUtils = () => {
         return color;
     };
 
+    trackUtilsStep('8.2', 'Define WWebJS methods', 'complete');
+
+    if (failedMethods.length > 0) {
+        console.warn(`[Utils.js] Failed to define ${failedMethods.length} methods:`, failedMethods);
+        trackUtilsError('8.2', 'Define WWebJS methods',
+            `Failed to define ${failedMethods.length} methods: ${failedMethods.join(', ')}`,
+            { failedMethods }
+        );
+    }
+
     // Create getter function
-    const getWWebJSFunc = () => WWebJS;
+    trackUtilsStep('8.3', 'Expose WWebJS on window', 'start');
+    try {
+        const getWWebJSFunc = () => WWebJS;
 
-    // Copy all WWebJS methods to the function object itself
-    // This allows both window.getWWebJS() and window.getWWebJS.method() to work
-    Object.assign(getWWebJSFunc, WWebJS);
+        // Copy all WWebJS methods to the function object itself
+        // This allows both window.getWWebJS() and window.getWWebJS.method() to work
+        Object.assign(getWWebJSFunc, WWebJS);
 
-    // Expose WWebJS getter function on window
-    window.getWWebJS = getWWebJSFunc;
+        // Expose WWebJS getter function on window
+        window.getWWebJS = getWWebJSFunc;
+
+        // Verify the assignment worked
+        if (typeof window.getWWebJS !== 'function') {
+            throw new Error('window.getWWebJS was not properly assigned as a function');
+        }
+
+        const testResult = window.getWWebJS();
+        if (!testResult || typeof testResult !== 'object') {
+            throw new Error('window.getWWebJS() does not return a valid WWebJS object');
+        }
+
+        trackUtilsStep('8.3', 'Expose WWebJS on window', 'complete');
+    } catch (error) {
+        trackUtilsError('8.3', 'Expose WWebJS on window', error, {
+            windowGetWWebJS: typeof window.getWWebJS,
+            WWebJSMethodCount: Object.keys(WWebJS).length
+        });
+        throw error; // Re-throw as this is critical
+    }
+
+    trackUtilsStep('8.0', 'LoadUtils initialization', 'complete');
+    console.log('%c[INIT Utils.js] ✅ LoadUtils completed successfully - WWebJS has ' + Object.keys(WWebJS).length + ' methods', 'color: #4CAF50; font-weight: bold; font-size: 12px;');
 };
