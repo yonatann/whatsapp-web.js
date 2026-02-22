@@ -305,7 +305,15 @@ exports.LoadUtils = () => {
             participant = window.getStore().WidFactory.asUserWidOrThrow(from);
         }
 
-        const newMsgKey = new window.getStore().MsgKey({
+        // The new method: window.getStore() 
+        // Support previous version as well
+        const Store =
+            window.Store ??
+            (typeof window.getStore === 'function' ? window.getStore() : window.getStore);
+
+        if (!Store) throw new Error('Store not available');
+
+        const newMsgKey = new Store.MsgKey({
             from: from,
             to: chat.id,
             id: newId,
