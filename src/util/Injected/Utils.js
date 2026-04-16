@@ -636,7 +636,10 @@ exports.LoadUtils = () => {
                     chat = await window.getStore().WAWebNewsletterMetadataCollection.find(chatWid);
                 }
             } catch (err) {
-                chat = null;
+                throw new Error(
+                    `[WWebJS.getChat] Failed to resolve newsletter chat ${chatId}: ${err && err.message ? err.message : String(err)}`,
+                    { cause: err },
+                );
             }
         } else {
             chat = window.getStore().Chat.get(chatWid) || (await window.getStore().FindOrCreateChat.findOrCreateLatestChat(chatWid))?.chat;

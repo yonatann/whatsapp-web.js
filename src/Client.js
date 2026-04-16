@@ -1752,7 +1752,10 @@ class Client extends EventEmitter {
                     participantWids
                 );
             } catch (err) {
-                return 'CreateGroupError: An unknown error occupied while creating a group';
+                throw new Error(
+                    `[Client.createGroup] GroupUtils.createGroup failed for title "${title}": ${err && err.message ? err.message : String(err)}`,
+                    { cause: err },
+                );
             }
 
             for (const participant of createGroupResult.participants) {

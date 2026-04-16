@@ -408,10 +408,14 @@ class Message extends Base {
      */
     async react(reaction) {
         await this.client.pupPage.evaluate(async (messageId, reaction) => {
-            if (!messageId) return null;
+            if (!messageId) {
+                throw new Error('[Message.react] messageId is required');
+            }
             const msg =
                 window.getStore().Msg.get(messageId) || (await window.getStore().Msg.getMessagesById([messageId]))?.messages?.[0];
-            if (!msg) return null;
+            if (!msg) {
+                throw new Error(`[Message.react] Message ${messageId} not found in Store`);
+            }
             await window.getStore().sendReactionToMsg(msg, reaction);
         }, this.id._serialized, reaction);
     }
