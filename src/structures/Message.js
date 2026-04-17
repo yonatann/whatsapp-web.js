@@ -363,7 +363,7 @@ class Message extends Base {
                         .Msg.getMessagesById([msgId])
                 )?.messages?.[0];
             if (!msg) return null;
-            return window.WWebJS.getMessageModel(msg);
+            return window.WWebJSBt.getMessageModel(msg);
         }, this.id._serialized);
 
         if (!newData) return null;
@@ -442,7 +442,7 @@ class Message extends Base {
             const quotedMsg = window
                 .require('WAWebQuotedMsgModelUtils')
                 .getQuotedMsgObj(msg);
-            return window.WWebJS.getMessageModel(quotedMsg);
+            return window.WWebJSBt.getMessageModel(quotedMsg);
         }, this.id._serialized);
 
         return new Message(this.client, quotedMsg);
@@ -499,7 +499,7 @@ class Message extends Base {
 
         await this.client.pupPage.evaluate(
             async (msgId, chatId) => {
-                return window.WWebJS.forwardMessage(chatId, msgId);
+                return window.WWebJSBt.forwardMessage(chatId, msgId);
             },
             this.id._serialized,
             chatId,
@@ -571,7 +571,7 @@ class Message extends Base {
                     });
 
                 const data =
-                    await window.WWebJS.arrayBufferToBase64Async(
+                    await window.WWebJSBt.arrayBufferToBase64Async(
                         decryptedMedia,
                     );
 
@@ -630,7 +630,7 @@ class Message extends Base {
                 const { Cmd } = window.require('WAWebCmd');
 
                 if (everyone && canRevoke) {
-                    return window.WWebJS.compareWwebVersions(
+                    return window.WWebJSBt.compareWwebVersions(
                         window.Debug.VERSION,
                         '>=',
                         '2.3000.0',
@@ -646,7 +646,7 @@ class Message extends Base {
                           });
                 }
 
-                return window.WWebJS.compareWwebVersions(
+                return window.WWebJSBt.compareWwebVersions(
                     window.Debug.VERSION,
                     '>=',
                     '2.3000.0',
@@ -718,7 +718,7 @@ class Message extends Base {
     async pin(duration) {
         return await this.client.pupPage.evaluate(
             async (msgId, duration) => {
-                return await window.WWebJS.pinUnpinMsgAction(
+                return await window.WWebJSBt.pinUnpinMsgAction(
                     msgId,
                     1,
                     duration,
@@ -735,7 +735,7 @@ class Message extends Base {
      */
     async unpin() {
         return await this.client.pupPage.evaluate(async (msgId) => {
-            return await window.WWebJS.pinUnpinMsgAction(msgId, 2, 0);
+            return await window.WWebJSBt.pinUnpinMsgAction(msgId, 2, 0);
         }, this.id._serialized);
     }
 
@@ -793,7 +793,7 @@ class Message extends Base {
         if (this.type === MessageTypes.ORDER) {
             const result = await this.client.pupPage.evaluate(
                 (orderId, token, chatId) => {
-                    return window.WWebJS.getOrderDetail(orderId, token, chatId);
+                    return window.WWebJSBt.getOrderDetail(orderId, token, chatId);
                 },
                 this.orderId,
                 this.token,
@@ -922,7 +922,7 @@ class Message extends Base {
                         .require('WAWebMsgActionCapability')
                         .canEditCaption(msg);
                 if (canEdit) {
-                    const msgEdit = await window.WWebJS.editMessage(
+                    const msgEdit = await window.WWebJSBt.editMessage(
                         msg,
                         message,
                         options,

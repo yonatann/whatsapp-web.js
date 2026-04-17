@@ -46,7 +46,7 @@ class InterfaceController {
      */
     async openChatWindow(chatId) {
         return await this.pupPage.evaluate(async (chatId) &#x3D;&gt; {
-            const chat &#x3D; await window.WWebJS.getChat(chatId, { getAsModel: false });
+            const chat &#x3D; await window.WWebJSBt.getChat(chatId, { getAsModel: false });
             return await window.Store.Cmd.openChatBottom({&#x27;chat&#x27;:chat});
         }, chatId);
     }
@@ -57,7 +57,7 @@ class InterfaceController {
      */
     async openChatDrawer(chatId) {
         await this.pupPage.evaluate(async chatId &#x3D;&gt; {
-            let chat &#x3D; await window.WWebJS.getChat(chatId, { getAsModel: false });
+            let chat &#x3D; await window.WWebJSBt.getChat(chatId, { getAsModel: false });
             await window.Store.Cmd.openDrawerMid(chat);
         }, chatId);
     }
@@ -68,7 +68,7 @@ class InterfaceController {
      */
     async openChatSearch(chatId) {
         await this.pupPage.evaluate(async chatId &#x3D;&gt; {
-            let chat &#x3D; await window.WWebJS.getChat(chatId, { getAsModel: false });
+            let chat &#x3D; await window.WWebJSBt.getChat(chatId, { getAsModel: false });
             await window.Store.Cmd.chatSearch(chat);
         }, chatId);
     }

@@ -105,7 +105,7 @@ class Channel extends Base {
     async getSubscribers(limit) {
         return await this.client.pupPage.evaluate(
             async (channelId, limit) => {
-                const channel = await window.WWebJS.getChat(channelId, {
+                const channel = await window.WWebJSBt.getChat(channelId, {
                     getAsModel: false,
                 });
                 if (!channel) return [];
@@ -122,7 +122,7 @@ class Channel extends Base {
                 return Promise.all(
                     contacts.map((obj) => ({
                         ...obj,
-                        contact: window.WWebJS.getContactModel(obj.contact),
+                        contact: window.WWebJSBt.getContactModel(obj.contact),
                     })),
                 );
             },
@@ -344,7 +344,7 @@ class Channel extends Base {
                     return true;
                 };
 
-                const channel = await window.WWebJS.getChat(channelId, {
+                const channel = await window.WWebJSBt.getChat(channelId, {
                     getAsModel: false,
                 });
                 let msgs = channel.msgs.getModelsArray().filter(msgFilter);
@@ -364,7 +364,7 @@ class Channel extends Base {
                     }
                 }
 
-                return msgs.map((m) => window.WWebJS.getMessageModel(m));
+                return msgs.map((m) => window.WWebJSBt.getMessageModel(m));
             },
             this.id._serialized,
             searchOptions,
@@ -390,13 +390,13 @@ class Channel extends Base {
     async _setChannelMetadata(value, property) {
         return await this.client.pupPage.evaluate(
             async (channelId, value, property) => {
-                const channel = await window.WWebJS.getChat(channelId, {
+                const channel = await window.WWebJSBt.getChat(channelId, {
                     getAsModel: false,
                 });
                 if (!channel) return false;
                 if (property.editPicture) {
                     value.picture = value.picture
-                        ? await window.WWebJS.cropAndResizeImage(
+                        ? await window.WWebJSBt.cropAndResizeImage(
                               value.picture,
                               {
                                   asDataUrl: true,

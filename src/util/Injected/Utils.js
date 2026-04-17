@@ -1,7 +1,7 @@
 'use strict';
 
 exports.LoadUtils = () => {
-    window.WWebJS = {};
+    window.WWebJSBt = {};
 
     /**
      * Helper function that compares between two WWeb versions. Its purpose is to help the developer to choose the correct code implementation depending on the comparison value and the WWeb version.
@@ -10,7 +10,7 @@ exports.LoadUtils = () => {
      * @param {string} rOperand The right operand for the WWeb version string to compare with
      * @returns {boolean} Boolean value that indicates the result of the comparison
      */
-    window.WWebJS.compareWwebVersions = (lOperand, operator, rOperand) => {
+    window.WWebJSBt.compareWwebVersions = (lOperand, operator, rOperand) => {
         if (!['>', '>=', '<', '<=', '='].includes(operator)) {
             throw new (class _ extends Error {
                 constructor(m) {
@@ -64,7 +64,7 @@ exports.LoadUtils = () => {
      * @param {TargetOptions} target Options specifying the target function to search for modifying
      * @param {Function} callback Modified function
      */
-    window.WWebJS.injectToFunction = (target, callback) => {
+    window.WWebJSBt.injectToFunction = (target, callback) => {
         try {
             let module = window.require(target.module);
             if (!module) return;
@@ -92,7 +92,7 @@ exports.LoadUtils = () => {
         }
     };
 
-    window.WWebJS.injectToFunction(
+    window.WWebJSBt.injectToFunction(
         { module: 'WAWebBackendJobsCommon', function: 'mediaTypeFromProtobuf' },
         (module, func, ...args) => {
             const [proto] = args;
@@ -100,7 +100,7 @@ exports.LoadUtils = () => {
         },
     );
 
-    window.WWebJS.injectToFunction(
+    window.WWebJSBt.injectToFunction(
         { module: 'WAWebE2EProtoUtils', function: 'typeAttributeFromProtobuf' },
         (module, func, ...args) => {
             const [proto] = args;
@@ -110,7 +110,7 @@ exports.LoadUtils = () => {
         },
     );
 
-    window.WWebJS.forwardMessage = async (chatId, msgId) => {
+    window.WWebJSBt.forwardMessage = async (chatId, msgId) => {
         const msg =
             window.require('WAWebCollections').Msg.get(msgId) ||
             (
@@ -118,7 +118,7 @@ exports.LoadUtils = () => {
                     .require('WAWebCollections')
                     .Msg.getMessagesById([msgId])
             )?.messages?.[0];
-        const chat = await window.WWebJS.getChat(chatId, { getAsModel: false });
+        const chat = await window.WWebJSBt.getChat(chatId, { getAsModel: false });
         return await window.require('WAWebChatForwardMessage').forwardMessages({
             chat: chat,
             msgs: [msg],
@@ -128,8 +128,8 @@ exports.LoadUtils = () => {
         });
     };
 
-    window.WWebJS.sendSeen = async (chatId) => {
-        const chat = await window.WWebJS.getChat(chatId, { getAsModel: false });
+    window.WWebJSBt.sendSeen = async (chatId) => {
+        const chat = await window.WWebJSBt.getChat(chatId, { getAsModel: false });
         if (chat) {
             window.require('WAWebStreamModel').Stream.markAvailable();
             await window.require('WAWebUpdateUnreadChatAction').sendSeen({
@@ -142,7 +142,7 @@ exports.LoadUtils = () => {
         return false;
     };
 
-    window.WWebJS.sendMessage = async (chat, content, options = {}) => {
+    window.WWebJSBt.sendMessage = async (chat, content, options = {}) => {
         const { getIsNewsletter, getIsBroadcast } =
             window.require('WAWebChatGetters');
         const isChannel = getIsNewsletter(chat);
@@ -154,8 +154,8 @@ exports.LoadUtils = () => {
         if (options.media) {
             mediaOptions =
                 options.sendMediaAsSticker && !isChannel && !isStatus
-                    ? await window.WWebJS.processStickerData(options.media)
-                    : await window.WWebJS.processMediaData(options.media, {
+                    ? await window.WWebJSBt.processStickerData(options.media)
+                    : await window.WWebJSBt.processMediaData(options.media, {
                           forceSticker: options.sendMediaAsSticker,
                           forceGif: options.sendVideoAsGif,
                           forceVoice: options.sendAudioAsVoice,
@@ -556,7 +556,7 @@ exports.LoadUtils = () => {
             const statusOptions = {
                 color:
                     (backgroundColor &&
-                        window.WWebJS.assertColor(backgroundColor)) ||
+                        window.WWebJSBt.assertColor(backgroundColor)) ||
                     0xff7acca5,
                 font: (fontStyle >= 0 && fontStyle <= 7 && fontStyle) || 0,
                 text: msg.body,
@@ -585,7 +585,7 @@ exports.LoadUtils = () => {
             .Msg.get(newMsgKey._serialized);
     };
 
-    window.WWebJS.editMessage = async (msg, content, options = {}) => {
+    window.WWebJSBt.editMessage = async (msg, content, options = {}) => {
         const extraOptions = options.extraOptions || {};
         delete options.extraOptions;
 
@@ -628,15 +628,15 @@ exports.LoadUtils = () => {
         return window.require('WAWebCollections').Msg.get(msg.id._serialized);
     };
 
-    window.WWebJS.toStickerData = async (mediaInfo) => {
+    window.WWebJSBt.toStickerData = async (mediaInfo) => {
         if (mediaInfo.mimetype == 'image/webp') return mediaInfo;
 
-        const file = window.WWebJS.mediaInfoToFile(mediaInfo);
+        const file = window.WWebJSBt.mediaInfoToFile(mediaInfo);
         const webpSticker = await window
             .require('WAWebImageUtils')
             .toWebpSticker(file);
         const webpBuffer = await webpSticker.arrayBuffer();
-        const data = window.WWebJS.arrayBufferToBase64(webpBuffer);
+        const data = window.WWebJSBt.arrayBufferToBase64(webpBuffer);
 
         return {
             mimetype: 'image/webp',
@@ -644,13 +644,13 @@ exports.LoadUtils = () => {
         };
     };
 
-    window.WWebJS.processStickerData = async (mediaInfo) => {
+    window.WWebJSBt.processStickerData = async (mediaInfo) => {
         if (mediaInfo.mimetype !== 'image/webp')
             throw new Error('Invalid media type');
 
-        const file = window.WWebJS.mediaInfoToFile(mediaInfo);
-        let filehash = await window.WWebJS.getFileHash(file);
-        let mediaKey = await window.WWebJS.generateHash(32);
+        const file = window.WWebJSBt.mediaInfoToFile(mediaInfo);
+        let filehash = await window.WWebJSBt.getFileHash(file);
+        let mediaKey = await window.WWebJSBt.generateHash(32);
 
         const controller = new AbortController();
         const uploadedInfo = await window
@@ -680,7 +680,7 @@ exports.LoadUtils = () => {
         return stickerInfo;
     };
 
-    window.WWebJS.processMediaData = async (
+    window.WWebJSBt.processMediaData = async (
         mediaInfo,
         {
             forceSticker,
@@ -692,7 +692,7 @@ exports.LoadUtils = () => {
             sendToStatus,
         },
     ) => {
-        const file = window.WWebJS.mediaInfoToFile(mediaInfo);
+        const file = window.WWebJSBt.mediaInfoToFile(mediaInfo);
         const OpaqueData = window.require('WAWebMediaOpaqueData');
         const opaqueData = await OpaqueData.createFromData(
             file,
@@ -732,7 +732,7 @@ exports.LoadUtils = () => {
         ) {
             const waveform = mediaObject.contentInfo.waveform;
             mediaData.waveform =
-                waveform || (await window.WWebJS.generateWaveform(file));
+                waveform || (await window.WWebJSBt.generateWaveform(file));
         }
 
         if (!(mediaData.mediaBlob instanceof OpaqueData)) {
@@ -800,7 +800,7 @@ exports.LoadUtils = () => {
         return mediaData;
     };
 
-    window.WWebJS.getMessageModel = (message) => {
+    window.WWebJSBt.getMessageModel = (message) => {
         const msg = message.serialize();
 
         const { findLinks } = window.require('WALinkify');
@@ -839,7 +839,7 @@ exports.LoadUtils = () => {
         return msg;
     };
 
-    window.WWebJS.getChat = async (chatId, { getAsModel = true } = {}) => {
+    window.WWebJSBt.getChat = async (chatId, { getAsModel = true } = {}) => {
         const isChannel = /@\w*newsletter\b/.test(chatId);
         const chatWid = window.require('WAWebWidFactory').createWid(chatId);
         let chat;
@@ -871,11 +871,11 @@ exports.LoadUtils = () => {
         }
 
         return getAsModel && chat
-            ? await window.WWebJS.getChatModel(chat, { isChannel: isChannel })
+            ? await window.WWebJSBt.getChatModel(chat, { isChannel: isChannel })
             : chat;
     };
 
-    window.WWebJS.getChannelMetadata = async (inviteCode) => {
+    window.WWebJSBt.getChannelMetadata = async (inviteCode) => {
         const role = window
             .require('WAWebNewsletterModelUtils')
             .getRoleByIdentifier(inviteCode);
@@ -917,25 +917,25 @@ exports.LoadUtils = () => {
         };
     };
 
-    window.WWebJS.getChats = async () => {
+    window.WWebJSBt.getChats = async () => {
         const chats = window.require('WAWebCollections').Chat.getModelsArray();
         const chatPromises = chats.map((chat) =>
-            window.WWebJS.getChatModel(chat),
+            window.WWebJSBt.getChatModel(chat),
         );
         return await Promise.all(chatPromises);
     };
 
-    window.WWebJS.getChannels = async () => {
+    window.WWebJSBt.getChannels = async () => {
         const channels = window
             .require('WAWebCollections')
             .WAWebNewsletterCollection.getModelsArray();
         const channelPromises = channels?.map((channel) =>
-            window.WWebJS.getChatModel(channel, { isChannel: true }),
+            window.WWebJSBt.getChatModel(channel, { isChannel: true }),
         );
         return await Promise.all(channelPromises);
     };
 
-    window.WWebJS.getChatModel = async (chat, { isChannel = false } = {}) => {
+    window.WWebJSBt.getChatModel = async (chat, { isChannel = false } = {}) => {
         if (!chat) return null;
 
         const model = chat.serialize();
@@ -995,7 +995,7 @@ exports.LoadUtils = () => {
                 : null;
             lastMessage &&
                 (model.lastMessage =
-                    window.WWebJS.getMessageModel(lastMessage));
+                    window.WWebJSBt.getMessageModel(lastMessage));
         }
 
         delete model.msgs;
@@ -1005,7 +1005,7 @@ exports.LoadUtils = () => {
         return model;
     };
 
-    window.WWebJS.getContactModel = (contact) => {
+    window.WWebJSBt.getContactModel = (contact) => {
         let res = contact.serialize();
 
         const wid = window
@@ -1056,7 +1056,7 @@ exports.LoadUtils = () => {
         return res;
     };
 
-    window.WWebJS.getContact = async (contactId) => {
+    window.WWebJSBt.getContact = async (contactId) => {
         const contactWid = window
             .require('WAWebWidFactory')
             .createWid(contactId);
@@ -1069,10 +1069,10 @@ exports.LoadUtils = () => {
                 .BusinessProfile.find(contactWid);
             bizProfile.profileOptions && (contact.businessProfile = bizProfile);
         }
-        return window.WWebJS.getContactModel(contact);
+        return window.WWebJSBt.getContactModel(contact);
     };
 
-    window.WWebJS.getContacts = () => {
+    window.WWebJSBt.getContacts = () => {
         const contacts = window
             .require('WAWebCollections')
             .Contact.getModelsArray();
@@ -1084,12 +1084,12 @@ exports.LoadUtils = () => {
                         .BusinessProfile.find(contact.id)
                         .catch(() => {});
                 }
-                return window.WWebJS.getContactModel(contact);
+                return window.WWebJSBt.getContactModel(contact);
             }),
         );
     };
 
-    window.WWebJS.mediaInfoToFile = ({ data, mimetype, filename }) => {
+    window.WWebJSBt.mediaInfoToFile = ({ data, mimetype, filename }) => {
         const binaryData = window.atob(data);
 
         const buffer = new ArrayBuffer(binaryData.length);
@@ -1105,7 +1105,7 @@ exports.LoadUtils = () => {
         });
     };
 
-    window.WWebJS.arrayBufferToBase64 = (arrayBuffer) => {
+    window.WWebJSBt.arrayBufferToBase64 = (arrayBuffer) => {
         let binary = '';
         const bytes = new Uint8Array(arrayBuffer);
         const len = bytes.byteLength;
@@ -1115,7 +1115,7 @@ exports.LoadUtils = () => {
         return window.btoa(binary);
     };
 
-    window.WWebJS.arrayBufferToBase64Async = (arrayBuffer) =>
+    window.WWebJSBt.arrayBufferToBase64Async = (arrayBuffer) =>
         new Promise((resolve, reject) => {
             const blob = new Blob([arrayBuffer], {
                 type: 'application/octet-stream',
@@ -1129,13 +1129,13 @@ exports.LoadUtils = () => {
             fileReader.readAsDataURL(blob);
         });
 
-    window.WWebJS.getFileHash = async (data) => {
+    window.WWebJSBt.getFileHash = async (data) => {
         let buffer = await data.arrayBuffer();
         const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
         return btoa(String.fromCharCode(...new Uint8Array(hashBuffer)));
     };
 
-    window.WWebJS.generateHash = async (length) => {
+    window.WWebJSBt.generateHash = async (length) => {
         var result = '';
         var characters =
             'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -1148,7 +1148,7 @@ exports.LoadUtils = () => {
         return result;
     };
 
-    window.WWebJS.generateWaveform = async (audioFile) => {
+    window.WWebJSBt.generateWaveform = async (audioFile) => {
         try {
             const audioData = await audioFile.arrayBuffer();
             const audioContext = new AudioContext();
@@ -1180,8 +1180,8 @@ exports.LoadUtils = () => {
         }
     };
 
-    window.WWebJS.sendClearChat = async (chatId) => {
-        let chat = await window.WWebJS.getChat(chatId, { getAsModel: false });
+    window.WWebJSBt.sendClearChat = async (chatId) => {
+        let chat = await window.WWebJSBt.getChat(chatId, { getAsModel: false });
         if (chat !== undefined) {
             await window.require('WAWebChatClearBridge').sendClear(chat, false);
             return true;
@@ -1189,8 +1189,8 @@ exports.LoadUtils = () => {
         return false;
     };
 
-    window.WWebJS.sendDeleteChat = async (chatId) => {
-        let chat = await window.WWebJS.getChat(chatId, { getAsModel: false });
+    window.WWebJSBt.sendDeleteChat = async (chatId) => {
+        let chat = await window.WWebJSBt.getChat(chatId, { getAsModel: false });
         if (chat !== undefined) {
             await window.require('WAWebDeleteChatAction').sendDelete(chat);
             return true;
@@ -1198,7 +1198,7 @@ exports.LoadUtils = () => {
         return false;
     };
 
-    window.WWebJS.sendChatstate = async (state, chatId) => {
+    window.WWebJSBt.sendChatstate = async (state, chatId) => {
         chatId = window.require('WAWebWidFactory').createWid(chatId);
 
         const ChatState = window.require('WAWebChatStateBridge');
@@ -1219,38 +1219,38 @@ exports.LoadUtils = () => {
         return true;
     };
 
-    window.WWebJS.getLabelModel = (label) => {
+    window.WWebJSBt.getLabelModel = (label) => {
         let res = label.serialize();
         res.hexColor = label.hexColor;
 
         return res;
     };
 
-    window.WWebJS.getLabels = () => {
+    window.WWebJSBt.getLabels = () => {
         const labels = window
             .require('WAWebCollections')
             .Label.getModelsArray();
-        return labels.map((label) => window.WWebJS.getLabelModel(label));
+        return labels.map((label) => window.WWebJSBt.getLabelModel(label));
     };
 
-    window.WWebJS.getLabel = (labelId) => {
+    window.WWebJSBt.getLabel = (labelId) => {
         const label = window.require('WAWebCollections').Label.get(labelId);
-        return window.WWebJS.getLabelModel(label);
+        return window.WWebJSBt.getLabelModel(label);
     };
 
-    window.WWebJS.getChatLabels = async (chatId) => {
-        const chat = await window.WWebJS.getChat(chatId);
-        return (chat.labels || []).map((id) => window.WWebJS.getLabel(id));
+    window.WWebJSBt.getChatLabels = async (chatId) => {
+        const chat = await window.WWebJSBt.getChat(chatId);
+        return (chat.labels || []).map((id) => window.WWebJSBt.getLabel(id));
     };
 
-    window.WWebJS.getOrderDetail = async (orderId, token, chatId) => {
+    window.WWebJSBt.getOrderDetail = async (orderId, token, chatId) => {
         const chatWid = window.require('WAWebWidFactory').createWid(chatId);
         return window
             .require('WAWebBizOrderBridge')
             .queryOrder(chatWid, orderId, 80, 80, token);
     };
 
-    window.WWebJS.getProductMetadata = async (productId) => {
+    window.WWebJSBt.getProductMetadata = async (productId) => {
         let sellerId = window.require('WAWebConnModel').Conn.wid;
         let product = await window
             .require('WAWebBizProductCatalogBridge')
@@ -1262,7 +1262,7 @@ exports.LoadUtils = () => {
         return undefined;
     };
 
-    window.WWebJS.rejectCall = async (peerJid, id) => {
+    window.WWebJSBt.rejectCall = async (peerJid, id) => {
         let userId = window
             .require('WAWebUserPrefsMeUser')
             .getMaybeMePnUser()._serialized;
@@ -1285,7 +1285,7 @@ exports.LoadUtils = () => {
         await window.require('WADeprecatedSendIq').deprecatedCastStanza(stanza);
     };
 
-    window.WWebJS.cropAndResizeImage = async (media, options = {}) => {
+    window.WWebJSBt.cropAndResizeImage = async (media, options = {}) => {
         if (!media.mimetype.includes('image'))
             throw new Error('Media is not an image');
 
@@ -1330,13 +1330,13 @@ exports.LoadUtils = () => {
         });
     };
 
-    window.WWebJS.setPicture = async (chatId, media) => {
-        const thumbnail = await window.WWebJS.cropAndResizeImage(media, {
+    window.WWebJSBt.setPicture = async (chatId, media) => {
+        const thumbnail = await window.WWebJSBt.cropAndResizeImage(media, {
             asDataUrl: true,
             mimetype: 'image/jpeg',
             size: 96,
         });
-        const profilePic = await window.WWebJS.cropAndResizeImage(media, {
+        const profilePic = await window.WWebJSBt.cropAndResizeImage(media, {
             asDataUrl: true,
             mimetype: 'image/jpeg',
             size: 640,
@@ -1363,7 +1363,7 @@ exports.LoadUtils = () => {
         }
     };
 
-    window.WWebJS.deletePicture = async (chatid) => {
+    window.WWebJSBt.deletePicture = async (chatid) => {
         const chatWid = window.require('WAWebWidFactory').createWid(chatid);
         try {
             const collection = window
@@ -1381,7 +1381,7 @@ exports.LoadUtils = () => {
         }
     };
 
-    window.WWebJS.getProfilePicThumbToBase64 = async (chatWid) => {
+    window.WWebJSBt.getProfilePicThumbToBase64 = async (chatWid) => {
         const profilePicCollection = await window
             .require('WAWebCollections')
             .ProfilePicThumb.find(chatWid);
@@ -1419,7 +1419,7 @@ exports.LoadUtils = () => {
         return undefined;
     };
 
-    window.WWebJS.getAddParticipantsRpcResult = async (
+    window.WWebJSBt.getAddParticipantsRpcResult = async (
         groupWid,
         participantWid,
     ) => {
@@ -1473,7 +1473,7 @@ exports.LoadUtils = () => {
         return data;
     };
 
-    window.WWebJS.membershipRequestAction = async (
+    window.WWebJSBt.membershipRequestAction = async (
         groupId,
         action,
         requesterIds,
@@ -1617,12 +1617,12 @@ exports.LoadUtils = () => {
         }
     };
 
-    window.WWebJS.subscribeToUnsubscribeFromChannel = async (
+    window.WWebJSBt.subscribeToUnsubscribeFromChannel = async (
         channelId,
         action,
         options = {},
     ) => {
-        const channel = await window.WWebJS.getChat(channelId, {
+        const channel = await window.WWebJSBt.getChat(channelId, {
             getAsModel: false,
         });
 
@@ -1650,7 +1650,7 @@ exports.LoadUtils = () => {
         }
     };
 
-    window.WWebJS.pinUnpinMsgAction = async (msgId, action, duration) => {
+    window.WWebJSBt.pinUnpinMsgAction = async (msgId, action, duration) => {
         const message =
             window.require('WAWebCollections').Msg.get(msgId) ||
             (
@@ -1678,20 +1678,20 @@ exports.LoadUtils = () => {
         return response.messageSendResult === 'OK';
     };
 
-    window.WWebJS.getStatusModel = (status) => {
+    window.WWebJSBt.getStatusModel = (status) => {
         const res = status.serialize();
         delete res._msgs;
         return res;
     };
 
-    window.WWebJS.getAllStatuses = () => {
+    window.WWebJSBt.getAllStatuses = () => {
         const statuses = window
             .require('WAWebCollections')
             .Status.getModelsArray();
-        return statuses.map((status) => window.WWebJS.getStatusModel(status));
+        return statuses.map((status) => window.WWebJSBt.getStatusModel(status));
     };
 
-    window.WWebJS.enforceLidAndPnRetrieval = async (userId) => {
+    window.WWebJSBt.enforceLidAndPnRetrieval = async (userId) => {
         const wid = window.require('WAWebWidFactory').createWid(userId);
         const isLid = wid.server === 'lid';
 
@@ -1721,7 +1721,7 @@ exports.LoadUtils = () => {
         return { lid, phone };
     };
 
-    window.WWebJS.assertColor = (hex) => {
+    window.WWebJSBt.assertColor = (hex) => {
         let color;
         if (typeof hex === 'number') {
             color = hex > 0 ? hex : 0xffffffff + parseInt(hex) + 1;
