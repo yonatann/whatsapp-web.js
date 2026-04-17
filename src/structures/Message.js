@@ -52,7 +52,9 @@ class Message extends Base {
          * Message content
          * @type {string}
          */
-        this.body = this.hasMedia ? data.caption || '' : data.body || data.pollName || data.eventName || '';
+        this.body = this.hasMedia
+            ? data.caption || ''
+            : data.body || data.pollName || data.eventName || '';
 
         /**
          * Message type
@@ -70,7 +72,10 @@ class Message extends Base {
          * ID for the Chat that this message was sent to, except if the message was sent by the current user.
          * @type {string}
          */
-        this.from = (typeof (data.from) === 'object' && data.from !== null) ? data.from._serialized : data.from;
+        this.from =
+            typeof data.from === 'object' && data.from !== null
+                ? data.from._serialized
+                : data.from;
 
         /**
          * ID for who this message is for.
@@ -79,19 +84,31 @@ class Message extends Base {
          * If the message is sent by another user, it will be the ID for the current user.
          * @type {string}
          */
-        this.to = (typeof (data.to) === 'object' && data.to !== null) ? data.to._serialized : data.to;
+        this.to =
+            typeof data.to === 'object' && data.to !== null
+                ? data.to._serialized
+                : data.to;
 
         /**
          * If the message was sent to a group, this field will contain the user that sent the message.
          * @type {string}
          */
-        this.author = (typeof (data.author) === 'object' && data.author !== null) ? data.author._serialized : data.author;
+        this.author =
+            typeof data.author === 'object' && data.author !== null
+                ? data.author._serialized
+                : data.author;
 
         /**
          * String that represents from which device type the message was sent
          * @type {string}
          */
-        this.deviceType = typeof data.id.id === 'string' && data.id.id.length > 21 ? 'android' : typeof data.id.id === 'string' && data.id.id.substring(0, 2) === '3A' ? 'ios' : 'web';
+        this.deviceType =
+            typeof data.id.id === 'string' && data.id.id.length > 25
+                ? 'android'
+                : typeof data.id.id === 'string' &&
+                    data.id.id.substring(0, 2) === '3A'
+                  ? 'ios'
+                  : 'web';
         /**
          * Indicates if the message was forwarded
          * @type {boolean}
@@ -110,7 +127,8 @@ class Message extends Base {
          * Indicates if the message is a status update
          * @type {boolean}
          */
-        this.isStatus = data.isStatusV3 || data.id.remote === 'status@broadcast';
+        this.isStatus =
+            data.isStatusV3 || data.id.remote === 'status@broadcast';
 
         /**
          * Indicates if the message was starred
@@ -162,7 +180,7 @@ class Message extends Base {
                 description = {
                     name: splitted[0],
                     address: splitted[1],
-                    url: data.clientUrl
+                    url: data.clientUrl,
                 };
             }
             return new Location(data.lat, data.lng, description);
@@ -172,20 +190,36 @@ class Message extends Base {
          * List of vCards contained in the message.
          * @type {Array<string>}
          */
-        this.vCards = data.type === MessageTypes.CONTACT_CARD_MULTI ? data.vcardList.map((c) => c.vcard) : data.type === MessageTypes.CONTACT_CARD ? [data.body] : [];
+        this.vCards =
+            data.type === MessageTypes.CONTACT_CARD_MULTI
+                ? data.vcardList.map((c) => c.vcard)
+                : data.type === MessageTypes.CONTACT_CARD
+                  ? [data.body]
+                  : [];
 
         /**
          * Group Invite Data
          * @type {object}
          */
-        this.inviteV4 = data.type === MessageTypes.GROUP_INVITE ? {
-            inviteCode: data.inviteCode,
-            inviteCodeExp: data.inviteCodeExp,
-            groupId: data.inviteGrp,
-            groupName: data.inviteGrpName,
-            fromId: typeof data.from === 'object' && '_serialized' in data.from ? data.from._serialized : data.from,
-            toId: typeof data.to === 'object' && '_serialized' in data.to ? data.to._serialized : data.to
-        } : undefined;
+        this.inviteV4 =
+            data.type === MessageTypes.GROUP_INVITE
+                ? {
+                      inviteCode: data.inviteCode,
+                      inviteCodeExp: data.inviteCodeExp,
+                      groupId: data.inviteGrp,
+                      groupName: data.inviteGrpName,
+                      fromId:
+                          typeof data.from === 'object' &&
+                          '_serialized' in data.from
+                              ? data.from._serialized
+                              : data.from,
+                      toId:
+                          typeof data.to === 'object' &&
+                          '_serialized' in data.to
+                              ? data.to._serialized
+                              : data.to,
+                  }
+                : undefined;
 
         /**
          * Indicates the mentions in the message body.
@@ -216,7 +250,7 @@ class Message extends Base {
          */
         this.token = data.token ? data.token : undefined;
 
-        /** 
+        /**
          * Indicates whether the message is a Gif
          * @type {boolean}
          */
@@ -284,17 +318,27 @@ class Message extends Base {
         }
 
         /** Selected List row Id **/
-        if (data.listResponse && data.listResponse.singleSelectReply.selectedRowId) {
-            this.selectedRowId = data.listResponse.singleSelectReply.selectedRowId;
+        if (
+            data.listResponse &&
+            data.listResponse.singleSelectReply.selectedRowId
+        ) {
+            this.selectedRowId =
+                data.listResponse.singleSelectReply.selectedRowId;
         }
 
         if (this.type === MessageTypes.POLL_CREATION) {
             this.pollName = data.pollName;
             this.pollOptions = data.pollOptions;
-            this.allowMultipleAnswers = Boolean(!data.pollSelectableOptionsCount);
+            this.allowMultipleAnswers = Boolean(
+                !data.pollSelectableOptionsCount,
+            );
             this.pollInvalidated = data.pollInvalidated;
             this.isSentCagPollCreation = data.isSentCagPollCreation;
-            this.messageSecret = data.messageSecret ? Object.keys(data.messageSecret).map((key) => data.messageSecret[key]) : [];
+            this.messageSecret = data.messageSecret
+                ? Object.keys(data.messageSecret).map(
+                      (key) => data.messageSecret[key],
+                  )
+                : [];
         }
 
         return super._patch(data);
@@ -305,15 +349,21 @@ class Message extends Base {
     }
 
     /**
-     * Reloads this Message object's data in-place with the latest values from WhatsApp Web. 
+     * Reloads this Message object's data in-place with the latest values from WhatsApp Web.
      * Note that the Message must still be in the web app cache for this to work, otherwise will return null.
      * @returns {Promise<Message>}
      */
     async reload() {
         const newData = await this.client.pupPage.evaluate(async (msgId) => {
-            const msg = window.getStore().Msg.get(msgId) || (await window.getStore().Msg.getMessagesById([msgId]))?.messages?.[0];
+            const msg =
+                window.require('WAWebCollections').Msg.get(msgId) ||
+                (
+                    await window
+                        .require('WAWebCollections')
+                        .Msg.getMessagesById([msgId])
+                )?.messages?.[0];
             if (!msg) return null;
-            return window.getWWebJS().getMessageModel(msg);
+            return window.WWebJS.getMessageModel(msg);
         }, this.id._serialized);
 
         if (!newData) return null;
@@ -351,7 +401,14 @@ class Message extends Base {
      * @returns {Promise<Array<Contact>>}
      */
     async getMentions() {
-        return await Promise.all(this.mentionedIds.map(async m => await this.client.getContactById(m)));
+        return await Promise.all(
+            this.mentionedIds.map(
+                async (m) =>
+                    await this.client.getContactById(
+                        typeof m === 'string' ? m : m._serialized,
+                    ),
+            ),
+        );
     }
 
     /**
@@ -359,7 +416,12 @@ class Message extends Base {
      * @returns {Promise<Array<GroupChat>>}
      */
     async getGroupMentions() {
-        return await Promise.all(this.groupMentions.map(async (m) => await this.client.getChatById(m.groupJid._serialized)));
+        return await Promise.all(
+            this.groupMentions.map(
+                async (m) =>
+                    await this.client.getChatById(m.groupJid._serialized),
+            ),
+        );
     }
 
     /**
@@ -370,9 +432,17 @@ class Message extends Base {
         if (!this.hasQuotedMsg) return undefined;
 
         const quotedMsg = await this.client.pupPage.evaluate(async (msgId) => {
-            const msg = window.getStore().Msg.get(msgId) || (await window.getStore().Msg.getMessagesById([msgId]))?.messages?.[0];
-            const quotedMsg = window.getStore().QuotedMsg.getQuotedMsgObj(msg);
-            return window.getWWebJS().getMessageModel(quotedMsg);
+            const msg =
+                window.require('WAWebCollections').Msg.get(msgId) ||
+                (
+                    await window
+                        .require('WAWebCollections')
+                        .Msg.getMessagesById([msgId])
+                )?.messages?.[0];
+            const quotedMsg = window
+                .require('WAWebQuotedMsgModelUtils')
+                .getQuotedMsgObj(msg);
+            return window.WWebJS.getMessageModel(quotedMsg);
         }, this.id._serialized);
 
         return new Message(this.client, quotedMsg);
@@ -395,7 +465,7 @@ class Message extends Base {
 
         options = {
             ...options,
-            quotedMessageId: this.id._serialized
+            quotedMessageId: this.id._serialized,
         };
 
         return this.client.sendMessage(chatId, content, options);
@@ -407,17 +477,7 @@ class Message extends Base {
      * @return {Promise}
      */
     async react(reaction) {
-        await this.client.pupPage.evaluate(async (messageId, reaction) => {
-            if (!messageId) {
-                throw new Error('[Message.react] messageId is required');
-            }
-            const msg =
-                window.getStore().Msg.get(messageId) || (await window.getStore().Msg.getMessagesById([messageId]))?.messages?.[0];
-            if (!msg) {
-                throw new Error(`[Message.react] Message ${messageId} not found in Store`);
-            }
-            await window.getStore().sendReactionToMsg(msg, reaction);
-        }, this.id._serialized, reaction);
+        return this.client.sendReaction(this.id._serialized, reaction);
     }
 
     /**
@@ -437,9 +497,13 @@ class Message extends Base {
     async forward(chat) {
         const chatId = typeof chat === 'string' ? chat : chat.id._serialized;
 
-        await this.client.pupPage.evaluate(async (msgId, chatId) => {
-            return window.getWWebJS().forwardMessage(chatId, msgId);
-        }, this.id._serialized, chatId);
+        await this.client.pupPage.evaluate(
+            async (msgId, chatId) => {
+                return window.WWebJS.forwardMessage(chatId, msgId);
+            },
+            this.id._serialized,
+            chatId,
+        );
     }
 
     /**
@@ -452,48 +516,70 @@ class Message extends Base {
         }
 
         const result = await this.client.pupPage.evaluate(async (msgId) => {
-            const msg = window.getStore().Msg.get(msgId) || (await window.getStore().Msg.getMessagesById([msgId]))?.messages?.[0];
+            const msg =
+                window.require('WAWebCollections').Msg.get(msgId) ||
+                (
+                    await window
+                        .require('WAWebCollections')
+                        .Msg.getMessagesById([msgId])
+                )?.messages?.[0];
 
             // REUPLOADING mediaStage means the media is expired and the download button is spinning, cannot be downloaded now
-            if (!msg || !msg.mediaData || msg.mediaData.mediaStage === 'REUPLOADING') {
+            if (
+                !msg ||
+                !msg.mediaData ||
+                msg.mediaData.mediaStage === 'REUPLOADING'
+            ) {
                 return null;
             }
             if (msg.mediaData.mediaStage != 'RESOLVED') {
                 // try to resolve media
                 await msg.downloadMedia({
                     downloadEvenIfExpensive: true,
-                    rmrReason: 1
+                    rmrReason: 1,
                 });
             }
 
-            if (msg.mediaData.mediaStage.includes('ERROR') || msg.mediaData.mediaStage === 'FETCHING') {
+            if (
+                msg.mediaData.mediaStage.includes('ERROR') ||
+                msg.mediaData.mediaStage === 'FETCHING'
+            ) {
                 // media could not be downloaded
                 return undefined;
             }
 
             try {
                 const mockQpl = {
-                    addAnnotations: function () { return this; },
-                    addPoint: function () { return this; }
+                    addAnnotations: function () {
+                        return this;
+                    },
+                    addPoint: function () {
+                        return this;
+                    },
                 };
-                const decryptedMedia = await window.getStore().DownloadManager.downloadAndMaybeDecrypt({
-                    directPath: msg.directPath,
-                    encFilehash: msg.encFilehash,
-                    filehash: msg.filehash,
-                    mediaKey: msg.mediaKey,
-                    mediaKeyTimestamp: msg.mediaKeyTimestamp,
-                    type: msg.type,
-                    signal: (new AbortController).signal,
-                    downloadQpl: mockQpl
-                });
+                const decryptedMedia = await window
+                    .require('WAWebDownloadManager')
+                    .downloadManager.downloadAndMaybeDecrypt({
+                        directPath: msg.directPath,
+                        encFilehash: msg.encFilehash,
+                        filehash: msg.filehash,
+                        mediaKey: msg.mediaKey,
+                        mediaKeyTimestamp: msg.mediaKeyTimestamp,
+                        type: msg.type,
+                        signal: new AbortController().signal,
+                        downloadQpl: mockQpl,
+                    });
 
-                const data = await window.getWWebJS().arrayBufferToBase64Async(decryptedMedia);
+                const data =
+                    await window.WWebJS.arrayBufferToBase64Async(
+                        decryptedMedia,
+                    );
 
                 return {
                     data,
                     mimetype: msg.mimetype,
                     filename: msg.filename,
-                    filesize: msg.size
+                    filesize: msg.size,
                 };
             } catch (e) {
                 if (e.status && e.status === 404) return undefined;
@@ -502,7 +588,12 @@ class Message extends Base {
         }, this.id._serialized);
 
         if (!result) return undefined;
-        return new MessageMedia(result.mimetype, result.data, result.filename, result.filesize);
+        return new MessageMedia(
+            result.mimetype,
+            result.data,
+            result.filename,
+            result.filesize,
+        );
     }
 
     /**
@@ -511,23 +602,66 @@ class Message extends Base {
      * @param {?boolean} [clearMedia = true] If true, any associated media will also be deleted from a device.
      */
     async delete(everyone, clearMedia = true) {
-        await this.client.pupPage.evaluate(async (msgId, everyone, clearMedia) => {
-            const msg = window.getStore().Msg.get(msgId) || (await window.getStore().Msg.getMessagesById([msgId]))?.messages?.[0];
-            const chat = window.getStore().Chat.get(msg.id.remote) || (await window.getStore().Chat.find(msg.id.remote));
+        await this.client.pupPage.evaluate(
+            async (msgId, everyone, clearMedia) => {
+                const msg =
+                    window.require('WAWebCollections').Msg.get(msgId) ||
+                    (
+                        await window
+                            .require('WAWebCollections')
+                            .Msg.getMessagesById([msgId])
+                    )?.messages?.[0];
+                const chat =
+                    window
+                        .require('WAWebCollections')
+                        .Chat.get(msg.id.remote) ||
+                    (await window
+                        .require('WAWebCollections')
+                        .Chat.find(msg.id.remote));
 
-            const canRevoke =
-                window.getStore().MsgActionChecks.canSenderRevokeMsg(msg) || window.getStore().MsgActionChecks.canAdminRevokeMsg(msg);
+                const canRevoke =
+                    window
+                        .require('WAWebMsgActionCapability')
+                        .canSenderRevokeMsg(msg) ||
+                    window
+                        .require('WAWebMsgActionCapability')
+                        .canAdminRevokeMsg(msg);
 
-            if (everyone && canRevoke) {
-                return window.compareWwebVersions(window.Debug.VERSION, '>=', '2.3000.0')
-                    ? window.getStore().Cmd.sendRevokeMsgs(chat, { list: [msg], type: 'message' }, { clearMedia: clearMedia })
-                    : window.getStore().Cmd.sendRevokeMsgs(chat, [msg], { clearMedia: true, type: msg.id.fromMe ? 'Sender' : 'Admin' });
-            }
+                const { Cmd } = window.require('WAWebCmd');
 
-            return window.compareWwebVersions(window.Debug.VERSION, '>=', '2.3000.0')
-                ? window.getStore().Cmd.sendDeleteMsgs(chat, { list: [msg], type: 'message' }, clearMedia)
-                : window.getStore().Cmd.sendDeleteMsgs(chat, [msg], clearMedia);
-        }, this.id._serialized, everyone, clearMedia);
+                if (everyone && canRevoke) {
+                    return window.WWebJS.compareWwebVersions(
+                        window.Debug.VERSION,
+                        '>=',
+                        '2.3000.0',
+                    )
+                        ? Cmd.sendRevokeMsgs(
+                              chat,
+                              { list: [msg], type: 'message' },
+                              { clearMedia: clearMedia },
+                          )
+                        : Cmd.sendRevokeMsgs(chat, [msg], {
+                              clearMedia: true,
+                              type: msg.id.fromMe ? 'Sender' : 'Admin',
+                          });
+                }
+
+                return window.WWebJS.compareWwebVersions(
+                    window.Debug.VERSION,
+                    '>=',
+                    '2.3000.0',
+                )
+                    ? Cmd.sendDeleteMsgs(
+                          chat,
+                          { list: [msg], type: 'message' },
+                          clearMedia,
+                      )
+                    : Cmd.sendDeleteMsgs(chat, [msg], clearMedia);
+            },
+            this.id._serialized,
+            everyone,
+            clearMedia,
+        );
     }
 
     /**
@@ -535,10 +669,20 @@ class Message extends Base {
      */
     async star() {
         await this.client.pupPage.evaluate(async (msgId) => {
-            const msg = window.getStore().Msg.get(msgId) || (await window.getStore().Msg.getMessagesById([msgId]))?.messages?.[0];
-            if (window.getStore().MsgActionChecks.canStarMsg(msg)) {
-                let chat = await window.getStore().Chat.find(msg.id.remote);
-                return window.getStore().Cmd.sendStarMsgs(chat, [msg], false);
+            const msg =
+                window.require('WAWebCollections').Msg.get(msgId) ||
+                (
+                    await window
+                        .require('WAWebCollections')
+                        .Msg.getMessagesById([msgId])
+                )?.messages?.[0];
+            if (window.require('WAWebMsgActionCapability').canStarMsg(msg)) {
+                let chat = await window
+                    .require('WAWebCollections')
+                    .Chat.find(msg.id.remote);
+                return window
+                    .require('WAWebCmd')
+                    .Cmd.sendStarMsgs(chat, [msg], false);
             }
         }, this.id._serialized);
     }
@@ -548,10 +692,20 @@ class Message extends Base {
      */
     async unstar() {
         await this.client.pupPage.evaluate(async (msgId) => {
-            const msg = window.getStore().Msg.get(msgId) || (await window.getStore().Msg.getMessagesById([msgId]))?.messages?.[0];
-            if (window.getStore().MsgActionChecks.canStarMsg(msg)) {
-                let chat = await window.getStore().Chat.find(msg.id.remote);
-                return window.getStore().Cmd.sendUnstarMsgs(chat, [msg], false);
+            const msg =
+                window.require('WAWebCollections').Msg.get(msgId) ||
+                (
+                    await window
+                        .require('WAWebCollections')
+                        .Msg.getMessagesById([msgId])
+                )?.messages?.[0];
+            if (window.require('WAWebMsgActionCapability').canStarMsg(msg)) {
+                let chat = await window
+                    .require('WAWebCollections')
+                    .Chat.find(msg.id.remote);
+                return window
+                    .require('WAWebCmd')
+                    .Cmd.sendUnstarMsgs(chat, [msg], false);
             }
         }, this.id._serialized);
     }
@@ -562,9 +716,17 @@ class Message extends Base {
      * @returns {Promise<boolean>} Returns true if the operation completed successfully, false otherwise
      */
     async pin(duration) {
-        return await this.client.pupPage.evaluate(async (msgId, duration) => {
-            return await window.getWWebJS().pinUnpinMsgAction(msgId, 1, duration);
-        }, this.id._serialized, duration);
+        return await this.client.pupPage.evaluate(
+            async (msgId, duration) => {
+                return await window.WWebJS.pinUnpinMsgAction(
+                    msgId,
+                    1,
+                    duration,
+                );
+            },
+            this.id._serialized,
+            duration,
+        );
     }
 
     /**
@@ -573,7 +735,7 @@ class Message extends Base {
      */
     async unpin() {
         return await this.client.pupPage.evaluate(async (msgId) => {
-            return await window.getWWebJS().pinUnpinMsgAction(msgId, 2, 0);
+            return await window.WWebJS.pinUnpinMsgAction(msgId, 2, 0);
         }, this.id._serialized);
     }
 
@@ -595,13 +757,28 @@ class Message extends Base {
      */
     async getInfo() {
         const info = await this.client.pupPage.evaluate(async (msgId) => {
-            const msg = window.getStore().Msg.get(msgId) || (await window.getStore().Msg.getMessagesById([msgId]))?.messages?.[0];
+            const msg =
+                window.require('WAWebCollections').Msg.get(msgId) ||
+                (
+                    await window
+                        .require('WAWebCollections')
+                        .Msg.getMessagesById([msgId])
+                )?.messages?.[0];
             if (!msg || !msg.id.fromMe) return null;
 
             return new Promise((resolve) => {
-                setTimeout(async () => {
-                    resolve(await window.getStore().getMsgInfo(msg.id));
-                }, (Date.now() - msg.t * 1000 < 1250) && Math.floor(Math.random() * (1200 - 1100 + 1)) + 1100 || 0);
+                setTimeout(
+                    async () => {
+                        resolve(
+                            await window
+                                .require('WAWebApiMessageInfoStore')
+                                .queryMsgInfo(msg.id),
+                        );
+                    },
+                    (Date.now() - msg.t * 1000 < 1250 &&
+                        Math.floor(Math.random() * (1200 - 1100 + 1)) + 1100) ||
+                        0,
+                );
             });
         }, this.id._serialized);
 
@@ -614,9 +791,14 @@ class Message extends Base {
      */
     async getOrder() {
         if (this.type === MessageTypes.ORDER) {
-            const result = await this.client.pupPage.evaluate((orderId, token, chatId) => {
-                return window.getWWebJS().getOrderDetail(orderId, token, chatId);
-            }, this.orderId, this.token, this._getChatId());
+            const result = await this.client.pupPage.evaluate(
+                (orderId, token, chatId) => {
+                    return window.WWebJS.getOrderDetail(orderId, token, chatId);
+                },
+                this.orderId,
+                this.token,
+                this._getChatId(),
+            );
             if (!result) return undefined;
             return new Order(this.client, result);
         }
@@ -629,7 +811,13 @@ class Message extends Base {
     async getPayment() {
         if (this.type === MessageTypes.PAYMENT) {
             const msg = await this.client.pupPage.evaluate(async (msgId) => {
-                const msg = window.getStore().Msg.get(msgId) || (await window.getStore().Msg.getMessagesById([msgId]))?.messages?.[0];
+                const msg =
+                    window.require('WAWebCollections').Msg.get(msgId) ||
+                    (
+                        await window
+                            .require('WAWebCollections')
+                            .Msg.getMessagesById([msgId])
+                    )?.messages?.[0];
                 if (!msg) return null;
                 return msg.serialize();
             }, this.id._serialized);
@@ -637,7 +825,6 @@ class Message extends Base {
         }
         return undefined;
     }
-
 
     /**
      * Reaction List
@@ -658,7 +845,9 @@ class Message extends Base {
         }
 
         const reactions = await this.client.pupPage.evaluate(async (msgId) => {
-            const msgReactions = await window.getStore().Reactions.find(msgId);
+            const msgReactions = await window
+                .require('WAWebCollections')
+                .Reactions.find(msgId);
             if (!msgReactions || !msgReactions.reactions.length) return null;
             return msgReactions.reactions.serialize();
         }, this.id._serialized);
@@ -667,8 +856,8 @@ class Message extends Base {
             return undefined;
         }
 
-        return reactions.map(reaction => {
-            reaction.senders = reaction.senders.map(sender => {
+        return reactions.map((reaction) => {
+            reaction.senders = reaction.senders.map((sender) => {
                 sender.timestamp = Math.round(sender.timestamp / 1000);
                 return new Reaction(this.client, sender);
             });
@@ -684,36 +873,68 @@ class Message extends Base {
      */
     async edit(content, options = {}) {
         if (options.mentions) {
-            !Array.isArray(options.mentions) && (options.mentions = [options.mentions]);
-            if (options.mentions.some((possiblyContact) => possiblyContact instanceof Contact)) {
-                console.warn('Mentions with an array of Contact are now deprecated. See more at https://github.com/pedroslopez/whatsapp-web.js/pull/2166.');
-                options.mentions = options.mentions.map((a) => a.id._serialized);
+            !Array.isArray(options.mentions) &&
+                (options.mentions = [options.mentions]);
+            if (
+                options.mentions.some(
+                    (possiblyContact) => possiblyContact instanceof Contact,
+                )
+            ) {
+                console.warn(
+                    'Mentions with an array of Contact are now deprecated. See more at https://github.com/wwebjs/whatsapp-web.js/pull/2166.',
+                );
+                options.mentions = options.mentions.map(
+                    (a) => a.id._serialized,
+                );
             }
         }
 
-        options.groupMentions && !Array.isArray(options.groupMentions) && (options.groupMentions = [options.groupMentions]);
+        options.groupMentions &&
+            !Array.isArray(options.groupMentions) &&
+            (options.groupMentions = [options.groupMentions]);
 
         let internalOptions = {
             linkPreview: options.linkPreview === false ? undefined : true,
             mentionedJidList: options.mentions || [],
             groupMentions: options.groupMentions,
-            extraOptions: options.extra
+            extraOptions: options.extra,
         };
 
         if (!this.fromMe) {
             return null;
         }
-        const messageEdit = await this.client.pupPage.evaluate(async (msgId, message, options) => {
-            const msg = window.getStore().Msg.get(msgId) || (await window.getStore().Msg.getMessagesById([msgId]))?.messages?.[0];
-            if (!msg) return null;
+        const messageEdit = await this.client.pupPage.evaluate(
+            async (msgId, message, options) => {
+                const msg =
+                    window.require('WAWebCollections').Msg.get(msgId) ||
+                    (
+                        await window
+                            .require('WAWebCollections')
+                            .Msg.getMessagesById([msgId])
+                    )?.messages?.[0];
+                if (!msg) return null;
 
-            let canEdit = window.getStore().MsgActionChecks.canEditText(msg) || window.getStore().MsgActionChecks.canEditCaption(msg);
-            if (canEdit) {
-                const msgEdit = await window.getWWebJS().editMessage(msg, message, options);
-                return msgEdit.serialize();
-            }
-            return null;
-        }, this.id._serialized, content, internalOptions);
+                let canEdit =
+                    window
+                        .require('WAWebMsgActionCapability')
+                        .canEditText(msg) ||
+                    window
+                        .require('WAWebMsgActionCapability')
+                        .canEditCaption(msg);
+                if (canEdit) {
+                    const msgEdit = await window.WWebJS.editMessage(
+                        msg,
+                        message,
+                        options,
+                    );
+                    return msgEdit.serialize();
+                }
+                return null;
+            },
+            this.id._serialized,
+            content,
+            internalOptions,
+        );
         if (messageEdit) {
             return new Message(this.client, messageEdit);
         }
@@ -731,25 +952,40 @@ class Message extends Base {
             return null;
         }
 
-        const edittedEventMsg = await this.client.pupPage.evaluate(async (msgId, editedEventObject) => {
-            const msg = window.getStore().Msg.get(msgId) || (await window.getStore().Msg.getMessagesById([msgId]))?.messages?.[0];
-            if (!msg) return null;
+        const edittedEventMsg = await this.client.pupPage.evaluate(
+            async (msgId, editedEventObject) => {
+                const msg =
+                    window.require('WAWebCollections').Msg.get(msgId) ||
+                    (
+                        await window
+                            .require('WAWebCollections')
+                            .Msg.getMessagesById([msgId])
+                    )?.messages?.[0];
+                if (!msg) return null;
 
-            const { name, startTimeTs, eventSendOptions } = editedEventObject;
-            const eventOptions = {
-                name: name,
-                description: eventSendOptions.description,
-                startTime: startTimeTs,
-                endTime: eventSendOptions.endTimeTs,
-                location: eventSendOptions.location,
-                callType: eventSendOptions.callType,
-                isEventCanceled: eventSendOptions.isEventCanceled,
-            };
+                const { name, startTimeTs, eventSendOptions } =
+                    editedEventObject;
+                const eventOptions = {
+                    name: name,
+                    description: eventSendOptions.description,
+                    startTime: startTimeTs,
+                    endTime: eventSendOptions.endTimeTs,
+                    location: eventSendOptions.location,
+                    callType: eventSendOptions.callType,
+                    isEventCanceled: eventSendOptions.isEventCanceled,
+                };
 
-            await window.getStore().ScheduledEventMsgUtils.sendEventEditMessage(eventOptions, msg);
-            const editedMsg = window.getStore().Msg.get(msg.id._serialized);
-            return editedMsg?.serialize();
-        }, this.id._serialized, editedEventObject);
+                await window
+                    .require('WAWebSendEventEditMsgAction')
+                    .sendEventEditMessage(eventOptions, msg);
+                const editedMsg = window
+                    .require('WAWebCollections')
+                    .Msg.get(msg.id._serialized);
+                return editedMsg?.serialize();
+            },
+            this.id._serialized,
+            editedEventObject,
+        );
 
         return edittedEventMsg && new Message(this.client, edittedEventMsg);
     }
@@ -767,24 +1003,36 @@ class Message extends Base {
      * @returns {Promise}
      */
     async vote(selectedOptions) {
-        if (this.type != MessageTypes.POLL_CREATION) throw 'Invalid usage! Can only be used with a pollCreation message';
+        if (this.type != MessageTypes.POLL_CREATION)
+            throw 'Invalid usage! Can only be used with a pollCreation message';
 
-        await this.client.pupPage.evaluate(async (messageId, votes) => {
-            if (!messageId) return null;
-            if (!Array.isArray(votes)) votes = [votes];
-            let localIdSet = new Set();
-            const msg =
-                window.getStore().Msg.get(messageId) || (await window.getStore().Msg.getMessagesById([messageId]))?.messages?.[0];
-            if (!msg) return null;
+        await this.client.pupPage.evaluate(
+            async (messageId, votes) => {
+                if (!messageId) return null;
+                if (!Array.isArray(votes)) votes = [votes];
+                let localIdSet = new Set();
+                const msg =
+                    window.require('WAWebCollections').Msg.get(messageId) ||
+                    (
+                        await window
+                            .require('WAWebCollections')
+                            .Msg.getMessagesById([messageId])
+                    )?.messages?.[0];
+                if (!msg) return null;
 
-            msg.pollOptions.forEach(a => {
-                for (const option of votes) {
-                    if (a.name === option) localIdSet.add(a.localId);
-                }
-            });
+                msg.pollOptions.forEach((a) => {
+                    for (const option of votes) {
+                        if (a.name === option) localIdSet.add(a.localId);
+                    }
+                });
 
-            await window.getStore().PollsSendVote.sendVote(msg, localIdSet);
-        }, this.id._serialized, selectedOptions);
+                await window
+                    .require('WAWebPollsSendVoteMsgAction')
+                    .sendVote(msg, localIdSet);
+            },
+            this.id._serialized,
+            selectedOptions,
+        );
     }
 }
 
