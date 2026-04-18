@@ -116,7 +116,7 @@ class Chat extends Base {
      */
     async clearMessages() {
         return this.client.pupPage.evaluate((chatId) => {
-            return window.WWebJSBt.sendClearChat(chatId);
+            return window.WWebJS.sendClearChat(chatId);
         }, this.id._serialized);
     }
 
@@ -126,7 +126,7 @@ class Chat extends Base {
      */
     async delete() {
         return this.client.pupPage.evaluate((chatId) => {
-            return window.WWebJSBt.sendDeleteChat(chatId);
+            return window.WWebJS.sendDeleteChat(chatId);
         }, this.id._serialized);
     }
 
@@ -217,7 +217,7 @@ class Chat extends Base {
                     return true;
                 };
 
-                const chat = await window.WWebJSBt.getChat(chatId, {
+                const chat = await window.WWebJS.getChat(chatId, {
                     getAsModel: false,
                 });
                 let msgs = chat.msgs.getModelsArray().filter(msgFilter);
@@ -237,7 +237,7 @@ class Chat extends Base {
                     }
                 }
 
-                return msgs.map((m) => window.WWebJSBt.getMessageModel(m));
+                return msgs.map((m) => window.WWebJS.getMessageModel(m));
             },
             this.id._serialized,
             searchOptions,
@@ -251,7 +251,7 @@ class Chat extends Base {
      */
     async sendStateTyping() {
         return this.client.pupPage.evaluate((chatId) => {
-            window.WWebJSBt.sendChatstate('typing', chatId);
+            window.WWebJS.sendChatstate('typing', chatId);
             return true;
         }, this.id._serialized);
     }
@@ -261,7 +261,7 @@ class Chat extends Base {
      */
     async sendStateRecording() {
         return this.client.pupPage.evaluate((chatId) => {
-            window.WWebJSBt.sendChatstate('recording', chatId);
+            window.WWebJS.sendChatstate('recording', chatId);
             return true;
         }, this.id._serialized);
     }
@@ -271,7 +271,7 @@ class Chat extends Base {
      */
     async clearState() {
         return this.client.pupPage.evaluate((chatId) => {
-            window.WWebJSBt.sendChatstate('stop', chatId);
+            window.WWebJS.sendChatstate('stop', chatId);
             return true;
         }, this.id._serialized);
     }

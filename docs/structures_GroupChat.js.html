@@ -179,7 +179,7 @@ class GroupChat extends Chat {
                 }
 
                 const rpcResult &#x3D;
-                    await window.WWebJSBt.getAddParticipantsRpcResult(groupWid, pWid);
+                    await window.WWebJS.getAddParticipantsRpcResult(groupWid, pWid);
                 const { code: rpcResultCode } &#x3D; rpcResult;
 
                 participantData[pId].code &#x3D; rpcResultCode;
@@ -200,7 +200,7 @@ class GroupChat extends Chat {
                             rpcResult.inviteV4Code,
                             rpcResult.inviteV4CodeExp,
                             comment,
-                            await window.WWebJSBt.getProfilePicThumbToBase64(groupWid)
+                            await window.WWebJS.getProfilePicThumbToBase64(groupWid)
                         );
                         isInviteV4Sent &#x3D; res.messageSendResult &#x3D;&#x3D;&#x3D; &#x27;OK&#x27;;
                     }
@@ -225,9 +225,9 @@ class GroupChat extends Chat {
      */
     async removeParticipants(participantIds) {
         return await this.client.pupPage.evaluate(async (chatId, participantIds) &#x3D;&gt; {
-            const chat &#x3D; await window.WWebJSBt.getChat(chatId, { getAsModel: false });
+            const chat &#x3D; await window.WWebJS.getChat(chatId, { getAsModel: false });
             const participants &#x3D; (await Promise.all(participantIds.map(async p &#x3D;&gt; {
-                const { lid, phone } &#x3D; await window.WWebJSBt.enforceLidAndPnRetrieval(p);
+                const { lid, phone } &#x3D; await window.WWebJS.enforceLidAndPnRetrieval(p);
 
                 return chat.groupMetadata.participants.get(lid?._serialized) ||
                     chat.groupMetadata.participants.get(phone?._serialized);
@@ -244,9 +244,9 @@ class GroupChat extends Chat {
      */
     async promoteParticipants(participantIds) {
         return await this.client.pupPage.evaluate(async (chatId, participantIds) &#x3D;&gt; {
-            const chat &#x3D; await window.WWebJSBt.getChat(chatId, { getAsModel: false });
+            const chat &#x3D; await window.WWebJS.getChat(chatId, { getAsModel: false });
             const participants &#x3D; (await Promise.all(participantIds.map(async p &#x3D;&gt; {
-                const { lid, phone } &#x3D; await window.WWebJSBt.enforceLidAndPnRetrieval(p);
+                const { lid, phone } &#x3D; await window.WWebJS.enforceLidAndPnRetrieval(p);
 
                 return chat.groupMetadata.participants.get(lid?._serialized) ||
                     chat.groupMetadata.participants.get(phone?._serialized);
@@ -263,9 +263,9 @@ class GroupChat extends Chat {
      */
     async demoteParticipants(participantIds) {
         return await this.client.pupPage.evaluate(async (chatId, participantIds) &#x3D;&gt; {
-            const chat &#x3D; await window.WWebJSBt.getChat(chatId, { getAsModel: false });
+            const chat &#x3D; await window.WWebJS.getChat(chatId, { getAsModel: false });
             const participants &#x3D; (await Promise.all(participantIds.map(async p &#x3D;&gt; {
-                const { lid, phone } &#x3D; await window.WWebJSBt.enforceLidAndPnRetrieval(p);
+                const { lid, phone } &#x3D; await window.WWebJS.enforceLidAndPnRetrieval(p);
 
                 return chat.groupMetadata.participants.get(lid?._serialized) ||
                     chat.groupMetadata.participants.get(phone?._serialized);
@@ -328,7 +328,7 @@ class GroupChat extends Chat {
      */
     async setAddMembersAdminsOnly(adminsOnly&#x3D;true) {
         const success &#x3D; await this.client.pupPage.evaluate(async (groupId, adminsOnly) &#x3D;&gt; {
-            const chat &#x3D; await window.WWebJSBt.getChat(groupId, { getAsModel: false });
+            const chat &#x3D; await window.WWebJS.getChat(groupId, { getAsModel: false });
             try {
                 await window.Store.GroupUtils.setGroupProperty(chat, &#x27;member_add_mode&#x27;, adminsOnly ? 0 : 1);
                 return true;
@@ -349,7 +349,7 @@ class GroupChat extends Chat {
      */
     async setMessagesAdminsOnly(adminsOnly&#x3D;true) {
         const success &#x3D; await this.client.pupPage.evaluate(async (chatId, adminsOnly) &#x3D;&gt; {
-            const chat &#x3D; await window.WWebJSBt.getChat(chatId, { getAsModel: false });
+            const chat &#x3D; await window.WWebJS.getChat(chatId, { getAsModel: false });
             try {
                 await window.Store.GroupUtils.setGroupProperty(chat, &#x27;announcement&#x27;, adminsOnly ? 1 : 0);
                 return true;
@@ -372,7 +372,7 @@ class GroupChat extends Chat {
      */
     async setInfoAdminsOnly(adminsOnly&#x3D;true) {
         const success &#x3D; await this.client.pupPage.evaluate(async (chatId, adminsOnly) &#x3D;&gt; {
-            const chat &#x3D; await window.WWebJSBt.getChat(chatId, { getAsModel: false });
+            const chat &#x3D; await window.WWebJS.getChat(chatId, { getAsModel: false });
             try {
                 await window.Store.GroupUtils.setGroupProperty(chat, &#x27;restrict&#x27;, adminsOnly ? 1 : 0);
                 return true;
@@ -394,7 +394,7 @@ class GroupChat extends Chat {
      */
     async deletePicture() {
         const success &#x3D; await this.client.pupPage.evaluate((chatid) &#x3D;&gt; {
-            return window.WWebJSBt.deletePicture(chatid);
+            return window.WWebJS.deletePicture(chatid);
         }, this.id._serialized);
 
         return success;
@@ -407,7 +407,7 @@ class GroupChat extends Chat {
      */
     async setPicture(media) {
         const success &#x3D; await this.client.pupPage.evaluate((chatid, media) &#x3D;&gt; {
-            return window.WWebJSBt.setPicture(chatid, media);
+            return window.WWebJS.setPicture(chatid, media);
         }, this.id._serialized, media);
 
         return success;
@@ -506,7 +506,7 @@ class GroupChat extends Chat {
      */
     async leave() {
         await this.client.pupPage.evaluate(async chatId &#x3D;&gt; {
-            const chat &#x3D; await window.WWebJSBt.getChat(chatId, { getAsModel: false });
+            const chat &#x3D; await window.WWebJS.getChat(chatId, { getAsModel: false });
             return window.Store.GroupUtils.sendExitGroup(chat);
         }, this.id._serialized);
     }

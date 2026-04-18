@@ -14,7 +14,7 @@ class InterfaceController {
      */
     async openChatWindow(chatId) {
         return await this.pupPage.evaluate(async (chatId) => {
-            const chat = await window.WWebJSBt.getChat(chatId, {
+            const chat = await window.WWebJS.getChat(chatId, {
                 getAsModel: false,
             });
             return await window
@@ -29,7 +29,7 @@ class InterfaceController {
      */
     async openChatDrawer(chatId) {
         await this.pupPage.evaluate(async (chatId) => {
-            let chat = await window.WWebJSBt.getChat(chatId, {
+            let chat = await window.WWebJS.getChat(chatId, {
                 getAsModel: false,
             });
             await window.require('WAWebCmd').Cmd.openDrawerMid(chat);
@@ -42,7 +42,7 @@ class InterfaceController {
      */
     async openChatSearch(chatId) {
         await this.pupPage.evaluate(async (chatId) => {
-            let chat = await window.WWebJSBt.getChat(chatId, {
+            let chat = await window.WWebJS.getChat(chatId, {
                 getAsModel: false,
             });
             await window.require('WAWebCmd').Cmd.chatSearch(chat);

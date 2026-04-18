@@ -132,14 +132,14 @@ class Channel extends Base {
      */
     async getSubscribers(limit) {
         return await this.client.pupPage.evaluate(async (channelId, limit) &#x3D;&gt; {
-            const channel &#x3D; await window.WWebJSBt.getChat(channelId, { getAsModel: false });
+            const channel &#x3D; await window.WWebJS.getChat(channelId, { getAsModel: false });
             if (!channel) return [];
             !limit &amp;amp;&amp;amp; (limit &#x3D; window.Store.ChannelUtils.getMaxSubscriberNumber());
             const response &#x3D; await window.Store.ChannelSubscribers.mexFetchNewsletterSubscribers(channelId, limit);
             const contacts &#x3D; window.Store.ChannelSubscribers.getSubscribersInContacts(response.subscribers);
             return Promise.all(contacts.map((obj) &#x3D;&gt; ({
                 ...obj,
-                contact: window.WWebJSBt.getContactModel(obj.contact)
+                contact: window.WWebJS.getContactModel(obj.contact)
             })));
         }, this.id._serialized, limit);
     }
@@ -329,7 +329,7 @@ class Channel extends Base {
                 return true;
             };
 
-            const channel &#x3D; await window.WWebJSBt.getChat(channelId, { getAsModel: false });
+            const channel &#x3D; await window.WWebJS.getChat(channelId, { getAsModel: false });
             let msgs &#x3D; channel.msgs.getModelsArray().filter(msgFilter);
 
             if (searchOptions &amp;amp;&amp;amp; searchOptions.limit &gt; 0) {
@@ -345,7 +345,7 @@ class Channel extends Base {
                 }
             }
 
-            return msgs.map(m &#x3D;&gt; window.WWebJSBt.getMessageModel(m));
+            return msgs.map(m &#x3D;&gt; window.WWebJS.getMessageModel(m));
 
         }, this.id._serialized, searchOptions);
 
@@ -368,11 +368,11 @@ class Channel extends Base {
      */
     async _setChannelMetadata(value, property) {
         return await this.client.pupPage.evaluate(async (channelId, value, property) &#x3D;&gt; {
-            const channel &#x3D; await window.WWebJSBt.getChat(channelId, { getAsModel: false });
+            const channel &#x3D; await window.WWebJS.getChat(channelId, { getAsModel: false });
             if (!channel) return false;
             if (property.editPicture) {
                 value.picture &#x3D; value.picture
-                    ? await window.WWebJSBt.cropAndResizeImage(value.picture, {
+                    ? await window.WWebJS.cropAndResizeImage(value.picture, {
                         asDataUrl: true,
                         mimetype: &#x27;image/jpeg&#x27;,
                         size: 640,

@@ -245,18 +245,18 @@ class Client extends EventEmitter {
 
                 await this.pupPage.evaluate(async () => {
                     const registrationInfo =
-                        await window.AuthStoreBt.RegistrationUtils.waSignalStore.getRegistrationInfo();
+                        await window.AuthStore.RegistrationUtils.waSignalStore.getRegistrationInfo();
                     const noiseKeyPair =
-                        await window.AuthStoreBt.RegistrationUtils.waNoiseInfo.get();
-                    const staticKeyB64 = window.AuthStoreBt.Base64Tools.encodeB64(
+                        await window.AuthStore.RegistrationUtils.waNoiseInfo.get();
+                    const staticKeyB64 = window.AuthStore.Base64Tools.encodeB64(
                         noiseKeyPair.staticKeyPair.pubKey,
                     );
                     const identityKeyB64 =
-                        window.AuthStoreBt.Base64Tools.encodeB64(
+                        window.AuthStore.Base64Tools.encodeB64(
                             registrationInfo.identityKeyPair.pubKey,
                         );
                     const platform =
-                        window.AuthStoreBt.RegistrationUtils.DEVICE_PLATFORM;
+                        window.AuthStore.RegistrationUtils.DEVICE_PLATFORM;
                     const getQR = (ref) =>
                         ref +
                         ',' +
@@ -269,8 +269,8 @@ class Client extends EventEmitter {
                             .getADVSecretKey() +
                         ',' +
                         platform;
-                    window.onQRChangedEvent(getQR(window.AuthStoreBt.Conn.ref)); // initial qr
-                    window.AuthStoreBt.Conn.on('change:ref', (_, ref) => {
+                    window.onQRChangedEvent(getQR(window.AuthStore.Conn.ref)); // initial qr
+                    window.AuthStore.Conn.on('change:ref', (_, ref) => {
                         window.onQRChangedEvent(getQR(ref));
                     }); // future QR changes
                 });
@@ -304,7 +304,7 @@ class Client extends EventEmitter {
                 this.emit(Events.AUTHENTICATED, authEventPayload);
 
                 const injected = await this.pupPage.evaluate(async () => {
-                    return typeof window.WWebJSBt !== 'undefined';
+                    return typeof window.WWebJS !== 'undefined';
                 });
 
                 if (!injected) {
@@ -328,9 +328,9 @@ class Client extends EventEmitter {
                     let start = Date.now();
                     let res = false;
                     while (start > Date.now() - 30000) {
-                        // Check window.WWebJSBt Injection
+                        // Check window.WWebJS Injection
                         res = await this.pupPage.evaluate(
-                            'window.WWebJSBt != undefined',
+                            'window.WWebJS != undefined',
                         );
                         if (res) {
                             break;
@@ -410,7 +410,7 @@ class Client extends EventEmitter {
             const Cmd = window.require('WAWebCmd').Cmd;
             Cmd.on('offline_progress_update_from_bridge', () => {
                 window.onOfflineProgressUpdateEvent(
-                    window.AuthStoreBt.OfflineMessageHandler.getOfflineDeliveryProgress(),
+                    window.AuthStore.OfflineMessageHandler.getOfflineDeliveryProgress(),
                 );
             });
             Cmd.on('logout', async () => {
@@ -526,16 +526,16 @@ class Client extends EventEmitter {
         return await this.pupPage.evaluate(
             async (phoneNumber, showNotification, intervalMs) => {
                 const getCode = async () => {
-                    while (!window.AuthStoreBt.PairingCodeLinkUtils) {
+                    while (!window.AuthStore.PairingCodeLinkUtils) {
                         await new Promise((resolve) =>
                             setTimeout(resolve, 250),
                         );
                     }
-                    window.AuthStoreBt.PairingCodeLinkUtils.setPairingType(
+                    window.AuthStore.PairingCodeLinkUtils.setPairingType(
                         'ALT_DEVICE_LINKING',
                     );
-                    await window.AuthStoreBt.PairingCodeLinkUtils.initializeAltDeviceLinking();
-                    return window.AuthStoreBt.PairingCodeLinkUtils.startAltLinkingFlow(
+                    await window.AuthStore.PairingCodeLinkUtils.initializeAltDeviceLinking();
+                    return window.AuthStore.PairingCodeLinkUtils.startAltLinkingFlow(
                         phoneNumber,
                         showNotification,
                     );
@@ -1028,34 +1028,34 @@ class Client extends EventEmitter {
             gatingUtils.isPlaceholderMessageResendEnabled = () => true;
 
             Msg.on('change', (msg) => {
-                window.onChangeMessageEvent(window.WWebJSBt.getMessageModel(msg));
+                window.onChangeMessageEvent(window.WWebJS.getMessageModel(msg));
             });
             Msg.on('change:type', (msg) => {
                 window.onChangeMessageTypeEvent(
-                    window.WWebJSBt.getMessageModel(msg),
+                    window.WWebJS.getMessageModel(msg),
                 );
             });
             Msg.on('change:ack', (msg, ack) => {
                 window.onMessageAckEvent(
-                    window.WWebJSBt.getMessageModel(msg),
+                    window.WWebJS.getMessageModel(msg),
                     ack,
                 );
             });
             Msg.on('change:isUnsentMedia', (msg, unsent) => {
                 if (msg.id.fromMe && !unsent)
                     window.onMessageMediaUploadedEvent(
-                        window.WWebJSBt.getMessageModel(msg),
+                        window.WWebJS.getMessageModel(msg),
                     );
             });
             Msg.on('remove', (msg) => {
                 if (msg.isNewMsg)
                     window.onRemoveMessageEvent(
-                        window.WWebJSBt.getMessageModel(msg),
+                        window.WWebJS.getMessageModel(msg),
                     );
             });
             Msg.on('change:body change:caption', (msg, newBody, prevBody) => {
                 window.onEditMessageEvent(
-                    window.WWebJSBt.getMessageModel(msg),
+                    window.WWebJS.getMessageModel(msg),
                     newBody,
                     prevBody,
                 );
@@ -1096,12 +1096,12 @@ class Client extends EventEmitter {
             }
             Chat.on('remove', async (chat) => {
                 window.onRemoveChatEvent(
-                    await window.WWebJSBt.getChatModel(chat),
+                    await window.WWebJS.getChatModel(chat),
                 );
             });
             Chat.on('change:archive', async (chat, currState, prevState) => {
                 window.onArchiveChatEvent(
-                    await window.WWebJSBt.getChatModel(chat),
+                    await window.WWebJS.getChatModel(chat),
                     currState,
                     prevState,
                 );
@@ -1130,13 +1130,13 @@ class Client extends EventEmitter {
 
                 if (msg.type !== 'ciphertext') {
                     window.onAddMessageEvent(
-                        window.WWebJSBt.getMessageModel(msg),
+                        window.WWebJS.getMessageModel(msg),
                     );
                     return;
                 }
 
                 window.onAddMessageCiphertextEvent(
-                    window.WWebJSBt.getMessageModel(msg),
+                    window.WWebJS.getMessageModel(msg),
                 );
 
                 if (msg.subtype && msg.subtype.endsWith('_unavailable_fanout'))
@@ -1147,7 +1147,7 @@ class Client extends EventEmitter {
                 const failTimer = setTimeout(() => {
                     if (msg.type !== 'ciphertext') return;
                     window.onCiphertextFailedEvent(
-                        window.WWebJSBt.getMessageModel(msg),
+                        window.WWebJS.getMessageModel(msg),
                     );
                 }, 15000);
 
@@ -1156,7 +1156,7 @@ class Client extends EventEmitter {
                     pendingResend.delete(_msg);
                     if (_msg.type === 'revoked') return;
                     window.onAddMessageEvent(
-                        window.WWebJSBt.getMessageModel(_msg),
+                        window.WWebJS.getMessageModel(_msg),
                     );
                 });
             });
@@ -1164,7 +1164,7 @@ class Client extends EventEmitter {
                 window.onChatUnreadCountEvent(chat);
             });
 
-            window.WWebJSBt.injectToFunction(
+            window.WWebJS.injectToFunction(
                 {
                     module: 'WAWebAddonReactionTableMode',
                     function: 'reactionTableMode.bulkUpsert',
@@ -1192,7 +1192,7 @@ class Client extends EventEmitter {
                 },
             );
 
-            window.WWebJSBt.injectToFunction(
+            window.WWebJS.injectToFunction(
                 {
                     module: 'WAWebAddonPollVoteTableMode',
                     function: 'pollVoteTableMode.bulkUpsert',
@@ -1337,7 +1337,7 @@ class Client extends EventEmitter {
      */
     async sendSeen(chatId) {
         return await this.pupPage.evaluate(async (chatId) => {
-            return window.WWebJSBt.sendSeen(chatId);
+            return window.WWebJS.sendSeen(chatId);
         }, chatId);
     }
 
@@ -1531,22 +1531,22 @@ class Client extends EventEmitter {
 
         const sentMsg = await this.pupPage.evaluate(
             async (chatId, content, options, sendSeen) => {
-                const chat = await window.WWebJSBt.getChat(chatId, {
+                const chat = await window.WWebJS.getChat(chatId, {
                     getAsModel: false,
                 });
 
                 if (!chat) return null;
 
                 if (sendSeen) {
-                    await window.WWebJSBt.sendSeen(chatId);
+                    await window.WWebJS.sendSeen(chatId);
                 }
 
-                const msg = await window.WWebJSBt.sendMessage(
+                const msg = await window.WWebJS.sendMessage(
                     chat,
                     content,
                     options,
                 );
-                return msg ? window.WWebJSBt.getMessageModel(msg) : undefined;
+                return msg ? window.WWebJS.getMessageModel(msg) : undefined;
             },
             chatId,
             content,
@@ -1619,7 +1619,7 @@ class Client extends EventEmitter {
                         invitee: chatWid,
                         inviteMessage: options.comment,
                         base64Thumb:
-                            await window.WWebJSBt.getProfilePicThumbToBase64(
+                            await window.WWebJS.getProfilePicThumbToBase64(
                                 channelWid,
                             ),
                     });
@@ -1648,7 +1648,7 @@ class Client extends EventEmitter {
                     .require('WAWebCollections')
                     .Msg.search(query, page, count, remote);
                 return messages.map((msg) =>
-                    window.WWebJSBt.getMessageModel(msg),
+                    window.WWebJS.getMessageModel(msg),
                 );
             },
             query,
@@ -1666,7 +1666,7 @@ class Client extends EventEmitter {
      */
     async getChats() {
         const chats = await this.pupPage.evaluate(async () => {
-            return await window.WWebJSBt.getChats();
+            return await window.WWebJS.getChats();
         });
 
         return chats.map((chat) => ChatFactory.create(this, chat));
@@ -1678,7 +1678,7 @@ class Client extends EventEmitter {
      */
     async getChannels() {
         const channels = await this.pupPage.evaluate(async () => {
-            return await window.WWebJSBt.getChannels();
+            return await window.WWebJS.getChannels();
         });
 
         return channels.map((channel) => ChatFactory.create(this, channel));
@@ -1691,7 +1691,7 @@ class Client extends EventEmitter {
      */
     async getChatById(chatId) {
         const chat = await this.pupPage.evaluate(async (chatId) => {
-            return await window.WWebJSBt.getChat(chatId);
+            return await window.WWebJS.getChat(chatId);
         }, chatId);
         return chat ? ChatFactory.create(this, chat) : undefined;
     }
@@ -1706,12 +1706,12 @@ class Client extends EventEmitter {
             let channelMetadata;
             try {
                 channelMetadata =
-                    await window.WWebJSBt.getChannelMetadata(inviteCode);
+                    await window.WWebJS.getChannelMetadata(inviteCode);
             } catch (err) {
                 if (err.name === 'ServerStatusCodeError') return null;
                 throw err;
             }
-            return await window.WWebJSBt.getChat(channelMetadata.id);
+            return await window.WWebJS.getChat(channelMetadata.id);
         }, inviteCode);
 
         return channel ? ChatFactory.create(this, channel) : undefined;
@@ -1723,7 +1723,7 @@ class Client extends EventEmitter {
      */
     async getContacts() {
         let contacts = await this.pupPage.evaluate(() => {
-            return window.WWebJSBt.getContacts();
+            return window.WWebJS.getContacts();
         });
 
         return contacts.map((contact) => ContactFactory.create(this, contact));
@@ -1736,7 +1736,7 @@ class Client extends EventEmitter {
      */
     async getContactById(contactId) {
         let contact = await this.pupPage.evaluate((contactId) => {
-            return window.WWebJSBt.getContact(contactId);
+            return window.WWebJS.getContact(contactId);
         }, contactId);
 
         return ContactFactory.create(this, contact);
@@ -1750,7 +1750,7 @@ class Client extends EventEmitter {
     async getMessageById(messageId) {
         const msg = await this.pupPage.evaluate(async (messageId) => {
             let msg = window.require('WAWebCollections').Msg.get(messageId);
-            if (msg) return window.WWebJSBt.getMessageModel(msg);
+            if (msg) return window.WWebJS.getMessageModel(msg);
 
             const params = messageId.split('_');
             if (params.length !== 3 && params.length !== 4)
@@ -1762,7 +1762,7 @@ class Client extends EventEmitter {
             if (messagesObject && messagesObject.messages.length)
                 msg = messagesObject.messages[0];
 
-            if (msg) return window.WWebJSBt.getMessageModel(msg);
+            if (msg) return window.WWebJS.getMessageModel(msg);
         }, messageId);
 
         if (msg) return new Message(this, msg);
@@ -1804,7 +1804,7 @@ class Client extends EventEmitter {
                 ? []
                 : await Promise.all(
                       pinnedMsgs.map((msg) =>
-                          window.WWebJSBt.getMessageModel(msg),
+                          window.WWebJS.getMessageModel(msg),
                       ),
                   );
         }, chatId);
@@ -2005,7 +2005,7 @@ class Client extends EventEmitter {
      */
     async archiveChat(chatId) {
         return await this.pupPage.evaluate(async (chatId) => {
-            let chat = await window.WWebJSBt.getChat(chatId, {
+            let chat = await window.WWebJS.getChat(chatId, {
                 getAsModel: false,
             });
             await window.require('WAWebCmd').Cmd.archiveChat(chat, true);
@@ -2019,7 +2019,7 @@ class Client extends EventEmitter {
      */
     async unarchiveChat(chatId) {
         return await this.pupPage.evaluate(async (chatId) => {
-            let chat = await window.WWebJSBt.getChat(chatId, {
+            let chat = await window.WWebJS.getChat(chatId, {
                 getAsModel: false,
             });
             await window.require('WAWebCmd').Cmd.archiveChat(chat, false);
@@ -2033,7 +2033,7 @@ class Client extends EventEmitter {
      */
     async pinChat(chatId) {
         return this.pupPage.evaluate(async (chatId) => {
-            let chat = await window.WWebJSBt.getChat(chatId, {
+            let chat = await window.WWebJS.getChat(chatId, {
                 getAsModel: false,
             });
             if (chat.pin) {
@@ -2060,7 +2060,7 @@ class Client extends EventEmitter {
      */
     async unpinChat(chatId) {
         return this.pupPage.evaluate(async (chatId) => {
-            let chat = await window.WWebJSBt.getChat(chatId, {
+            let chat = await window.WWebJS.getChat(chatId, {
                 getAsModel: false,
             });
             if (!chat.pin) {
@@ -2129,7 +2129,7 @@ class Client extends EventEmitter {
      */
     async markChatUnread(chatId) {
         await this.pupPage.evaluate(async (chatId) => {
-            let chat = await window.WWebJSBt.getChat(chatId, {
+            let chat = await window.WWebJS.getChat(chatId, {
                 getAsModel: false,
             });
             await window.require('WAWebCmd').Cmd.markChatUnread(chat, true);
@@ -2144,7 +2144,7 @@ class Client extends EventEmitter {
     async getProfilePicUrl(contactId) {
         const profilePic = await this.pupPage.evaluate(async (contactId) => {
             try {
-                const chat = await window.WWebJSBt.getChat(contactId);
+                const chat = await window.WWebJS.getChat(contactId);
                 return await window
                     .require('WAWebContactProfilePicThumbBridge')
                     .requestProfilePicFromServer(chat);
@@ -2402,7 +2402,7 @@ class Client extends EventEmitter {
                                 participant.invite_code,
                                 participant.invite_code_exp,
                                 comment,
-                                await window.WWebJSBt.getProfilePicThumbToBase64(
+                                await window.WWebJS.getProfilePicThumbToBase64(
                                     createGroupResult.wid,
                                 ),
                             );
@@ -2481,7 +2481,7 @@ class Client extends EventEmitter {
                 }
 
                 if (picture) {
-                    picture = await window.WWebJSBt.cropAndResizeImage(picture, {
+                    picture = await window.WWebJS.cropAndResizeImage(picture, {
                         asDataUrl: true,
                         mimetype: 'image/jpeg',
                         size: 640,
@@ -2527,7 +2527,7 @@ class Client extends EventEmitter {
      */
     async subscribeToChannel(channelId) {
         return await this.pupPage.evaluate(async (channelId) => {
-            return await window.WWebJSBt.subscribeToUnsubscribeFromChannel(
+            return await window.WWebJS.subscribeToUnsubscribeFromChannel(
                 channelId,
                 'Subscribe',
             );
@@ -2549,7 +2549,7 @@ class Client extends EventEmitter {
     async unsubscribeFromChannel(channelId, options) {
         return await this.pupPage.evaluate(
             async (channelId, options) => {
-                return await window.WWebJSBt.subscribeToUnsubscribeFromChannel(
+                return await window.WWebJS.subscribeToUnsubscribeFromChannel(
                     channelId,
                     'Unsubscribe',
                     options,
@@ -2577,7 +2577,7 @@ class Client extends EventEmitter {
     async transferChannelOwnership(channelId, newOwnerId, options = {}) {
         return await this.pupPage.evaluate(
             async (channelId, newOwnerId, options) => {
-                const channel = await window.WWebJSBt.getChat(channelId, {
+                const channel = await window.WWebJS.getChat(channelId, {
                     getAsModel: false,
                 });
                 const newOwner =
@@ -2705,7 +2705,7 @@ class Client extends EventEmitter {
                 return channels
                     ? await Promise.all(
                           channels.map((channel) =>
-                              window.WWebJSBt.getChatModel(channel, {
+                              window.WWebJS.getChatModel(channel, {
                                   isChannel: true,
                               }),
                           ),
@@ -2723,7 +2723,7 @@ class Client extends EventEmitter {
      */
     async deleteChannel(channelId) {
         return await this.pupPage.evaluate(async (channelId) => {
-            const channel = await window.WWebJSBt.getChat(channelId, {
+            const channel = await window.WWebJS.getChat(channelId, {
                 getAsModel: false,
             });
             if (!channel) return false;
@@ -2745,7 +2745,7 @@ class Client extends EventEmitter {
      */
     async getLabels() {
         const labels = await this.pupPage.evaluate(async () => {
-            return window.WWebJSBt.getLabels();
+            return window.WWebJS.getLabels();
         });
 
         return labels.map((data) => new Label(this, data));
@@ -2757,7 +2757,7 @@ class Client extends EventEmitter {
      */
     async getBroadcasts() {
         const broadcasts = await this.pupPage.evaluate(async () => {
-            return window.WWebJSBt.getAllStatuses();
+            return window.WWebJS.getAllStatuses();
         });
         return broadcasts.map((data) => new Broadcast(this, data));
     }
@@ -2781,7 +2781,7 @@ class Client extends EventEmitter {
                 status = null;
             }
 
-            if (status) return window.WWebJSBt.getStatusModel(status);
+            if (status) return window.WWebJS.getStatusModel(status);
         }, contactId);
         return new Broadcast(this, broadcast);
     }
@@ -2823,7 +2823,7 @@ class Client extends EventEmitter {
      */
     async getLabelById(labelId) {
         const label = await this.pupPage.evaluate(async (labelId) => {
-            return window.WWebJSBt.getLabel(labelId);
+            return window.WWebJS.getLabel(labelId);
         }, labelId);
 
         return new Label(this, label);
@@ -2836,7 +2836,7 @@ class Client extends EventEmitter {
      */
     async getChatLabels(chatId) {
         const labels = await this.pupPage.evaluate(async (chatId) => {
-            return window.WWebJSBt.getChatLabels(chatId);
+            return window.WWebJS.getChatLabels(chatId);
         }, chatId);
 
         return labels.map((data) => new Label(this, data));
@@ -2873,7 +2873,7 @@ class Client extends EventEmitter {
                 .Blocklist.getModelsArray()
                 .map((a) => a.id._serialized);
             return Promise.all(
-                chatIds.map((id) => window.WWebJSBt.getContact(id)),
+                chatIds.map((id) => window.WWebJS.getContact(id)),
             );
         });
 
@@ -2890,7 +2890,7 @@ class Client extends EventEmitter {
     async setProfilePicture(media) {
         const success = await this.pupPage.evaluate(
             (chatid, media) => {
-                return window.WWebJSBt.setPicture(chatid, media);
+                return window.WWebJS.setPicture(chatid, media);
             },
             this.info.wid._serialized,
             media,
@@ -2905,7 +2905,7 @@ class Client extends EventEmitter {
      */
     async deleteProfilePicture() {
         const success = await this.pupPage.evaluate((chatid) => {
-            return window.WWebJSBt.deletePicture(chatid);
+            return window.WWebJS.deletePicture(chatid);
         }, this.info.wid._serialized);
 
         return success;
@@ -2927,7 +2927,7 @@ class Client extends EventEmitter {
                 ) {
                     throw '[LT01] Only Whatsapp business';
                 }
-                const labels = window.WWebJSBt.getLabels().filter(
+                const labels = window.WWebJS.getLabels().filter(
                     (e) => labelIds.find((l) => l == e.id) !== undefined,
                 );
                 const chats = window
@@ -3007,7 +3007,7 @@ class Client extends EventEmitter {
         return await this.pupPage.evaluate(
             async (groupId, options) => {
                 const { requesterIds = null, sleep = [250, 500] } = options;
-                return await window.WWebJSBt.membershipRequestAction(
+                return await window.WWebJS.membershipRequestAction(
                     groupId,
                     'Approve',
                     requesterIds,
@@ -3029,7 +3029,7 @@ class Client extends EventEmitter {
         return await this.pupPage.evaluate(
             async (groupId, options) => {
                 const { requesterIds = null, sleep = [250, 500] } = options;
-                return await window.WWebJSBt.membershipRequestAction(
+                return await window.WWebJS.membershipRequestAction(
                     groupId,
                     'Reject',
                     requesterIds,
@@ -3310,7 +3310,7 @@ class Client extends EventEmitter {
             return await Promise.all(
                 userIds.map(async (userId) => {
                     const { lid, phone } =
-                        await window.WWebJSBt.enforceLidAndPnRetrieval(userId);
+                        await window.WWebJS.enforceLidAndPnRetrieval(userId);
 
                     return {
                         lid: lid?._serialized,

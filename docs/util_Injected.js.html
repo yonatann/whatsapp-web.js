@@ -180,9 +180,9 @@ exports.ExposeStore &#x3D; (moduleRaidStr) &#x3D;&gt; {
 };
 
 exports.LoadUtils &#x3D; () &#x3D;&gt; {
-    window.WWebJSBt &#x3D; {};
+    window.WWebJS &#x3D; {};
 
-    window.WWebJSBt.sendSeen &#x3D; async (chatId) &#x3D;&gt; {
+    window.WWebJS.sendSeen &#x3D; async (chatId) &#x3D;&gt; {
         let chat &#x3D; window.Store.Chat.get(chatId);
         if (chat !&#x3D;&#x3D; undefined) {
             await window.Store.SendSeen.sendSeen(chat, false);
@@ -192,12 +192,12 @@ exports.LoadUtils &#x3D; () &#x3D;&gt; {
 
     };
 
-    window.WWebJSBt.sendMessage &#x3D; async (chat, content, options &#x3D; {}) &#x3D;&gt; {
+    window.WWebJS.sendMessage &#x3D; async (chat, content, options &#x3D; {}) &#x3D;&gt; {
         let attOptions &#x3D; {};
         if (options.attachment) {
             attOptions &#x3D; options.sendMediaAsSticker
-                ? await window.WWebJSBt.processStickerData(options.attachment)
-                : await window.WWebJSBt.processMediaData(options.attachment, {
+                ? await window.WWebJS.processStickerData(options.attachment)
+                : await window.WWebJS.processMediaData(options.attachment, {
                     forceVoice: options.sendAudioAsVoice,
                     forceDocument: options.sendMediaAsDocument,
                     forceGif: options.sendVideoAsGif
@@ -396,7 +396,7 @@ exports.LoadUtils &#x3D; () &#x3D;&gt; {
         return window.Store.Msg.get(newMsgId._serialized);
     };
 	
-    window.WWebJSBt.editMessage &#x3D; async (msg, content, options &#x3D; {}) &#x3D;&gt; {
+    window.WWebJS.editMessage &#x3D; async (msg, content, options &#x3D; {}) &#x3D;&gt; {
 
         const extraOptions &#x3D; options.extraOptions || {};
         delete options.extraOptions;
@@ -430,13 +430,13 @@ exports.LoadUtils &#x3D; () &#x3D;&gt; {
         return window.Store.Msg.get(msg.id._serialized);
     };
 
-    window.WWebJSBt.toStickerData &#x3D; async (mediaInfo) &#x3D;&gt; {
+    window.WWebJS.toStickerData &#x3D; async (mediaInfo) &#x3D;&gt; {
         if (mediaInfo.mimetype &#x3D;&#x3D; &#x27;image/webp&#x27;) return mediaInfo;
 
-        const file &#x3D; window.WWebJSBt.mediaInfoToFile(mediaInfo);
+        const file &#x3D; window.WWebJS.mediaInfoToFile(mediaInfo);
         const webpSticker &#x3D; await window.Store.StickerTools.toWebpSticker(file);
         const webpBuffer &#x3D; await webpSticker.arrayBuffer();
-        const data &#x3D; window.WWebJSBt.arrayBufferToBase64(webpBuffer);
+        const data &#x3D; window.WWebJS.arrayBufferToBase64(webpBuffer);
 
         return {
             mimetype: &#x27;image/webp&#x27;,
@@ -444,12 +444,12 @@ exports.LoadUtils &#x3D; () &#x3D;&gt; {
         };
     };
 
-    window.WWebJSBt.processStickerData &#x3D; async (mediaInfo) &#x3D;&gt; {
+    window.WWebJS.processStickerData &#x3D; async (mediaInfo) &#x3D;&gt; {
         if (mediaInfo.mimetype !&#x3D;&#x3D; &#x27;image/webp&#x27;) throw new Error(&#x27;Invalid media type&#x27;);
 
-        const file &#x3D; window.WWebJSBt.mediaInfoToFile(mediaInfo);
-        let filehash &#x3D; await window.WWebJSBt.getFileHash(file);
-        let mediaKey &#x3D; await window.WWebJSBt.generateHash(32);
+        const file &#x3D; window.WWebJS.mediaInfoToFile(mediaInfo);
+        let filehash &#x3D; await window.WWebJS.getFileHash(file);
+        let mediaKey &#x3D; await window.WWebJS.generateHash(32);
 
         const controller &#x3D; new AbortController();
         const uploadedInfo &#x3D; await window.Store.UploadUtils.encryptAndUpload({
@@ -472,8 +472,8 @@ exports.LoadUtils &#x3D; () &#x3D;&gt; {
         return stickerInfo;
     };
 
-    window.WWebJSBt.processMediaData &#x3D; async (mediaInfo, { forceVoice, forceDocument, forceGif }) &#x3D;&gt; {
-        const file &#x3D; window.WWebJSBt.mediaInfoToFile(mediaInfo);
+    window.WWebJS.processMediaData &#x3D; async (mediaInfo, { forceVoice, forceDocument, forceGif }) &#x3D;&gt; {
+        const file &#x3D; window.WWebJS.mediaInfoToFile(mediaInfo);
         const mData &#x3D; await window.Store.OpaqueData.createFromData(file, file.type);
         const mediaPrep &#x3D; window.Store.MediaPrep.prepRawMedia(mData, { asDocument: forceDocument });
         const mediaData &#x3D; await mediaPrep.waitForPrep();
@@ -488,7 +488,7 @@ exports.LoadUtils &#x3D; () &#x3D;&gt; {
             mediaData.type &#x3D; &#x27;ptt&#x27;;
             const waveform &#x3D; mediaObject.contentInfo.waveform;
             mediaData.waveform &#x3D;
-                waveform ?? await window.WWebJSBt.generateWaveform(file);
+                waveform ?? await window.WWebJS.generateWaveform(file);
         }
 
         if (forceGif &amp;amp;&amp;amp; mediaData.type &#x3D;&#x3D;&#x3D; &#x27;video&#x27;) {
@@ -535,7 +535,7 @@ exports.LoadUtils &#x3D; () &#x3D;&gt; {
         return mediaData;
     };
 
-    window.WWebJSBt.getMessageModel &#x3D; message &#x3D;&gt; {
+    window.WWebJS.getMessageModel &#x3D; message &#x3D;&gt; {
         const msg &#x3D; message.serialize();
 
         msg.isEphemeral &#x3D; message.isEphemeral;
@@ -565,7 +565,7 @@ exports.LoadUtils &#x3D; () &#x3D;&gt; {
     };
 
 
-    window.WWebJSBt.getChatModel &#x3D; async chat &#x3D;&gt; {
+    window.WWebJS.getChatModel &#x3D; async chat &#x3D;&gt; {
 
         let res &#x3D; chat.serialize();
         res.isGroup &#x3D; chat.isGroup;
@@ -582,7 +582,7 @@ exports.LoadUtils &#x3D; () &#x3D;&gt; {
         if (res.msgs &amp;amp;&amp;amp; res.msgs.length) {
             const lastMessage &#x3D; chat.lastReceivedKey ? window.Store.Msg.get(chat.lastReceivedKey._serialized) : null;
             if (lastMessage) {
-                res.lastMessage &#x3D; window.WWebJSBt.getMessageModel(lastMessage);
+                res.lastMessage &#x3D; window.WWebJS.getMessageModel(lastMessage);
             }
         }
         
@@ -593,20 +593,20 @@ exports.LoadUtils &#x3D; () &#x3D;&gt; {
         return res;
     };
 
-    window.WWebJSBt.getChat &#x3D; async chatId &#x3D;&gt; {
+    window.WWebJS.getChat &#x3D; async chatId &#x3D;&gt; {
         const chatWid &#x3D; window.Store.WidFactory.createWid(chatId);
         const chat &#x3D; await window.Store.Chat.find(chatWid);
-        return await window.WWebJSBt.getChatModel(chat);
+        return await window.WWebJS.getChatModel(chat);
     };
 
-    window.WWebJSBt.getChats &#x3D; async () &#x3D;&gt; {
+    window.WWebJS.getChats &#x3D; async () &#x3D;&gt; {
         const chats &#x3D; window.Store.Chat.getModelsArray();
 
-        const chatPromises &#x3D; chats.map(chat &#x3D;&gt; window.WWebJSBt.getChatModel(chat));
+        const chatPromises &#x3D; chats.map(chat &#x3D;&gt; window.WWebJS.getChatModel(chat));
         return await Promise.all(chatPromises);
     };
 
-    window.WWebJSBt.getContactModel &#x3D; contact &#x3D;&gt; {
+    window.WWebJS.getContactModel &#x3D; contact &#x3D;&gt; {
         let res &#x3D; contact.serialize();
         res.isBusiness &#x3D; contact.isBusiness &#x3D;&#x3D;&#x3D; undefined ? false : contact.isBusiness;
 
@@ -662,20 +662,20 @@ exports.LoadUtils &#x3D; () &#x3D;&gt; {
         return res;
     };
 
-    window.WWebJSBt.getContact &#x3D; async contactId &#x3D;&gt; {
+    window.WWebJS.getContact &#x3D; async contactId &#x3D;&gt; {
         const wid &#x3D; window.Store.WidFactory.createWid(contactId);
         const contact &#x3D; await window.Store.Contact.find(wid);
         const bizProfile &#x3D; await window.Store.BusinessProfileCollection.fetchBizProfile(wid);
         bizProfile.profileOptions &amp;amp;&amp;amp; (contact.businessProfile &#x3D; bizProfile);
-        return window.WWebJSBt.getContactModel(contact);
+        return window.WWebJS.getContactModel(contact);
     };
 
-    window.WWebJSBt.getContacts &#x3D; () &#x3D;&gt; {
+    window.WWebJS.getContacts &#x3D; () &#x3D;&gt; {
         const contacts &#x3D; window.Store.Contact.getModelsArray();
-        return contacts.map(contact &#x3D;&gt; window.WWebJSBt.getContactModel(contact));
+        return contacts.map(contact &#x3D;&gt; window.WWebJS.getContactModel(contact));
     };
 
-    window.WWebJSBt.mediaInfoToFile &#x3D; ({ data, mimetype, filename }) &#x3D;&gt; {
+    window.WWebJS.mediaInfoToFile &#x3D; ({ data, mimetype, filename }) &#x3D;&gt; {
         const binaryData &#x3D; window.atob(data);
 
         const buffer &#x3D; new ArrayBuffer(binaryData.length);
@@ -691,7 +691,7 @@ exports.LoadUtils &#x3D; () &#x3D;&gt; {
         });
     };
 
-    window.WWebJSBt.arrayBufferToBase64 &#x3D; (arrayBuffer) &#x3D;&gt; {
+    window.WWebJS.arrayBufferToBase64 &#x3D; (arrayBuffer) &#x3D;&gt; {
         let binary &#x3D; &#x27;&#x27;;
         const bytes &#x3D; new Uint8Array(arrayBuffer);
         const len &#x3D; bytes.byteLength;
@@ -701,7 +701,7 @@ exports.LoadUtils &#x3D; () &#x3D;&gt; {
         return window.btoa(binary);
     };
 
-    window.WWebJSBt.arrayBufferToBase64Async &#x3D; (arrayBuffer) &#x3D;&gt;
+    window.WWebJS.arrayBufferToBase64Async &#x3D; (arrayBuffer) &#x3D;&gt;
         new Promise((resolve, reject) &#x3D;&gt; {
             const blob &#x3D; new Blob([arrayBuffer], {
                 type: &#x27;application/octet-stream&#x27;,
@@ -715,13 +715,13 @@ exports.LoadUtils &#x3D; () &#x3D;&gt; {
             fileReader.readAsDataURL(blob);
         });
 
-    window.WWebJSBt.getFileHash &#x3D; async (data) &#x3D;&gt; {
+    window.WWebJS.getFileHash &#x3D; async (data) &#x3D;&gt; {
         let buffer &#x3D; await data.arrayBuffer();
         const hashBuffer &#x3D; await crypto.subtle.digest(&#x27;SHA-256&#x27;, buffer);
         return btoa(String.fromCharCode(...new Uint8Array(hashBuffer)));
     };
 
-    window.WWebJSBt.generateHash &#x3D; async (length) &#x3D;&gt; {
+    window.WWebJS.generateHash &#x3D; async (length) &#x3D;&gt; {
         var result &#x3D; &#x27;&#x27;;
         var characters &#x3D; &#x27;ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789&#x27;;
         var charactersLength &#x3D; characters.length;
@@ -735,7 +735,7 @@ exports.LoadUtils &#x3D; () &#x3D;&gt; {
      * Referenced from and modified:
      * @see https://github.com/wppconnect-team/wa-js/commit/290ebfefe6021b3d17f7fdfdda5545bb0473b26f
      */
-    window.WWebJSBt.generateWaveform &#x3D; async (audioFile) &#x3D;&gt; {
+    window.WWebJS.generateWaveform &#x3D; async (audioFile) &#x3D;&gt; {
         try {
             const audioData &#x3D; await audioFile.arrayBuffer();
             const audioContext &#x3D; new AudioContext();
@@ -767,7 +767,7 @@ exports.LoadUtils &#x3D; () &#x3D;&gt; {
         }
     };
 
-    window.WWebJSBt.sendClearChat &#x3D; async (chatId) &#x3D;&gt; {
+    window.WWebJS.sendClearChat &#x3D; async (chatId) &#x3D;&gt; {
         let chat &#x3D; window.Store.Chat.get(chatId);
         if (chat !&#x3D;&#x3D; undefined) {
             await window.Store.SendClear.sendClear(chat, false);
@@ -776,7 +776,7 @@ exports.LoadUtils &#x3D; () &#x3D;&gt; {
         return false;
     };
 
-    window.WWebJSBt.sendDeleteChat &#x3D; async (chatId) &#x3D;&gt; {
+    window.WWebJS.sendDeleteChat &#x3D; async (chatId) &#x3D;&gt; {
         let chat &#x3D; window.Store.Chat.get(chatId);
         if (chat !&#x3D;&#x3D; undefined) {
             await window.Store.SendDelete.sendDelete(chat);
@@ -785,7 +785,7 @@ exports.LoadUtils &#x3D; () &#x3D;&gt; {
         return false;
     };
 
-    window.WWebJSBt.sendChatstate &#x3D; async (state, chatId) &#x3D;&gt; {
+    window.WWebJS.sendChatstate &#x3D; async (state, chatId) &#x3D;&gt; {
         if (window.Store.MDBackend) {
             chatId &#x3D; window.Store.WidFactory.createWid(chatId);
         }
@@ -806,34 +806,34 @@ exports.LoadUtils &#x3D; () &#x3D;&gt; {
         return true;
     };
 
-    window.WWebJSBt.getLabelModel &#x3D; label &#x3D;&gt; {
+    window.WWebJS.getLabelModel &#x3D; label &#x3D;&gt; {
         let res &#x3D; label.serialize();
         res.hexColor &#x3D; label.hexColor;
 
         return res;
     };
 
-    window.WWebJSBt.getLabels &#x3D; () &#x3D;&gt; {
+    window.WWebJS.getLabels &#x3D; () &#x3D;&gt; {
         const labels &#x3D; window.Store.Label.getModelsArray();
-        return labels.map(label &#x3D;&gt; window.WWebJSBt.getLabelModel(label));
+        return labels.map(label &#x3D;&gt; window.WWebJS.getLabelModel(label));
     };
 
-    window.WWebJSBt.getLabel &#x3D; (labelId) &#x3D;&gt; {
+    window.WWebJS.getLabel &#x3D; (labelId) &#x3D;&gt; {
         const label &#x3D; window.Store.Label.get(labelId);
-        return window.WWebJSBt.getLabelModel(label);
+        return window.WWebJS.getLabelModel(label);
     };
 
-    window.WWebJSBt.getChatLabels &#x3D; async (chatId) &#x3D;&gt; {
-        const chat &#x3D; await window.WWebJSBt.getChat(chatId);
-        return (chat.labels || []).map(id &#x3D;&gt; window.WWebJSBt.getLabel(id));
+    window.WWebJS.getChatLabels &#x3D; async (chatId) &#x3D;&gt; {
+        const chat &#x3D; await window.WWebJS.getChat(chatId);
+        return (chat.labels || []).map(id &#x3D;&gt; window.WWebJS.getLabel(id));
     };
 
-    window.WWebJSBt.getOrderDetail &#x3D; async (orderId, token, chatId) &#x3D;&gt; {
+    window.WWebJS.getOrderDetail &#x3D; async (orderId, token, chatId) &#x3D;&gt; {
         const chatWid &#x3D; window.Store.WidFactory.createWid(chatId);
         return window.Store.QueryOrder.queryOrder(chatWid, orderId, 80, 80, token);
     };
 
-    window.WWebJSBt.getProductMetadata &#x3D; async (productId) &#x3D;&gt; {
+    window.WWebJS.getProductMetadata &#x3D; async (productId) &#x3D;&gt; {
         let sellerId &#x3D; window.Store.Conn.wid;
         let product &#x3D; await window.Store.QueryProduct.queryProduct(sellerId, productId);
         if (product &amp;amp;&amp;amp; product.data) {
@@ -843,7 +843,7 @@ exports.LoadUtils &#x3D; () &#x3D;&gt; {
         return undefined;
     };
 
-    window.WWebJSBt.rejectCall &#x3D; async (peerJid, id) &#x3D;&gt; {
+    window.WWebJS.rejectCall &#x3D; async (peerJid, id) &#x3D;&gt; {
         peerJid &#x3D; peerJid.split(&#x27;@&#x27;)[0] + &#x27;@s.whatsapp.net&#x27;;
         let userId &#x3D; window.Store.User.getMaybeMeUser().user + &#x27;@s.whatsapp.net&#x27;;
         const stanza &#x3D; window.Store.SocketWap.wap(&#x27;call&#x27;, {
@@ -860,7 +860,7 @@ exports.LoadUtils &#x3D; () &#x3D;&gt; {
         await window.Store.Socket.deprecatedCastStanza(stanza);
     };
 
-    window.WWebJSBt.cropAndResizeImage &#x3D; async (media, options &#x3D; {}) &#x3D;&gt; {
+    window.WWebJS.cropAndResizeImage &#x3D; async (media, options &#x3D; {}) &#x3D;&gt; {
         if (!media.mimetype.includes(&#x27;image&#x27;))
             throw new Error(&#x27;Media is not an image&#x27;);
 
@@ -898,9 +898,9 @@ exports.LoadUtils &#x3D; () &#x3D;&gt; {
         });
     };
 
-    window.WWebJSBt.setPicture &#x3D; async (chatid, media) &#x3D;&gt; {
-        const thumbnail &#x3D; await window.WWebJSBt.cropAndResizeImage(media, { asDataUrl: true, mimetype: &#x27;image/jpeg&#x27;, size: 96 });
-        const profilePic &#x3D; await window.WWebJSBt.cropAndResizeImage(media, { asDataUrl: true, mimetype: &#x27;image/jpeg&#x27;, size: 640 });
+    window.WWebJS.setPicture &#x3D; async (chatid, media) &#x3D;&gt; {
+        const thumbnail &#x3D; await window.WWebJS.cropAndResizeImage(media, { asDataUrl: true, mimetype: &#x27;image/jpeg&#x27;, size: 96 });
+        const profilePic &#x3D; await window.WWebJS.cropAndResizeImage(media, { asDataUrl: true, mimetype: &#x27;image/jpeg&#x27;, size: 640 });
 
         const chatWid &#x3D; window.Store.WidFactory.createWid(chatid);
         try {
@@ -915,7 +915,7 @@ exports.LoadUtils &#x3D; () &#x3D;&gt; {
         }
     };
 
-    window.WWebJSBt.deletePicture &#x3D; async (chatid) &#x3D;&gt; {
+    window.WWebJS.deletePicture &#x3D; async (chatid) &#x3D;&gt; {
         const chatWid &#x3D; window.Store.WidFactory.createWid(chatid);
         try {
             const collection &#x3D; window.Store.ProfilePicThumb.get(chatid);
@@ -929,7 +929,7 @@ exports.LoadUtils &#x3D; () &#x3D;&gt; {
         }
     };
     
-    window.WWebJSBt.getProfilePicThumbToBase64 &#x3D; async (chatWid) &#x3D;&gt; {
+    window.WWebJS.getProfilePicThumbToBase64 &#x3D; async (chatWid) &#x3D;&gt; {
         const profilePicCollection &#x3D; await window.Store.ProfilePicThumb.find(chatWid);
 
         const _readImageAsBase64 &#x3D; (imageBlob) &#x3D;&gt; {
@@ -963,7 +963,7 @@ exports.LoadUtils &#x3D; () &#x3D;&gt; {
         return undefined;
     };
 
-    window.WWebJSBt.getAddParticipantsRpcResult &#x3D; async (groupMetadata, groupWid, participantWid) &#x3D;&gt; {
+    window.WWebJS.getAddParticipantsRpcResult &#x3D; async (groupMetadata, groupWid, participantWid) &#x3D;&gt; {
         const participantLidArgs &#x3D; groupMetadata?.isLidAddressingMode
             ? {
                 phoneNumber: participantWid,
@@ -1028,7 +1028,7 @@ exports.LoadUtils &#x3D; () &#x3D;&gt; {
         return data;
     };
 
-    window.WWebJSBt.membershipRequestAction &#x3D; async (groupId, action, requesterIds, sleep) &#x3D;&gt; {
+    window.WWebJS.membershipRequestAction &#x3D; async (groupId, action, requesterIds, sleep) &#x3D;&gt; {
         const groupWid &#x3D; window.Store.WidFactory.createWid(groupId);
         const group &#x3D; await window.Store.Chat.find(groupWid);
         const toApprove &#x3D; action &#x3D;&#x3D;&#x3D; &#x27;Approve&#x27;;
