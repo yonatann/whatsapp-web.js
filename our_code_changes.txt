@@ -1,0 +1,38 @@
+   this function:
+   D:\dev2\Blueticks\whatsapp-scheduler\src\whatsapp-web.js\src\util\Injected\Utils.js
+   
+    window.WWebJS.sendChatstate = async (state, chatId) => {
+        chatId = window.require('WAWebWidFactory').createWid(chatId);
+
+        const Stream = window.require('WAWebStreamModel').Stream;
+        const ChatState = window.require('WAWebChatStateBridge');
+        switch (state) {
+            case 'typing':
+                // The composing chat-state is only relayed to the recipient when
+                // our presence is "available". When WAWeb runs backgrounded (the
+                // gateway's normal state) presence is unavailable and the server
+                // silently drops the chat-state. Mark available first (as sendSeen
+                // does) and keep it available so the indicator persists.
+                Stream.markAvailable();
+                await ChatState.sendChatStateComposing(chatId);
+                break;
+            case 'recording':
+                Stream.markAvailable();
+                await ChatState.sendChatStateRecording(chatId);
+                break;
+            case 'stop':
+                // Just send `paused` — it cleanly stops the typing indicator.
+                // Do NOT markUnavailable here: that toggles global online→offline
+                // presence, and rapidly flipping available↔unavailable between
+                // consecutive typing/clear cycles makes the recipient's "typing…"
+                // indicator flicker (and leaves a stale presence that only resets
+                // when they reopen the chat). Presence stays available; WhatsApp
+                // marks it away on its own idle timeout.
+                await ChatState.sendChatStatePaused(chatId);
+                break;
+            default:
+                throw 'Invalid chatstate';
+        }
+
+        return true;
+    };

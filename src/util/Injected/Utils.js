@@ -1241,6 +1241,13 @@ exports.LoadUtils = () => {
         let chat = await window.WWebJS.getChat(chatId, { getAsModel: false });
         if (chat !== undefined) {
             await window.require('WAWebChatClearBridge').sendClear(chat, false);
+            // sendClear purges the messages but leaves the chat's in-memory
+            // message collection intact, so the native WA Web conversation panel
+            // doesn't repaint until reload. Emptying the collection (what the
+            // native "Clear chat" confirm flow does) makes the UI clear live.
+            // Best-effort: the purge already succeeded, so a repaint hiccup must
+            // not flip the result to failure.
+            try { chat.msgs?.reset?.([]); } catch (e) { /* repaint is best-effort */ }
             return true;
         }
         return false;
