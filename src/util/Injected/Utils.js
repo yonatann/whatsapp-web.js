@@ -333,7 +333,7 @@ exports.LoadUtils = () => {
                             .vcardGetNameFromParsed(parsed),
                     };
                 }
-            } catch (_) {
+            } catch (ignoredError) {
                 // not a vcard
             }
         }
@@ -361,7 +361,7 @@ exports.LoadUtils = () => {
                 content = options.buttons.body;
                 caption = content;
             } else {
-                caption = options.caption ? options.caption : ' '; //Caption can't be empty
+                caption = options.caption ? options.caption : ' '; // Caption can't be empty
             }
             buttonOptions = {
                 productHeaderImageRejected: false,
@@ -857,7 +857,7 @@ exports.LoadUtils = () => {
                         .require('WAWebCollections')
                         .WAWebNewsletterCollection.find(chatWid);
                 }
-            } catch (err) {
+            } catch (ignoredError) {
                 chat = null;
             }
         } else {
@@ -1105,6 +1105,63 @@ exports.LoadUtils = () => {
         });
     };
 
+    /**
+     * Resolves the media blob and metadata for a message.
+     * Shared by downloadMedia and downloadMediaStream.
+     * @param {string} msgId
+     * @returns {Promise<{blob: Blob, mimetype: string, filename: string, filesize: number}|null>}
+     */
+    window.WWebJS.resolveMediaBlob = async (msgId) => {
+        const { Msg } = window.require('WAWebCollections');
+        const msg =
+            Msg.get(msgId) ||
+            (await Msg.getMessagesById([msgId]))?.messages?.[0];
+
+        if (
+            !msg ||
+            !msg.mediaData ||
+            msg.mediaData.mediaStage === 'REUPLOADING'
+        ) {
+            return null;
+        }
+
+        // Always call internal downloadMedia - never skip based on
+        // mediaStage, because cache eviction can leave stage=RESOLVED
+        // with empty InMemoryMediaBlobCache.
+        await msg.downloadMedia({
+            downloadEvenIfExpensive: true,
+            rmrReason: 1,
+            isUserInitiated: true,
+        });
+
+        if (
+            msg.mediaData.mediaStage.includes('ERROR') ||
+            msg.mediaData.mediaStage === 'FETCHING'
+        ) {
+            return null;
+        }
+
+        const cached = window
+            .require('WAWebMediaInMemoryBlobCache')
+            .InMemoryMediaBlobCache.get(msg.mediaObject?.filehash);
+
+        let blob;
+        if (cached) {
+            blob = cached;
+        } else if (msg.mediaObject?.mediaBlob) {
+            blob = msg.mediaObject.mediaBlob.forceToBlob();
+        }
+
+        if (!blob) return null;
+
+        return {
+            blob,
+            mimetype: msg.mimetype,
+            filename: msg.filename,
+            filesize: msg.size,
+        };
+    };
+
     window.WWebJS.arrayBufferToBase64 = (arrayBuffer) => {
         let binary = '';
         const bytes = new Uint8Array(arrayBuffer);
@@ -1175,7 +1232,7 @@ exports.LoadUtils = () => {
             );
 
             return waveform;
-        } catch (e) {
+        } catch (ignoredError) {
             return undefined;
         }
     };
@@ -1201,15 +1258,30 @@ exports.LoadUtils = () => {
     window.WWebJS.sendChatstate = async (state, chatId) => {
         chatId = window.require('WAWebWidFactory').createWid(chatId);
 
+        const Stream = window.require('WAWebStreamModel').Stream;
         const ChatState = window.require('WAWebChatStateBridge');
         switch (state) {
             case 'typing':
+                // The composing chat-state is only relayed to the recipient when
+                // our presence is "available". When WAWeb runs backgrounded (the
+                // gateway's normal state) presence is unavailable and the server
+                // silently drops the chat-state. Mark available first (as sendSeen
+                // does) and keep it available so the indicator persists.
+                Stream.markAvailable();
                 await ChatState.sendChatStateComposing(chatId);
                 break;
             case 'recording':
+                Stream.markAvailable();
                 await ChatState.sendChatStateRecording(chatId);
                 break;
             case 'stop':
+                // Just send `paused` — it cleanly stops the typing indicator.
+                // Do NOT markUnavailable here: that toggles global online→offline
+                // presence, and rapidly flipping available↔unavailable between
+                // consecutive typing/clear cycles makes the recipient's "typing…"
+                // indicator flicker (and leaves a stale presence that only resets
+                // when they reopen the chat). Presence stays available; WhatsApp
+                // marks it away on its own idle timeout.
                 await ChatState.sendChatStatePaused(chatId);
                 break;
             default:
@@ -1412,7 +1484,7 @@ exports.LoadUtils = () => {
                         return base64Image;
                     }
                 }
-            } catch (error) {
+            } catch (ignoredError) {
                 /* empty */
             }
         }
@@ -1449,7 +1521,7 @@ exports.LoadUtils = () => {
                 rpcResult.value.addParticipant[0]
                     .addParticipantsParticipantAddedOrNonRegisteredWaUserParticipantErrorLidResponseMixinGroup
                     .value.addParticipantsParticipantMixins;
-        } catch (err) {
+        } catch (ignoredError) {
             data.code = 400;
             return data;
         }
@@ -1612,7 +1684,7 @@ exports.LoadUtils = () => {
                     ));
             }
             return result;
-        } catch (err) {
+        } catch (ignoredError) {
             return [];
         }
     };
