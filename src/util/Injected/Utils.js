@@ -1,5 +1,3 @@
-'use strict';
-
 exports.LoadUtils = () => {
     window.WWebJS = {};
 
@@ -80,13 +78,13 @@ exports.LoadUtils = () => {
             const originalFunction = module[funcName];
             if (typeof originalFunction !== 'function') return;
 
-            module[funcName] = ((...args) => {
+            module[funcName] = (...args) => {
                 try {
                     return callback(module, originalFunction, ...args);
                 } catch {
                     return originalFunction.apply(module, args);
                 }
-            }).bind(module);
+            };
         } catch {
             return;
         }
@@ -515,7 +513,9 @@ exports.LoadUtils = () => {
                     newsletterJid: chat.id.toJid(),
                     ...(isMedia
                         ? {
-                              mediaMetadata: msg.avParams(),
+                              mediaMetadata: window
+                                  .require('WAWebMediaMetadata')
+                                  .mediaMetadata(msg),
                               mediaHandle: isMedia
                                   ? mediaOptions.mediaHandle
                                   : null,
@@ -1462,11 +1462,11 @@ exports.LoadUtils = () => {
             data.inviteV4CodeExp =
                 resultArgs?.value.addRequestExpiration?.toString();
         } else if (rpcResult.name === 'AddParticipantsResponseClientError') {
-            const { code: code } =
+            const { code } =
                 rpcResult.value.errorAddParticipantsClientErrors.value;
             data.code = +code;
         } else if (rpcResult.name === 'AddParticipantsResponseServerError') {
-            const { code: code } = rpcResult.value.errorServerErrors.value;
+            const { code } = rpcResult.value.errorServerErrors.value;
             data.code = +code;
         }
 
