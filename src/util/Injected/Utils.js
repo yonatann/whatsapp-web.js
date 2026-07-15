@@ -580,14 +580,25 @@ exports.LoadUtils = () => {
 
         if (options.waitUntilMsgSent) await sendMsgResultPromise;
 
-        // WhatsApp Web 2.3000.10431xxxxx (2026-07) dropped MsgKey._serialized
-        // (value moved to a minified field), so `newMsgKey._serialized` is now
-        // `undefined` → `Msg.get(undefined)` returned null → callers reported the
-        // send as failed even though it went out (→ retries → duplicates). `.toString()`
-        // returns the canonical serialized key on both old and new builds.
-        return window
-            .require('WAWebCollections')
-            .Msg.get(newMsgKey.toString());
+        // WhatsApp Web 2.3000.10431xxxxx+ (2026-07) dropped MsgKey._serialized AND
+        // re-addresses the recipient to @lid on send (LID migration): the stored
+        // message lands under a @lid-addressed key that differs from the @c.us
+        // `newMsgKey` we built, so `Msg.get(newMsgKey.toString())` MISSES → returns
+        // null → callers report the send FAILED even though it went out (→ retries
+        // → DUPLICATES). Resolve addressing-agnostically by the unique message id
+        // (`newMsgKey.id` is address-independent), falling back to the direct key
+        // lookup for old builds / exact-address matches.
+        const Msg = window.require('WAWebCollections').Msg;
+        const byKey = Msg.get(newMsgKey.toString());
+        if (byKey) return byKey;
+        const models = Msg.getModelsArray
+            ? Msg.getModelsArray()
+            : (Msg._models || []);
+        return (
+            models.find(
+                (m) => m && m.id && m.id.fromMe && m.id.id === newMsgKey.id,
+            ) || null
+        );
     };
 
     window.WWebJS.editMessage = async (msg, content, options = {}) => {
