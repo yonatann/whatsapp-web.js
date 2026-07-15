@@ -580,9 +580,14 @@ exports.LoadUtils = () => {
 
         if (options.waitUntilMsgSent) await sendMsgResultPromise;
 
+        // WhatsApp Web 2.3000.10431xxxxx (2026-07) dropped MsgKey._serialized
+        // (value moved to a minified field), so `newMsgKey._serialized` is now
+        // `undefined` → `Msg.get(undefined)` returned null → callers reported the
+        // send as failed even though it went out (→ retries → duplicates). `.toString()`
+        // returns the canonical serialized key on both old and new builds.
         return window
             .require('WAWebCollections')
-            .Msg.get(newMsgKey._serialized);
+            .Msg.get(newMsgKey.toString());
     };
 
     window.WWebJS.editMessage = async (msg, content, options = {}) => {
@@ -625,7 +630,8 @@ exports.LoadUtils = () => {
         await window
             .require('WAWebSendMessageEditAction')
             .sendMessageEdit(msg, content, internalOptions);
-        return window.require('WAWebCollections').Msg.get(msg.id._serialized);
+        // .toString() — MsgKey._serialized is undefined on WhatsApp Web 2.3000.10431xxxxx+.
+        return window.require('WAWebCollections').Msg.get(msg.id.toString());
     };
 
     window.WWebJS.toStickerData = async (mediaInfo) => {
@@ -981,15 +987,18 @@ exports.LoadUtils = () => {
 
         model.lastMessage = null;
         if (model.msgs && model.msgs.length) {
+            const lastReceivedKeySerialized = chat.lastReceivedKey
+                ? chat.lastReceivedKey.toString()   // _serialized dropped on WA 2.3000.10431xxxxx+
+                : null;
             const lastMessage = chat.lastReceivedKey
                 ? window
                       .require('WAWebCollections')
-                      .Msg.get(chat.lastReceivedKey._serialized) ||
+                      .Msg.get(lastReceivedKeySerialized) ||
                   (
                       await window
                           .require('WAWebCollections')
                           .Msg.getMessagesById([
-                              chat.lastReceivedKey._serialized,
+                              lastReceivedKeySerialized,
                           ])
                   )?.messages?.[0]
                 : null;
