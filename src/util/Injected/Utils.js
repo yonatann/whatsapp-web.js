@@ -1131,11 +1131,49 @@ exports.LoadUtils = () => {
      * @param {string} msgId
      * @returns {Promise<{blob: Blob, mimetype: string, filename: string, filesize: number}|null>}
      */
-    window.WWebJS.resolveMediaBlob = async (msgId) => {
+    // Resolve a live Msg model from a serialized MsgKey string.
+    //
+    // WAWeb changed the MsgKey model: `msgKey._serialized` is now `undefined`
+    // (the collection only indexes by a MsgKey *object*), so:
+    //   • `Msg.get(serializedString)` MISSES — it used to hit.
+    //   • `Msg.getMessagesById([serializedString])` no longer parses the
+    //     string into a key and calls `IDBObjectStore.get(undefined)`, which
+    //     throws "No key or key range specified" — the failure that made
+    //     get_message_media return "Error getting message media by message
+    //     key" for every media message.
+    // Resolve defensively: try the string get (cheap, still works on older
+    // builds), then scan the in-memory models by `String(id)` (covers every
+    // loaded message — all a media request can target), then rebuild a proper
+    // MsgKey via `WAWebMsgKey.fromString` for messages evicted from memory.
+    window.WWebJS.resolveMsgModelById = async (msgId) => {
+        if (msgId == null) return null;
         const { Msg } = window.require('WAWebCollections');
-        const msg =
-            Msg.get(msgId) ||
-            (await Msg.getMessagesById([msgId]))?.messages?.[0];
+        let msg = Msg.get(msgId);
+        if (msg) return msg;
+        const idStr = String(msgId);
+        msg = (Msg.getModelsArray?.() ?? Msg._models ?? []).find(
+            (m) => String(m?.id) === idStr,
+        );
+        if (msg) return msg;
+        try {
+            const key = window.require('WAWebMsgKey').fromString(idStr);
+            return (
+                Msg.get(key) ||
+                (await Msg.getMessagesById([key]))?.messages?.[0] ||
+                null
+            );
+        } catch (e) {
+            console.warn(
+                '[resolveMsgModelById] key-rebuild failed for',
+                idStr,
+                e,
+            );
+            return null;
+        }
+    };
+
+    window.WWebJS.resolveMediaBlob = async (msgId) => {
+        const msg = await window.WWebJS.resolveMsgModelById(msgId);
 
         if (
             !msg ||
