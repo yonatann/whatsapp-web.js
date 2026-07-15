@@ -580,9 +580,25 @@ exports.LoadUtils = () => {
 
         if (options.waitUntilMsgSent) await sendMsgResultPromise;
 
-        return window
-            .require('WAWebCollections')
-            .Msg.get(newMsgKey._serialized);
+        // WhatsApp Web 2.3000.10431xxxxx+ (2026-07) dropped MsgKey._serialized AND
+        // re-addresses the recipient to @lid on send (LID migration): the stored
+        // message lands under a @lid-addressed key that differs from the @c.us
+        // `newMsgKey` we built, so `Msg.get(newMsgKey.toString())` MISSES → returns
+        // null → callers report the send FAILED even though it went out (→ retries
+        // → DUPLICATES). Resolve addressing-agnostically by the unique message id
+        // (`newMsgKey.id` is address-independent), falling back to the direct key
+        // lookup for old builds / exact-address matches.
+        const Msg = window.require('WAWebCollections').Msg;
+        const byKey = Msg.get(newMsgKey.toString());
+        if (byKey) return byKey;
+        const models = Msg.getModelsArray
+            ? Msg.getModelsArray()
+            : (Msg._models || []);
+        return (
+            models.find(
+                (m) => m && m.id && m.id.fromMe && m.id.id === newMsgKey.id,
+            ) || null
+        );
     };
 
     window.WWebJS.editMessage = async (msg, content, options = {}) => {
@@ -625,7 +641,8 @@ exports.LoadUtils = () => {
         await window
             .require('WAWebSendMessageEditAction')
             .sendMessageEdit(msg, content, internalOptions);
-        return window.require('WAWebCollections').Msg.get(msg.id._serialized);
+        // .toString() — MsgKey._serialized is undefined on WhatsApp Web 2.3000.10431xxxxx+.
+        return window.require('WAWebCollections').Msg.get(msg.id.toString());
     };
 
     window.WWebJS.toStickerData = async (mediaInfo) => {
@@ -981,15 +998,18 @@ exports.LoadUtils = () => {
 
         model.lastMessage = null;
         if (model.msgs && model.msgs.length) {
+            const lastReceivedKeySerialized = chat.lastReceivedKey
+                ? chat.lastReceivedKey.toString()   // _serialized dropped on WA 2.3000.10431xxxxx+
+                : null;
             const lastMessage = chat.lastReceivedKey
                 ? window
                       .require('WAWebCollections')
-                      .Msg.get(chat.lastReceivedKey._serialized) ||
+                      .Msg.get(lastReceivedKeySerialized) ||
                   (
                       await window
                           .require('WAWebCollections')
                           .Msg.getMessagesById([
-                              chat.lastReceivedKey._serialized,
+                              lastReceivedKeySerialized,
                           ])
                   )?.messages?.[0]
                 : null;
