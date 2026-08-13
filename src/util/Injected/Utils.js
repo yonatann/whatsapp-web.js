@@ -1828,7 +1828,14 @@ exports.LoadUtils = () => {
                 .require('WAWebQueryExistsJob')
                 .queryWidExists(wid);
             if (!queryResult?.wid) return {};
-            lid = window.require('WAWebApiContact').getCurrentLid(wid);
+            // FE#179 — resolve the LID against the server's CANONICAL wid
+            // (`queryResult.wid`), not the caller's input `wid`. For numbers WA
+            // canonicalizes (e.g. Brazilian 9th-digit 13-digit numbers), the LID
+            // is mapped under the canonical form, so getCurrentLid(wid) on the
+            // dialed form returns null → the send fails "No LID for user".
+            lid = window
+                .require('WAWebApiContact')
+                .getCurrentLid(queryResult.wid);
         }
 
         if (isLid && !phone) {
@@ -1836,7 +1843,11 @@ exports.LoadUtils = () => {
                 .require('WAWebQueryExistsJob')
                 .queryWidExists(wid);
             if (!queryResult?.wid) return {};
-            phone = window.require('WAWebApiContact').getPhoneNumber(wid);
+            // FE#179 — same fix for the reverse (lid→phone) direction: read the
+            // phone from the server-canonical wid.
+            phone = window
+                .require('WAWebApiContact')
+                .getPhoneNumber(queryResult.wid);
         }
 
         return { lid, phone };
