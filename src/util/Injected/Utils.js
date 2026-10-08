@@ -1024,13 +1024,22 @@ exports.LoadUtils = () => {
 
         res.isBlocked = contact.isContactBlocked;
         if (!res.isBlocked) {
-            const alt = window
-                .require('WAWebApiContact')
-                .getAlternateUserWid(wid);
-            if (alt) {
-                res.isBlocked = !!window
-                    .require('WAWebCollections')
-                    .Blocklist.get(alt);
+            // WA Web (≈2.3000.1049+) rejects `getAlternateUserWid(wid)` with
+            // "Invalid get call using deviceWid" for some wids. This value only
+            // feeds `isBlocked`, so swallow the throw and keep `isBlocked` false.
+            // Without this, one throwing contact rejects the whole getContacts
+            // map and empties the ENTIRE contacts list.
+            try {
+                const alt = window
+                    .require('WAWebApiContact')
+                    .getAlternateUserWid(wid);
+                if (alt) {
+                    res.isBlocked = !!window
+                        .require('WAWebCollections')
+                        .Blocklist.get(alt);
+                }
+            } catch {
+                res.isBlocked = false;
             }
         }
 
